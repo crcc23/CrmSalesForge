@@ -73,6 +73,8 @@ body {
     padding: 0.8rem 1rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     background-color: #ffffff;
+    position: relative;
+    z-index: 101; /* Mayor que el sidebar (100) */
 }
 
 .navbar-brand {
@@ -112,15 +114,15 @@ body {
     background-color: #ffffff;
     width: 250px;
     position: fixed;
-    top: 56px;
+    top: 0;
     bottom: 0;
     left: 0;
     z-index: 100;
-    padding-top: 20px;
+    padding-top: 76px; /* 56px (navbar height) + 20px (original padding) */
     box-shadow: 1px 0 10px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease-in-out;
     border-right: 1px solid var(--bs-gray-200);
-    height: calc(100vh - 56px);
+    height: 100vh;
     overflow-y: visible;
 }
 
@@ -180,7 +182,8 @@ body {
     margin-left: 250px;
     transition: margin-left 0.3s ease-in-out;
     width: calc(100% - 250px);
-    min-height: calc(100vh - 56px);
+    min-height: 100vh;
+    padding-top: 56px; /* Altura de la navbar */
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -194,7 +197,7 @@ body {
     }
     .sidebar.show {
         transform: translateX(0);
-        height: calc(100vh - 56px);
+        height: 100vh;
         overflow-y: visible;
     }
     .content-with-sidebar {
