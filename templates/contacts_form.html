@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 
-{% block title %}{% if action == 'edit' %}Edit{% else %}New{% endif %} Contact - CRM System{% endblock %}
+{% block title %}{% if action == 'edit' %}Editar{% else %}Nuevo{% endif %} Contacto - Sistema CRM{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1 class="h3 mb-0">{% if action == 'edit' %}Edit{% else %}New{% endif %} Contact</h1>
+        <h1 class="h3 mb-0">{% if action == 'edit' %}Editar{% else %}Nuevo{% endif %} Contacto</h1>
     </div>
     <div class="col-md-4 text-md-end">
         <a href="{{ url_for('contact.list_contacts') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Contacts
+            <i class="fas fa-arrow-left me-2"></i>Volver a Contactos
         </a>
     </div>
 </div>
@@ -18,7 +18,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Contact Information</h5>
+                <h5 class="mb-0">Información del Contacto</h5>
             </div>
             <div class="card-body">
                 <form id="contactForm" method="POST" action="{% if action == 'edit' %}{{ url_for('contact.edit_contact', contact_id=contact.id) }}{% else %}{{ url_for('contact.new_contact') }}{% endif %}" class="needs-validation" novalidate>
