@@ -59,7 +59,7 @@ body {
     width: 100%;
     overflow: hidden;
     position: relative;
-    margin-top: 56px;
+    margin-top: 55px; /* ajustado para alinear perfectamente con la navbar */
 }
 
 .content-wrapper {
@@ -70,11 +70,11 @@ body {
 }
 
 .dashboard-content {
-    padding: 30px !important;
+    padding: 15px 20px !important;
     background-color: #f8f9fa;
-    border-radius: 10px;
-    margin: 0 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
     flex: 1;
 }
 
@@ -134,7 +134,7 @@ body {
 
 .sidebar-nav {
     list-style: none;
-    padding: 0;
+    padding: 5px 0 0 0;
 }
 
 .sidebar-nav-item {
@@ -142,7 +142,7 @@ body {
 }
 
 .sidebar-nav-item:first-child {
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 .sidebar-nav-link {
