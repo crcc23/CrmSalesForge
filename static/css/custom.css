@@ -59,7 +59,7 @@ body {
     width: 100%;
     overflow: hidden;
     position: relative;
-    margin-top: 40px; /* Exactamente igual a la altura del navbar */
+    margin-top: 60px; /* Exactamente igual a la altura del navbar */
 }
 
 .content-wrapper {
@@ -70,7 +70,7 @@ body {
 }
 
 .dashboard-content {
-    padding: 15px 20px !important;
+    padding: 20px !important;
     background-color: #f8f9fa;
     border-radius: 0;
     margin: 0;
@@ -80,9 +80,9 @@ body {
 
 /* Navbar */
 .navbar {
-    padding: 0 1rem;
-    min-height: 40px;
-    height: 40px;
+    padding: 0 1.5rem;
+    min-height: 60px;
+    height: 60px;
     background-color: #ffffff;
     position: fixed;
     top: 0;
@@ -139,7 +139,7 @@ body {
 
 .sidebar-nav {
     list-style: none;
-    padding: 5px 0 0 0;
+    padding: 20px 0 0 0;
 }
 
 .sidebar-nav-item {
