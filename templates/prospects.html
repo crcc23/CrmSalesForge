@@ -86,7 +86,6 @@
                                 <th>Email</th>
                                 <th>Fuente</th>
                                 <th>Estado</th>
-                                <th>Propietario</th>
                                 <th width="120">Acciones</th>
                             </tr>
                         </thead>
@@ -118,7 +117,6 @@
                                         {{ prospect.status }}
                                     </span>
                                 </td>
-                                <td>{{ prospect.owner.full_name }}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         <a href="{{ url_for('prospect.edit_prospect', prospect_id=prospect.id) }}" class="btn btn-outline-primary">
@@ -154,7 +152,7 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="8" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     <p class="mb-0 text-muted">No se encontraron prospectos</p>
                                     <a href="{{ url_for('prospect.new_prospect') }}" class="btn btn-sm btn-primary mt-2">
                                         <i class="fas fa-plus me-2"></i>Agregar Nuevo Prospecto

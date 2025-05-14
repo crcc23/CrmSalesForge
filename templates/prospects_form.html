@@ -81,17 +81,7 @@
                             <option value="Other" {% if prospect and prospect.source == 'Other' %}selected{% endif %}>Otro</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="owner_id" class="form-label">Propietario</label>
-                        <select class="form-select" id="owner_id" name="owner_id" required>
-                            {% for user in users %}
-                            <option value="{{ user.id }}" {% if (prospect and prospect.owner_id == user.id) or (not prospect and user.id == current_user.id) %}selected{% endif %}>{{ user.full_name }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="invalid-feedback">
-                            Por favor seleccione un propietario.
-                        </div>
-                    </div>
+
                     <div class="mb-3">
                         <label for="notes" class="form-label">Notas</label>
                         <textarea class="form-control" id="notes" name="notes" rows="3">{{ prospect.notes if prospect else '' }}</textarea>
@@ -140,7 +130,7 @@
                             <div class="timeline-date">{{ prospect.created_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
                             <div class="timeline-title">Prospecto Creado</div>
                             <div class="timeline-body">
-                                Creado por {{ prospect.owner.full_name }}
+                                Creado el {{ prospect.created_at.strftime('%d/%m/%Y') }}
                             </div>
                         </div>
                     </div>
@@ -151,7 +141,7 @@
                             <div class="timeline-date">{{ prospect.updated_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
                             <div class="timeline-title">Prospecto Actualizado</div>
                             <div class="timeline-body">
-                                Última actualización por {{ prospect.owner.full_name }}
+                                Última actualización el {{ prospect.updated_at.strftime('%d/%m/%Y') }}
                             </div>
                         </div>
                     </div>

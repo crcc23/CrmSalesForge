@@ -69,7 +69,7 @@ def new_prospect():
         # Create new prospect
         new_prospect = Prospect(
             tenant_id=tenant_id,
-            owner_id=request.form.get('owner_id', current_user.id),
+            owner_id=current_user.id,
             first_name=request.form.get('first_name'),
             last_name=request.form.get('last_name'),
             company=request.form.get('company'),
