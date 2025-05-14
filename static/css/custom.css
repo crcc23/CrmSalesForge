@@ -50,6 +50,10 @@ body {
 
 .dashboard-content {
     padding: 30px !important;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    margin: 0 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
 }
 
 /* Navbar */
@@ -537,29 +541,17 @@ body {
     text-overflow: ellipsis;
 }
 
-/* Avatar */
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+/* User Dropdown */
+.nav-user-dropdown {
+    font-weight: 600;
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: var(--bs-primary);
-    color: #fff;
+}
+
+.user-initials {
     font-weight: 600;
-}
-
-.avatar.sm {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
-}
-
-.avatar.lg {
-    width: 60px;
-    height: 60px;
-    font-size: 1.5rem;
+    color: var(--bs-primary);
+    margin-right: 5px;
 }
 
 /* Tenant theme customization */
