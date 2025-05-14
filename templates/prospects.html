@@ -1,56 +1,56 @@
 {% extends "layout.html" %}
 
-{% block title %}Prospects - CRM System{% endblock %}
+{% block title %}Prospectos - Sistema CRM{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1 class="h3 mb-0">Prospects</h1>
+        <h1 class="h3 mb-0">Prospectos</h1>
     </div>
     <div class="col-md-4 text-md-end">
         <a href="{{ url_for('prospect.new_prospect') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>New Prospect
+            <i class="fas fa-plus me-2"></i>Nuevo Prospecto
         </a>
     </div>
 </div>
 
 <div class="card mb-4">
     <div class="card-header">
-        <h5 class="mb-0">Filter Prospects</h5>
+        <h5 class="mb-0">Filtrar Prospectos</h5>
     </div>
     <div class="card-body">
         <form id="prospectSearchForm" action="{{ url_for('prospect.list_prospects') }}" method="GET" class="row">
             <div class="col-md-3 mb-3">
-                <label for="prospectSearchInput" class="form-label">Search</label>
-                <input type="text" class="form-control" id="prospectSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Name, email, company...">
+                <label for="prospectSearchInput" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="prospectSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Nombre, email, empresa...">
             </div>
             <div class="col-md-3 mb-3">
-                <label for="status" class="form-label">Status</label>
+                <label for="status" class="form-label">Estado</label>
                 <select class="form-select" id="status" name="status">
-                    <option value="">All Statuses</option>
+                    <option value="">Todos los Estados</option>
                     {% for status in statuses %}
                     <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>{{ status }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="sort" class="form-label">Sort by</label>
+                <label for="sort" class="form-label">Ordenar por</label>
                 <select class="form-select" id="sort" name="sort">
-                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
-                    <option value="last_name" {% if request.args.get('sort') == 'last_name' %}selected{% endif %}>Last Name</option>
-                    <option value="company" {% if request.args.get('sort') == 'company' %}selected{% endif %}>Company</option>
-                    <option value="status" {% if request.args.get('sort') == 'status' %}selected{% endif %}>Status</option>
+                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Fecha de Creación</option>
+                    <option value="last_name" {% if request.args.get('sort') == 'last_name' %}selected{% endif %}>Apellido</option>
+                    <option value="company" {% if request.args.get('sort') == 'company' %}selected{% endif %}>Empresa</option>
+                    <option value="status" {% if request.args.get('sort') == 'status' %}selected{% endif %}>Estado</option>
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="order" class="form-label">Order</label>
+                <label for="order" class="form-label">Orden</label>
                 <select class="form-select" id="order" name="order">
-                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
-                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
+                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descendente</option>
+                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascendente</option>
                 </select>
             </div>
             <div class="col-md-2 mb-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
             </div>
         </form>
     </div>
@@ -60,14 +60,14 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Prospect List</h5>
+                <h5 class="mb-0">Lista de Prospectos</h5>
                 <div class="d-flex align-items-center">
                     <select class="form-select form-select-sm me-2" id="bulkActionSelect">
-                        <option value="">Bulk Actions</option>
-                        <option value="change_status">Change Status</option>
-                        <option value="delete">Delete</option>
+                        <option value="">Acciones en Grupo</option>
+                        <option value="change_status">Cambiar Estado</option>
+                        <option value="delete">Eliminar</option>
                     </select>
-                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Apply</button>
+                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Aplicar</button>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -81,12 +81,12 @@
                                         <label class="form-check-label" for="selectAllProspects"></label>
                                     </div>
                                 </th>
-                                <th>Name</th>
-                                <th>Company</th>
+                                <th>Nombre</th>
+                                <th>Empresa</th>
                                 <th>Email</th>
-                                <th>Status</th>
-                                <th>Owner</th>
-                                <th width="120">Actions</th>
+                                <th>Estado</th>
+                                <th>Propietario</th>
+                                <th width="120">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -153,9 +153,9 @@
                             {% else %}
                             <tr>
                                 <td colspan="7" class="text-center py-4">
-                                    <p class="mb-0 text-muted">No prospects found</p>
+                                    <p class="mb-0 text-muted">No se encontraron prospectos</p>
                                     <a href="{{ url_for('prospect.new_prospect') }}" class="btn btn-sm btn-primary mt-2">
-                                        <i class="fas fa-plus me-2"></i>Add New Prospect
+                                        <i class="fas fa-plus me-2"></i>Agregar Nuevo Prospecto
                                     </a>
                                 </td>
                             </tr>

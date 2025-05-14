@@ -38,11 +38,11 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             {% if current_user.role.name == 'Admin' %}
-                            <li><a class="dropdown-item" href="{{ url_for('tenant.settings') }}"><i class="fas fa-cog me-2"></i>Tenant Settings</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('tenant.users') }}"><i class="fas fa-users me-2"></i>Manage Users</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenant.settings') }}"><i class="fas fa-cog me-2"></i>Configuración de Empresa</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenant.users') }}"><i class="fas fa-users me-2"></i>Administrar Usuarios</a></li>
                             <li><hr class="dropdown-divider"></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -57,39 +57,39 @@
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if request.path == url_for('dashboard.index') %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
                         <i class="fas fa-tachometer-alt"></i>
-                        Dashboard
+                        Panel de Control
                     </a>
                 </li>
                 <li class="sidebar-heading">CRM</li>
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'prospects' in request.path %}active{% endif %}" href="{{ url_for('prospect.list_prospects') }}">
                         <i class="fas fa-user-plus"></i>
-                        Prospects
+                        Prospectos
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'opportunities' in request.path %}active{% endif %}" href="{{ url_for('opportunity.list_opportunities') }}">
                         <i class="fas fa-chart-line"></i>
-                        Opportunities
+                        Oportunidades
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'contacts' in request.path %}active{% endif %}" href="{{ url_for('contact.list_contacts') }}">
                         <i class="fas fa-address-book"></i>
-                        Contacts
+                        Contactos
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'accounts' in request.path %}active{% endif %}" href="{{ url_for('account.list_accounts') }}">
                         <i class="fas fa-building"></i>
-                        Accounts
+                        Cuentas
                     </a>
                 </li>
-                <li class="sidebar-heading">Integrations</li>
+                <li class="sidebar-heading">Integraciones</li>
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'integrations' in request.path %}active{% endif %}" href="{{ url_for('integration.index') }}">
                         <i class="fas fa-plug"></i>
-                        Integrations
+                        Integraciones
                     </a>
                 </li>
             </ul>
