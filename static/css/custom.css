@@ -366,7 +366,7 @@ body {
     margin-bottom: 1.5rem;
 }
 
-/* Auth pages */
+/* Modern Auth pages - Tailwind-inspired */
 .auth-container {
     display: flex;
     align-items: center;
@@ -375,6 +375,7 @@ body {
     background-color: var(--bs-body-bg);
 }
 
+/* Original auth card styling kept for backward compatibility */
 .auth-card {
     width: 400px;
     max-width: 100%;
@@ -400,6 +401,85 @@ body {
     padding: 1rem 1.5rem;
     text-align: center;
     border-top: 1px solid var(--bs-border-color);
+}
+
+/* Modern auth card styling - React/Tailwind inspired */
+.modern-auth-card {
+    width: 100%;
+    background-color: var(--bs-card-bg);
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    transition: all 0.3s ease;
+}
+
+.logo-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--bs-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.modern-auth-card .form-control {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.modern-auth-card .form-control:focus {
+    box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bs-body-color);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.password-toggle:hover {
+    opacity: 1;
+}
+
+.modern-auth-card .btn-primary {
+    border-radius: 8px;
+    padding: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.modern-auth-card .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(var(--bs-primary-rgb), 0.3);
+}
+
+.modern-auth-card a {
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.modern-auth-card a:hover {
+    opacity: 0.8;
 }
 
 /* Utilities */

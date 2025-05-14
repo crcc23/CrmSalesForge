@@ -3,100 +3,140 @@
 {% block title %}Register - CRM System{% endblock %}
 
 {% block auth_content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h3 class="mb-0"><i class="fas fa-cube me-2"></i>CRM System</h3>
-                <p class="mb-0">Create a new organization</p>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-10 col-lg-8">
+        <div class="modern-auth-card">
+            <div class="text-center mb-5">
+                <div class="logo-icon mb-4">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <h2 class="fw-bold mb-1">Create your organization</h2>
+                <p class="text-muted">Set up your CRM instance in just a few steps</p>
             </div>
-            <div class="auth-body">
-                <form method="POST" action="{{ url_for('auth.register') }}" class="needs-validation" novalidate>
+            
+            <form method="POST" action="{{ url_for('auth.register') }}" class="needs-validation" novalidate>
+                <!-- Organization Section -->
+                <div class="mb-4">
+                    <h5 class="fw-bold small text-uppercase text-primary pb-2 border-bottom mb-3">Organization Details</h5>
+                    
+                    <div class="mb-3">
+                        <label for="company_name" class="form-label small text-uppercase">Company Name</label>
+                        <input type="text" class="form-control form-control-lg border-0 shadow-sm" 
+                               id="company_name" name="company_name" required 
+                               placeholder="Your company name">
+                        <div class="invalid-feedback">
+                            Please enter your company name.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="subdomain" class="form-label small text-uppercase">Subdomain</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg border-0 shadow-sm" 
+                                   id="subdomain" name="subdomain" required 
+                                   placeholder="your-company">
+                            <span class="input-group-text border-0 shadow-sm">.crm.com</span>
+                        </div>
+                        <div class="form-text small mt-2">Your unique URL to access the CRM</div>
+                    </div>
+                </div>
+                
+                <!-- Admin Account Section -->
+                <div class="mb-4">
+                    <h5 class="fw-bold small text-uppercase text-primary pb-2 border-bottom mb-3">Admin Account</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label small text-uppercase">First Name</label>
+                            <input type="text" class="form-control form-control-lg border-0 shadow-sm" 
+                                   id="first_name" name="first_name" required 
+                                   placeholder="First name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label small text-uppercase">Last Name</label>
+                            <input type="text" class="form-control form-control-lg border-0 shadow-sm" 
+                                   id="last_name" name="last_name" required 
+                                   placeholder="Last name">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label small text-uppercase">Email</label>
+                        <input type="email" class="form-control form-control-lg border-0 shadow-sm" 
+                               id="email" name="email" required 
+                               placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label small text-uppercase">Username</label>
+                        <input type="text" class="form-control form-control-lg border-0 shadow-sm" 
+                               id="username" name="username" required 
+                               placeholder="Choose a username">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label small text-uppercase">Password</label>
+                        <div class="password-field">
+                            <input type="password" class="form-control form-control-lg border-0 shadow-sm" 
+                                   id="password" name="password" required 
+                                   placeholder="Create a password" minlength="8">
+                            <span class="password-toggle" onclick="togglePassword('password')">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="form-text small mt-2">Must be at least 8 characters</div>
+                    </div>
+                    
                     <div class="mb-4">
-                        <h5>Organization Information</h5>
-                        <hr>
-                        <div class="mb-3">
-                            <label for="company_name" class="form-label">Company Name</label>
-                            <input type="text" class="form-control" id="company_name" name="company_name" required placeholder="Your company name">
-                            <div class="invalid-feedback">
-                                Please enter your company name.
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="subdomain" class="form-label">Subdomain</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="subdomain" name="subdomain" required placeholder="your-company">
-                                <span class="input-group-text">.crm.com</span>
-                            </div>
-                            <div class="form-text">This will be used to access your CRM.</div>
-                            <div class="invalid-feedback">
-                                Please enter a valid subdomain.
-                            </div>
+                        <label for="confirm_password" class="form-label small text-uppercase">Confirm Password</label>
+                        <div class="password-field">
+                            <input type="password" class="form-control form-control-lg border-0 shadow-sm" 
+                                   id="confirm_password" name="confirm_password" required 
+                                   placeholder="Confirm your password">
+                            <span class="password-toggle" onclick="togglePassword('confirm_password')">
+                                <i class="fas fa-eye"></i>
+                            </span>
                         </div>
                     </div>
-
-                    <div class="mb-4">
-                        <h5>Admin Account Information</h5>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="first_name" class="form-label">First Name</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" required placeholder="First name">
-                                <div class="invalid-feedback">
-                                    Please enter your first name.
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="last_name" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" required placeholder="Last name">
-                                <div class="invalid-feedback">
-                                    Please enter your last name.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required placeholder="your@email.com">
-                            <div class="invalid-feedback">
-                                Please enter a valid email address.
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required placeholder="Choose a username">
-                            <div class="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required placeholder="Create a password" minlength="8">
-                            <div class="invalid-feedback">
-                                Password must be at least 8 characters.
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
-                            <div class="invalid-feedback">
-                                Passwords must match.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Create Organization</button>
-                    </div>
-                </form>
-            </div>
-            <div class="auth-footer">
-                <p class="mb-0">Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
-            </div>
+                </div>
+                
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" value="" id="terms" required>
+                    <label class="form-check-label" for="terms">
+                        I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <div class="d-grid mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Create Organization</button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary">Sign in instead</a></p>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
+function togglePassword(fieldId) {
+    const passwordField = document.getElementById(fieldId);
+    const icon = document.querySelector(`[onclick="togglePassword('${fieldId}')"] i`);
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
     const password = document.getElementById('password');
@@ -123,6 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
     subdomain.addEventListener('input', function() {
         this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     });
+});
+</script>
+{% endblock %}
 });
 </script>
 {% endblock %}
