@@ -1,57 +1,57 @@
 {% extends "layout.html" %}
 
-{% block title %}Opportunities - CRM System{% endblock %}
+{% block title %}Oportunidades - Sistema CRM{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1 class="h3 mb-0">Opportunities</h1>
+        <h1 class="h3 mb-0">Oportunidades</h1>
     </div>
     <div class="col-md-4 text-md-end">
         <a href="{{ url_for('opportunity.new_opportunity') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>New Opportunity
+            <i class="fas fa-plus me-2"></i>Nueva Oportunidad
         </a>
     </div>
 </div>
 
 <div class="card mb-4">
     <div class="card-header">
-        <h5 class="mb-0">Filter Opportunities</h5>
+        <h5 class="mb-0">Filtrar Oportunidades</h5>
     </div>
     <div class="card-body">
         <form id="opportunitySearchForm" action="{{ url_for('opportunity.list_opportunities') }}" method="GET" class="row">
             <div class="col-md-3 mb-3">
-                <label for="opportunitySearchInput" class="form-label">Search</label>
-                <input type="text" class="form-control" id="opportunitySearchInput" name="q" value="{{ search_query or '' }}" placeholder="Opportunity name...">
+                <label for="opportunitySearchInput" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="opportunitySearchInput" name="q" value="{{ search_query or '' }}" placeholder="Nombre de oportunidad...">
             </div>
             <div class="col-md-3 mb-3">
-                <label for="stage" class="form-label">Stage</label>
+                <label for="stage" class="form-label">Etapa</label>
                 <select class="form-select" id="stage" name="stage">
-                    <option value="">All Stages</option>
+                    <option value="">Todas las Etapas</option>
                     {% for stage in stages %}
                     <option value="{{ stage }}" {% if current_stage == stage %}selected{% endif %}>{{ stage }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="sort" class="form-label">Sort by</label>
+                <label for="sort" class="form-label">Ordenar por</label>
                 <select class="form-select" id="sort" name="sort">
-                    <option value="close_date" {% if request.args.get('sort') == 'close_date' %}selected{% endif %}>Close Date</option>
-                    <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Name</option>
-                    <option value="amount" {% if request.args.get('sort') == 'amount' %}selected{% endif %}>Amount</option>
-                    <option value="stage" {% if request.args.get('sort') == 'stage' %}selected{% endif %}>Stage</option>
-                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
+                    <option value="close_date" {% if request.args.get('sort') == 'close_date' %}selected{% endif %}>Fecha de Cierre</option>
+                    <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Nombre</option>
+                    <option value="amount" {% if request.args.get('sort') == 'amount' %}selected{% endif %}>Monto</option>
+                    <option value="stage" {% if request.args.get('sort') == 'stage' %}selected{% endif %}>Etapa</option>
+                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Fecha de Creación</option>
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="order" class="form-label">Order</label>
+                <label for="order" class="form-label">Orden</label>
                 <select class="form-select" id="order" name="order">
-                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
-                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
+                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascendente</option>
+                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descendente</option>
                 </select>
             </div>
             <div class="col-md-2 mb-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
             </div>
         </form>
     </div>
@@ -61,7 +61,7 @@
     <div class="col-12">
         <div class="card h-100">
             <div class="card-header">
-                <h5 class="mb-0">Pipeline Chart</h5>
+                <h5 class="mb-0">Gráfico de Pipeline</h5>
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -76,14 +76,14 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Opportunity List</h5>
+                <h5 class="mb-0">Lista de Oportunidades</h5>
                 <div class="d-flex align-items-center">
                     <select class="form-select form-select-sm me-2" id="bulkActionSelect">
-                        <option value="">Bulk Actions</option>
-                        <option value="change_stage">Change Stage</option>
-                        <option value="delete">Delete</option>
+                        <option value="">Acciones en Grupo</option>
+                        <option value="change_stage">Cambiar Etapa</option>
+                        <option value="delete">Eliminar</option>
                     </select>
-                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Apply</button>
+                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Aplicar</button>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -97,13 +97,13 @@
                                         <label class="form-check-label" for="selectAllOpportunities"></label>
                                     </div>
                                 </th>
-                                <th>Name</th>
-                                <th>Account</th>
-                                <th>Amount</th>
-                                <th>Close Date</th>
-                                <th>Stage</th>
-                                <th>Owner</th>
-                                <th width="120">Actions</th>
+                                <th>Nombre</th>
+                                <th>Cuenta</th>
+                                <th>Monto</th>
+                                <th>Fecha de Cierre</th>
+                                <th>Etapa</th>
+                                <th>Propietario</th>
+                                <th width="120">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
