@@ -123,12 +123,15 @@ body {
     transition: transform 0.3s ease-in-out;
     border-right: 1px solid var(--bs-gray-200);
     height: 100vh;
-    overflow-y: visible;
+    overflow: hidden;
 }
 
 .sidebar-nav {
     list-style: none;
     padding: 0;
+    max-height: calc(100vh - 76px);
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-nav-item {
@@ -198,7 +201,7 @@ body {
     .sidebar.show {
         transform: translateX(0);
         height: 100vh;
-        overflow-y: visible;
+        overflow: hidden;
     }
     .content-with-sidebar {
         margin-left: 0;
