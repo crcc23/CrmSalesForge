@@ -1,57 +1,57 @@
 {% extends "layout.html" %}
 
-{% block title %}Accounts - CRM System{% endblock %}
+{% block title %}Cuentas - Sistema CRM{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1 class="h3 mb-0">Accounts</h1>
+        <h1 class="h3 mb-0">Cuentas</h1>
     </div>
     <div class="col-md-4 text-md-end">
         <a href="{{ url_for('account.new_account') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>New Account
+            <i class="fas fa-plus me-2"></i>Nueva Cuenta
         </a>
     </div>
 </div>
 
 <div class="card mb-4">
     <div class="card-header">
-        <h5 class="mb-0">Filter Accounts</h5>
+        <h5 class="mb-0">Filtrar Cuentas</h5>
     </div>
     <div class="card-body">
         <form id="accountSearchForm" action="{{ url_for('account.list_accounts') }}" method="GET" class="row">
             <div class="col-md-3 mb-3">
-                <label for="accountSearchInput" class="form-label">Search</label>
-                <input type="text" class="form-control" id="accountSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Name, website, industry...">
+                <label for="accountSearchInput" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="accountSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Nombre, sitio web, industria...">
             </div>
             <div class="col-md-3 mb-3">
-                <label for="industry" class="form-label">Industry</label>
+                <label for="industry" class="form-label">Industria</label>
                 <select class="form-select" id="industry" name="industry">
-                    <option value="">All Industries</option>
+                    <option value="">Todas las Industrias</option>
                     {% for industry in industries %}
                     <option value="{{ industry }}" {% if current_industry == industry %}selected{% endif %}>{{ industry }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="sort" class="form-label">Sort by</label>
+                <label for="sort" class="form-label">Ordenar por</label>
                 <select class="form-select" id="sort" name="sort">
-                    <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Name</option>
-                    <option value="industry" {% if request.args.get('sort') == 'industry' %}selected{% endif %}>Industry</option>
-                    <option value="employees" {% if request.args.get('sort') == 'employees' %}selected{% endif %}>Employees</option>
-                    <option value="annual_revenue" {% if request.args.get('sort') == 'annual_revenue' %}selected{% endif %}>Annual Revenue</option>
-                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
+                    <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Nombre</option>
+                    <option value="industry" {% if request.args.get('sort') == 'industry' %}selected{% endif %}>Industria</option>
+                    <option value="employees" {% if request.args.get('sort') == 'employees' %}selected{% endif %}>Empleados</option>
+                    <option value="annual_revenue" {% if request.args.get('sort') == 'annual_revenue' %}selected{% endif %}>Ingresos Anuales</option>
+                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Fecha de Creación</option>
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="order" class="form-label">Order</label>
+                <label for="order" class="form-label">Orden</label>
                 <select class="form-select" id="order" name="order">
-                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
-                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
+                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascendente</option>
+                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descendente</option>
                 </select>
             </div>
             <div class="col-md-2 mb-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
             </div>
         </form>
     </div>
@@ -61,7 +61,7 @@
     <div class="col-12">
         <div class="card h-100">
             <div class="card-header">
-                <h5 class="mb-0">Industry Distribution</h5>
+                <h5 class="mb-0">Distribución por Industria</h5>
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -78,15 +78,15 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Account List</h5>
+                <h5 class="mb-0">Lista de Cuentas</h5>
                 <div class="d-flex align-items-center">
                     <select class="form-select form-select-sm me-2" id="bulkActionSelect">
-                        <option value="">Bulk Actions</option>
-                        <option value="change_industry">Change Industry</option>
-                        <option value="export">Export</option>
-                        <option value="delete">Delete</option>
+                        <option value="">Acciones en Grupo</option>
+                        <option value="change_industry">Cambiar Industria</option>
+                        <option value="export">Exportar</option>
+                        <option value="delete">Eliminar</option>
                     </select>
-                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Apply</button>
+                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Aplicar</button>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -100,13 +100,13 @@
                                         <label class="form-check-label" for="selectAllAccounts"></label>
                                     </div>
                                 </th>
-                                <th>Name</th>
-                                <th>Industry</th>
-                                <th>Website</th>
-                                <th>Phone</th>
-                                <th>Location</th>
-                                <th>Owner</th>
-                                <th width="120">Actions</th>
+                                <th>Nombre</th>
+                                <th>Industria</th>
+                                <th>Sitio Web</th>
+                                <th>Teléfono</th>
+                                <th>Ubicación</th>
+                                <th>Propietario</th>
+                                <th width="120">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -183,9 +183,9 @@
                             {% else %}
                             <tr>
                                 <td colspan="8" class="text-center py-4">
-                                    <p class="mb-0 text-muted">No accounts found</p>
+                                    <p class="mb-0 text-muted">No se encontraron cuentas</p>
                                     <a href="{{ url_for('account.new_account') }}" class="btn btn-sm btn-primary mt-2">
-                                        <i class="fas fa-plus me-2"></i>Add New Account
+                                        <i class="fas fa-plus me-2"></i>Agregar Nueva Cuenta
                                     </a>
                                 </td>
                             </tr>
