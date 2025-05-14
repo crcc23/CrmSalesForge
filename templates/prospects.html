@@ -84,6 +84,7 @@
                                 <th>Nombre</th>
                                 <th>Empresa</th>
                                 <th>Email</th>
+                                <th>Fuente</th>
                                 <th>Estado</th>
                                 <th>Propietario</th>
                                 <th width="120">Acciones</th>
@@ -105,6 +106,7 @@
                                 </td>
                                 <td>{{ prospect.company or '-' }}</td>
                                 <td>{{ prospect.email or '-' }}</td>
+                                <td>{{ prospect.source or '-' }}</td>
                                 <td>
                                     <span class="badge rounded-pill prospect-status-badge
                                         {% if prospect.status == 'New' %}bg-primary
