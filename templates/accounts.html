@@ -14,52 +14,52 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-3 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Filter Accounts</h5>
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Accounts</h5>
+    </div>
+    <div class="card-body">
+        <form id="accountSearchForm" action="{{ url_for('account.list_accounts') }}" method="GET" class="row">
+            <div class="col-md-3 mb-3">
+                <label for="accountSearchInput" class="form-label">Search</label>
+                <input type="text" class="form-control" id="accountSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Name, website, industry...">
             </div>
-            <div class="card-body">
-                <form id="accountSearchForm" action="{{ url_for('account.list_accounts') }}" method="GET">
-                    <div class="mb-3">
-                        <label for="accountSearchInput" class="form-label">Search</label>
-                        <input type="text" class="form-control" id="accountSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Name, website, industry...">
-                    </div>
-                    <div class="mb-3">
-                        <label for="industry" class="form-label">Industry</label>
-                        <select class="form-select" id="industry" name="industry">
-                            <option value="">All Industries</option>
-                            {% for industry in industries %}
-                            <option value="{{ industry }}" {% if current_industry == industry %}selected{% endif %}>{{ industry }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="sort" class="form-label">Sort by</label>
-                        <select class="form-select" id="sort" name="sort">
-                            <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Name</option>
-                            <option value="industry" {% if request.args.get('sort') == 'industry' %}selected{% endif %}>Industry</option>
-                            <option value="employees" {% if request.args.get('sort') == 'employees' %}selected{% endif %}>Employees</option>
-                            <option value="annual_revenue" {% if request.args.get('sort') == 'annual_revenue' %}selected{% endif %}>Annual Revenue</option>
-                            <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="order" class="form-label">Order</label>
-                        <select class="form-select" id="order" name="order">
-                            <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
-                            <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
-                        </select>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    </div>
-                </form>
+            <div class="col-md-3 mb-3">
+                <label for="industry" class="form-label">Industry</label>
+                <select class="form-select" id="industry" name="industry">
+                    <option value="">All Industries</option>
+                    {% for industry in industries %}
+                    <option value="{{ industry }}" {% if current_industry == industry %}selected{% endif %}>{{ industry }}</option>
+                    {% endfor %}
+                </select>
             </div>
-        </div>
-        
-        <div class="card mt-4">
+            <div class="col-md-2 mb-3">
+                <label for="sort" class="form-label">Sort by</label>
+                <select class="form-select" id="sort" name="sort">
+                    <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Name</option>
+                    <option value="industry" {% if request.args.get('sort') == 'industry' %}selected{% endif %}>Industry</option>
+                    <option value="employees" {% if request.args.get('sort') == 'employees' %}selected{% endif %}>Employees</option>
+                    <option value="annual_revenue" {% if request.args.get('sort') == 'annual_revenue' %}selected{% endif %}>Annual Revenue</option>
+                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="order" class="form-label">Order</label>
+                <select class="form-select" id="order" name="order">
+                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
+                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="mb-0">Industry Distribution</h5>
             </div>
@@ -72,8 +72,10 @@
             </div>
         </div>
     </div>
-    
-    <div class="col-md-9">
+</div>
+
+<div class="row">
+    <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Account List</h5>

@@ -14,63 +14,50 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-3 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Filter Prospects</h5>
-            </div>
-            <div class="card-body">
-                <form id="prospectSearchForm" action="{{ url_for('prospect.list_prospects') }}" method="GET">
-                    <div class="mb-3">
-                        <label for="prospectSearchInput" class="form-label">Search</label>
-                        <input type="text" class="form-control" id="prospectSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Name, email, company...">
-                    </div>
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status</label>
-                        <select class="form-select" id="status" name="status">
-                            <option value="">All Statuses</option>
-                            {% for status in statuses %}
-                            <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>{{ status }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="sort" class="form-label">Sort by</label>
-                        <select class="form-select" id="sort" name="sort">
-                            <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
-                            <option value="last_name" {% if request.args.get('sort') == 'last_name' %}selected{% endif %}>Last Name</option>
-                            <option value="company" {% if request.args.get('sort') == 'company' %}selected{% endif %}>Company</option>
-                            <option value="status" {% if request.args.get('sort') == 'status' %}selected{% endif %}>Status</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="order" class="form-label">Order</label>
-                        <select class="form-select" id="order" name="order">
-                            <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
-                            <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
-                        </select>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">Status Distribution</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-        </div>
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Prospects</h5>
     </div>
-    
-    <div class="col-md-9">
+    <div class="card-body">
+        <form id="prospectSearchForm" action="{{ url_for('prospect.list_prospects') }}" method="GET" class="row">
+            <div class="col-md-3 mb-3">
+                <label for="prospectSearchInput" class="form-label">Search</label>
+                <input type="text" class="form-control" id="prospectSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Name, email, company...">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    {% for status in statuses %}
+                    <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="sort" class="form-label">Sort by</label>
+                <select class="form-select" id="sort" name="sort">
+                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
+                    <option value="last_name" {% if request.args.get('sort') == 'last_name' %}selected{% endif %}>Last Name</option>
+                    <option value="company" {% if request.args.get('sort') == 'company' %}selected{% endif %}>Company</option>
+                    <option value="status" {% if request.args.get('sort') == 'status' %}selected{% endif %}>Status</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="order" class="form-label">Order</label>
+                <select class="form-select" id="order" name="order">
+                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
+                    <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Prospect List</h5>
