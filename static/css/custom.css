@@ -1,23 +1,30 @@
 /* Custom CSS for CRM Application */
 
-/* Dark theme variables for overrides */
+/* Light theme variables for overrides */
 :root {
-    --bs-body-bg: #121212;
-    --bs-body-color: #f8f9fa;
+    --bs-body-bg: #ffffff;
+    --bs-body-color: #212529;
     --bs-primary: #3498db;
     --bs-secondary: #2ecc71;
     --bs-success: #2ecc71;
     --bs-info: #3498db;
     --bs-warning: #f39c12;
     --bs-danger: #e74c3c;
-    --bs-light: #343a40;
-    --bs-dark: #212529;
+    --bs-light: #f8f9fa;
+    --bs-dark: #343a40;
     --bs-primary-rgb: 52, 152, 219;
     --bs-secondary-rgb: 46, 204, 113;
+    --bs-gray-100: #f8f9fa;
+    --bs-gray-200: #e9ecef;
+    --bs-gray-300: #dee2e6;
+    --bs-gray-400: #ced4da;
+    --bs-gray-500: #adb5bd;
+    --bs-gray-600: #6c757d;
+    --bs-gray-700: #495057;
     --bs-gray-800: #343a40;
     --bs-gray-900: #212529;
-    --bs-card-bg: #1e1e1e;
-    --bs-border-color: #2c2c2c;
+    --bs-card-bg: #ffffff;
+    --bs-border-color: #dee2e6;
 }
 
 body {
@@ -43,13 +50,15 @@ body {
 /* Navbar */
 .navbar {
     padding: 0.8rem 1rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
 }
 
 .navbar-brand {
     display: flex;
     align-items: center;
     font-weight: 600;
+    color: var(--bs-gray-800);
 }
 
 .navbar-brand img {
@@ -60,6 +69,11 @@ body {
 .nav-link {
     padding: 0.5rem 1rem;
     position: relative;
+    color: var(--bs-gray-700);
+}
+
+.nav-link:hover {
+    color: var(--bs-primary);
 }
 
 .nav-link.active::after {
@@ -74,7 +88,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    background-color: var(--bs-gray-900);
+    background-color: #ffffff;
     width: 250px;
     position: fixed;
     top: 56px;
@@ -82,8 +96,9 @@ body {
     left: 0;
     z-index: 100;
     padding-top: 20px;
-    box-shadow: 1px 0 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 1px 0 10px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease-in-out;
+    border-right: 1px solid var(--bs-gray-200);
 }
 
 .sidebar-nav {
@@ -99,7 +114,7 @@ body {
     display: flex;
     align-items: center;
     padding: 10px 15px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--bs-gray-700);
     text-decoration: none;
     border-radius: 5px;
     margin: 0 10px;
@@ -107,28 +122,35 @@ body {
 }
 
 .sidebar-nav-link:hover {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--bs-primary);
+    background-color: var(--bs-gray-100);
 }
 
 .sidebar-nav-link.active {
-    color: #fff;
-    background-color: var(--bs-primary);
+    color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    font-weight: 500;
 }
 
 .sidebar-nav-link i {
     margin-right: 10px;
     width: 20px;
     text-align: center;
+    color: var(--bs-gray-600);
+}
+
+.sidebar-nav-link.active i {
+    color: var(--bs-primary);
 }
 
 .sidebar-heading {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--bs-gray-500);
     padding: 10px 15px;
     margin-top: 10px;
+    font-weight: 600;
 }
 
 .content-with-sidebar {
@@ -157,16 +179,17 @@ body {
     background-color: var(--bs-card-bg);
     border: 1px solid var(--bs-border-color);
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin-bottom: 1.5rem;
     overflow: hidden;
 }
 
 .card-header {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.02);
     border-bottom: 1px solid var(--bs-border-color);
     padding: 1rem 1.25rem;
     font-weight: 600;
+    color: var(--bs-gray-700);
 }
 
 .card-body {
@@ -174,7 +197,7 @@ body {
 }
 
 .card-footer {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.02);
     border-top: 1px solid var(--bs-border-color);
     padding: 0.75rem 1.25rem;
 }
@@ -372,7 +395,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-color: var(--bs-body-bg);
+    background-color: var(--bs-gray-100);
 }
 
 /* Original auth card styling kept for backward compatibility */
@@ -406,11 +429,12 @@ body {
 /* Modern auth card styling - React/Tailwind inspired */
 .modern-auth-card {
     width: 100%;
-    background-color: var(--bs-card-bg);
+    background-color: #ffffff;
     border-radius: 1rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     padding: 2.5rem;
     transition: all 0.3s ease;
+    border: 1px solid var(--bs-gray-200);
 }
 
 .logo-icon {
@@ -428,16 +452,18 @@ body {
 }
 
 .modern-auth-card .form-control {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: none;
+    background-color: var(--bs-gray-100);
+    border: 1px solid var(--bs-gray-200);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     transition: all 0.2s ease;
+    color: var(--bs-gray-900);
 }
 
 .modern-auth-card .form-control:focus {
-    box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
-    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.15);
+    background-color: #ffffff;
+    border-color: var(--bs-primary);
 }
 
 .password-field {

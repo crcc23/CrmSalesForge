@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,9 +18,9 @@
 <body>
     {% if current_user.is_authenticated %}
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
         <div class="container-fluid">
-            <button id="sidebarToggle" class="btn btn-dark d-md-none me-2">
+            <button id="sidebarToggle" class="btn btn-light btn-sm d-md-none me-2">
                 <i class="fas fa-bars"></i>
             </button>
             <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
