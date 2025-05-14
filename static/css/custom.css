@@ -47,6 +47,10 @@ body {
     padding: 20px 0;
 }
 
+.dashboard-content {
+    padding: 30px !important;
+}
+
 /* Navbar */
 .navbar {
     padding: 0.8rem 1rem;
@@ -215,15 +219,16 @@ body {
 }
 
 .stat-card .stat-icon {
-    font-size: 2rem;
-    width: 60px;
-    height: 60px;
+    font-size: 1.25rem;
+    width: 45px;
+    height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     margin-right: 15px;
     color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .stat-card.primary {

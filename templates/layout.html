@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <style>
         :root {
-            --tenant-primary-color: {% if session.get('tenant_id') %}{{ tenant.primary_color or '#3498db' }}{% else %}#3498db{% endif %};
-            --tenant-secondary-color: {% if session.get('tenant_id') %}{{ tenant.secondary_color or '#2ecc71' }}{% else %}#2ecc71{% endif %};
+            --tenant-primary-color: #3498db;
+            --tenant-secondary-color: #2ecc71;
         }
     </style>
     {% block additional_head %}{% endblock %}
@@ -102,7 +102,7 @@
 
         <!-- Content -->
         <div class="content-with-sidebar">
-            <div class="container content-wrapper">
+            <div class="container content-wrapper dashboard-content">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
                     {% for category, message in messages %}
