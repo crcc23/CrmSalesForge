@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block title %}Register New Tenant - CRM System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Create New Tenant</h1>
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">New Tenant Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('auth.register_tenant') }}" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="company_name" class="form-label">Company Name</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name" required placeholder="New company name">
+                        <div class="invalid-feedback">
+                            Please enter the company name.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subdomain" class="form-label">Subdomain</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="subdomain" name="subdomain" required placeholder="new-company">
+                            <span class="input-group-text">.crm.com</span>
+                        </div>
+                        <div class="form-text">This will be used to access the CRM.</div>
+                        <div class="invalid-feedback">
+                            Please enter a valid subdomain.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subscription_plan_id" class="form-label">Subscription Plan</label>
+                        <select class="form-select" id="subscription_plan_id" name="subscription_plan_id" required>
+                            <option value="" selected disabled>Select a plan</option>
+                            {% for plan in subscription_plans %}
+                            <option value="{{ plan.id }}">{{ plan.name }} - ${{ "%.2f"|format(plan.price) }}/month</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a subscription plan.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Create Tenant</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Format subdomain to be URL-friendly
+    const subdomain = document.getElementById('subdomain');
+    subdomain.addEventListener('input', function() {
+        this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    });
+});
+</script>
+{% endblock %}

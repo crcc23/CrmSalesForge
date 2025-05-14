@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if action == 'edit' %}Edit{% else %}New{% endif %} Prospect - CRM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">{% if action == 'edit' %}Edit{% else %}New{% endif %} Prospect</h1>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('prospect.list_prospects') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Prospects
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Prospect Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="prospectForm" method="POST" action="{% if action == 'edit' %}{{ url_for('prospect.edit_prospect', prospect_id=prospect.id) }}{% else %}{{ url_for('prospect.new_prospect') }}{% endif %}" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ prospect.first_name if prospect else '' }}" required>
+                            <div class="invalid-feedback">
+                                Please enter a first name.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ prospect.last_name if prospect else '' }}" required>
+                            <div class="invalid-feedback">
+                                Please enter a last name.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="company" class="form-label">Company</label>
+                        <input type="text" class="form-control" id="company" name="company" value="{{ prospect.company if prospect else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="job_title" class="form-label">Job Title</label>
+                        <input type="text" class="form-control" id="job_title" name="job_title" value="{{ prospect.job_title if prospect else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ prospect.email if prospect else '' }}">
+                        <div class="invalid-feedback">
+                            Please enter a valid email address.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" value="{{ prospect.phone if prospect else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            {% for status in statuses %}
+                            <option value="{{ status }}" {% if prospect and prospect.status == status %}selected{% elif not prospect and status == 'New' %}selected{% endif %}>{{ status }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a status.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="source" class="form-label">Source</label>
+                        <select class="form-select" id="source" name="source">
+                            <option value="" {% if not prospect or not prospect.source %}selected{% endif %}>Select source</option>
+                            <option value="Website" {% if prospect and prospect.source == 'Website' %}selected{% endif %}>Website</option>
+                            <option value="Referral" {% if prospect and prospect.source == 'Referral' %}selected{% endif %}>Referral</option>
+                            <option value="Social Media" {% if prospect and prospect.source == 'Social Media' %}selected{% endif %}>Social Media</option>
+                            <option value="Email Campaign" {% if prospect and prospect.source == 'Email Campaign' %}selected{% endif %}>Email Campaign</option>
+                            <option value="Trade Show" {% if prospect and prospect.source == 'Trade Show' %}selected{% endif %}>Trade Show</option>
+                            <option value="Cold Call" {% if prospect and prospect.source == 'Cold Call' %}selected{% endif %}>Cold Call</option>
+                            <option value="Other" {% if prospect and prospect.source == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="owner_id" class="form-label">Owner</label>
+                        <select class="form-select" id="owner_id" name="owner_id" required>
+                            {% for user in users %}
+                            <option value="{{ user.id }}" {% if (prospect and prospect.owner_id == user.id) or (not prospect and user.id == current_user.id) %}selected{% endif %}>{{ user.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select an owner.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ prospect.notes if prospect else '' }}</textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save Prospect</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Help Information</h5>
+            </div>
+            <div class="card-body">
+                <h6>Prospect Stages</h6>
+                <ul class="list-unstyled">
+                    <li><span class="badge bg-primary me-2">New</span> First contact, not yet engaged</li>
+                    <li><span class="badge bg-info me-2">Contacted</span> Initial outreach made</li>
+                    <li><span class="badge bg-success me-2">Qualified</span> Meets criteria for follow-up</li>
+                    <li><span class="badge bg-danger me-2">Disqualified</span> Not a good fit</li>
+                </ul>
+                <hr>
+                <h6>Tips</h6>
+                <ul>
+                    <li>Enter as much information as possible to improve follow-up quality</li>
+                    <li>Regular status updates help track prospect journey</li>
+                    <li>Add detailed notes for context when handing over prospects</li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if prospect %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Prospect History</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ prospect.created_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                            <div class="timeline-title">Prospect Created</div>
+                            <div class="timeline-body">
+                                Created by {{ prospect.owner.full_name }}
+                            </div>
+                        </div>
+                    </div>
+                    {% if prospect.created_at != prospect.updated_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ prospect.updated_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                            <div class="timeline-title">Prospect Updated</div>
+                            <div class="timeline-body">
+                                Last updated by {{ prospect.owner.full_name }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/prospects.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,238 @@
+{% extends "layout.html" %}
+
+{% block title %}Accounts - CRM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Accounts</h1>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('account.new_account') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Account
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Filter Accounts</h5>
+            </div>
+            <div class="card-body">
+                <form id="accountSearchForm" action="{{ url_for('account.list_accounts') }}" method="GET">
+                    <div class="mb-3">
+                        <label for="accountSearchInput" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="accountSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Name, website, industry...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="industry" class="form-label">Industry</label>
+                        <select class="form-select" id="industry" name="industry">
+                            <option value="">All Industries</option>
+                            {% for industry in industries %}
+                            <option value="{{ industry }}" {% if current_industry == industry %}selected{% endif %}>{{ industry }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sort" class="form-label">Sort by</label>
+                        <select class="form-select" id="sort" name="sort">
+                            <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Name</option>
+                            <option value="industry" {% if request.args.get('sort') == 'industry' %}selected{% endif %}>Industry</option>
+                            <option value="employees" {% if request.args.get('sort') == 'employees' %}selected{% endif %}>Employees</option>
+                            <option value="annual_revenue" {% if request.args.get('sort') == 'annual_revenue' %}selected{% endif %}>Annual Revenue</option>
+                            <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="order" class="form-label">Order</label>
+                        <select class="form-select" id="order" name="order">
+                            <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
+                            <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Industry Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="industryChart" 
+                            data-industries="{{ industries|tojson }}" 
+                            data-counts="{{ industries|map('count', accounts)|list|tojson }}"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Account List</h5>
+                <div class="d-flex align-items-center">
+                    <select class="form-select form-select-sm me-2" id="bulkActionSelect">
+                        <option value="">Bulk Actions</option>
+                        <option value="change_industry">Change Industry</option>
+                        <option value="export">Export</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Apply</button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="40">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllAccounts">
+                                        <label class="form-check-label" for="selectAllAccounts"></label>
+                                    </div>
+                                </th>
+                                <th>Name</th>
+                                <th>Industry</th>
+                                <th>Website</th>
+                                <th>Phone</th>
+                                <th>Location</th>
+                                <th>Owner</th>
+                                <th width="120">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for account in accounts %}
+                            <tr data-account-id="{{ account.id }}">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input account-checkbox" type="checkbox" value="{{ account.id }}" id="account{{ account.id }}">
+                                        <label class="form-check-label" for="account{{ account.id }}"></label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('account.view_account', account_id=account.id) }}">
+                                        {{ account.name }}
+                                    </a>
+                                </td>
+                                <td class="account-industry" data-account-id="{{ account.id }}">{{ account.industry or 'Not specified' }}</td>
+                                <td>
+                                    {% if account.website %}
+                                    <a href="{{ account.website }}" target="_blank">{{ account.website|truncate(25) }}</a>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>{{ account.phone or '-' }}</td>
+                                <td>
+                                    {% if account.city and account.country %}
+                                    {{ account.city }}, {{ account.country }}
+                                    {% elif account.city %}
+                                    {{ account.city }}
+                                    {% elif account.country %}
+                                    {{ account.country }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>{{ account.owner.full_name }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('account.view_account', account_id=account.id) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('account.edit_account', account_id=account.id) }}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal{{ account.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteAccountModal{{ account.id }}" tabindex="-1" aria-labelledby="deleteAccountModalLabel{{ account.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteAccountModalLabel{{ account.id }}">Delete Account</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the account <strong>{{ account.name }}</strong>?
+                                                    This action cannot be undone.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="{{ url_for('account.delete_account', account_id=account.id) }}" method="POST">
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <p class="mb-0 text-muted">No accounts found</p>
+                                    <a href="{{ url_for('account.new_account') }}" class="btn btn-sm btn-primary mt-2">
+                                        <i class="fas fa-plus me-2"></i>Add New Account
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Industry Modal -->
+<div class="modal fade" id="changeIndustryModal" tabindex="-1" aria-labelledby="changeIndustryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeIndustryModalLabel">Change Industry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changeIndustryForm">
+                <div class="modal-body">
+                    <input type="hidden" id="selectedAccountsIds" name="account_ids">
+                    <div class="mb-3">
+                        <label for="newIndustrySelect" class="form-label">New Industry</label>
+                        <select class="form-select" id="newIndustrySelect" name="industry">
+                            <option value="">No Industry</option>
+                            {% for industry in industries %}
+                            <option value="{{ industry }}">{{ industry }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply Industry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/accounts.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize industry chart
+    initializeIndustryChart();
+});
+</script>
+{% endblock %}

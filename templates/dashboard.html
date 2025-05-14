@@ -1,0 +1,194 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - CRM System{% endblock %}
+
+{% block additional_head %}
+<style>
+.stat-card .stat-icon {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--tenant-primary-color, var(--bs-primary));
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">Dashboard</h1>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card primary">
+            <div class="stat-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="stat-content">
+                <h4 id="prospectCount">{{ prospect_count }}</h4>
+                <p>Prospects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card success">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <h4 id="opportunityCount">{{ opportunity_count }}</h4>
+                <p>Opportunities</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card info">
+            <div class="stat-icon">
+                <i class="fas fa-address-book"></i>
+            </div>
+            <div class="stat-content">
+                <h4 id="contactCount">{{ contact_count }}</h4>
+                <p>Contacts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card warning">
+            <div class="stat-icon">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="stat-content">
+                <h4 id="accountCount">{{ account_count }}</h4>
+                <p>Accounts</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mt-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Sales Pipeline</h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshDashboardData()">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="pipelineChart" 
+                            data-stages="{{ pipeline_stages|tojson }}" 
+                            data-counts="{{ pipeline_counts|tojson }}"
+                            data-amounts="{{ pipeline_amounts|tojson }}"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Total Opportunity Value</h5>
+            </div>
+            <div class="card-body text-center py-4">
+                <h2 class="display-5 text-tenant-primary" id="totalOpportunityAmount">${{ "%.2f"|format(total_opportunity_amount) }}</h2>
+                <p class="text-muted">Potential revenue from all opportunities</p>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Sales Funnel</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="salesFunnel" 
+                            data-stages="{{ pipeline_stages|tojson }}" 
+                            data-counts="{{ pipeline_counts|tojson }}"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity & Closing Deals Row -->
+<div class="row mt-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Prospects</h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush" id="recentProspects">
+                    {% for prospect in recent_prospects %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ prospect.first_name }} {{ prospect.last_name }}</strong>
+                            <small class="d-block text-muted">{{ prospect.company or 'No company' }}</small>
+                        </div>
+                        <span class="badge rounded-pill bg-primary">{{ prospect.status }}</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center py-4">
+                        <p class="mb-0 text-muted">No recent prospects</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('prospect.list_prospects') }}" class="btn btn-sm btn-outline-primary">View All Prospects</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Opportunities Closing This Month</h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for opportunity in closing_opportunities %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ opportunity.name }}</strong>
+                            <small class="d-block text-muted">Close date: {{ opportunity.close_date.strftime('%b %d, %Y') }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge rounded-pill 
+                                {% if opportunity.stage == 'Closed Won' %}bg-success
+                                {% elif opportunity.stage == 'Closed Lost' %}bg-danger
+                                {% else %}bg-primary{% endif %}">
+                                {{ opportunity.stage }}
+                            </span>
+                            <div class="mt-1">${{ "%.2f"|format(opportunity.amount or 0) }}</div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center py-4">
+                        <p class="mb-0 text-muted">No opportunities closing this month</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('opportunity.list_opportunities') }}" class="btn btn-sm btn-outline-primary">View All Opportunities</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts
+    if (document.getElementById('pipelineChart')) {
+        initializePipelineChart();
+    }
+    if (document.getElementById('salesFunnel')) {
+        initializeSalesFunnel();
+    }
+});
+</script>
+{% endblock %}

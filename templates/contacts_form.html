@@ -1,0 +1,216 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if action == 'edit' %}Edit{% else %}New{% endif %} Contact - CRM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">{% if action == 'edit' %}Edit{% else %}New{% endif %} Contact</h1>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('contact.list_contacts') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Contacts
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Contact Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="contactForm" method="POST" action="{% if action == 'edit' %}{{ url_for('contact.edit_contact', contact_id=contact.id) }}{% else %}{{ url_for('contact.new_contact') }}{% endif %}" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ contact.first_name if contact else '' }}" required>
+                            <div class="invalid-feedback">
+                                Please enter a first name.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ contact.last_name if contact else '' }}" required>
+                            <div class="invalid-feedback">
+                                Please enter a last name.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="account_id" class="form-label">Account</label>
+                            <select class="form-select" id="account_id" name="account_id">
+                                <option value="">No Account</option>
+                                {% for account in accounts %}
+                                <option value="{{ account.id }}" {% if contact and contact.account_id == account.id %}selected{% endif %}>{{ account.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="job_title" class="form-label">Job Title</label>
+                            <input type="text" class="form-control" id="job_title" name="job_title" value="{{ contact.job_title if contact else '' }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ contact.email if contact else '' }}">
+                            <div class="invalid-feedback">
+                                Please enter a valid email address.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ contact.phone if contact else '' }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="mobile" class="form-label">Mobile</label>
+                            <input type="text" class="form-control" id="mobile" name="mobile" value="{{ contact.mobile if contact else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="owner_id" class="form-label">Owner</label>
+                            <select class="form-select" id="owner_id" name="owner_id" required>
+                                {% for user in users %}
+                                <option value="{{ user.id }}" {% if (contact and contact.owner_id == user.id) or (not contact and user.id == current_user.id) %}selected{% endif %}>{{ user.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select an owner.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-4 mb-3">Address Information</h6>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Street Address</label>
+                        <input type="text" class="form-control" id="address" name="address" value="{{ contact.address if contact else '' }}">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" value="{{ contact.city if contact else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="state" class="form-label">State/Province</label>
+                            <input type="text" class="form-control" id="state" name="state" value="{{ contact.state if contact else '' }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="postal_code" class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ contact.postal_code if contact else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" name="country" value="{{ contact.country if contact else '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ contact.notes if contact else '' }}</textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save Contact</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Related Information</h5>
+            </div>
+            <div class="card-body">
+                {% if contact and contact.account %}
+                <h6>Account Details</h6>
+                <div class="mb-3">
+                    <a href="{{ url_for('account.view_account', account_id=contact.account.id) }}" class="d-block mb-2">
+                        <i class="fas fa-building me-1"></i> {{ contact.account.name }}
+                    </a>
+                    <small class="text-muted d-block">{{ contact.account.industry or 'No industry' }}</small>
+                    {% if contact.account.phone %}
+                    <small class="text-muted d-block">{{ contact.account.phone }}</small>
+                    {% endif %}
+                    {% if contact.account.website %}
+                    <small class="text-muted d-block">{{ contact.account.website }}</small>
+                    {% endif %}
+                </div>
+                <hr>
+                {% endif %}
+                
+                {% if contact %}
+                <h6>Recent Opportunities</h6>
+                <ul class="list-group list-group-flush mb-3">
+                    {% for opportunity in contact.opportunities %}
+                    <li class="list-group-item px-0">
+                        <a href="{{ url_for('opportunity.edit_opportunity', opportunity_id=opportunity.id) }}">
+                            {{ opportunity.name }}
+                        </a>
+                        <small class="d-block text-muted">
+                            {{ opportunity.stage }} - ${{ "%.2f"|format(opportunity.amount or 0) }}
+                        </small>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item px-0 text-muted">No linked opportunities</li>
+                    {% endfor %}
+                </ul>
+                <hr>
+                {% endif %}
+                
+                <h6>Contact Management Tips</h6>
+                <ul>
+                    <li>Keep contact information up to date</li>
+                    <li>Document all important interactions in notes</li>
+                    <li>Link to the correct account for better reporting</li>
+                    <li>Record both office and mobile numbers when available</li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if contact %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Contact History</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ contact.created_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                            <div class="timeline-title">Contact Created</div>
+                            <div class="timeline-body">
+                                Created by {{ contact.owner.full_name }}
+                            </div>
+                        </div>
+                    </div>
+                    {% if contact.created_at != contact.updated_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ contact.updated_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                            <div class="timeline-title">Contact Updated</div>
+                            <div class="timeline-body">
+                                Last updated by {{ contact.owner.full_name }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/contacts.js') }}"></script>
+{% endblock %}

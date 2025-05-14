@@ -1,0 +1,236 @@
+{% extends "layout.html" %}
+
+{% block title %}Opportunities - CRM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Opportunities</h1>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('opportunity.new_opportunity') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Opportunity
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Filter Opportunities</h5>
+            </div>
+            <div class="card-body">
+                <form id="opportunitySearchForm" action="{{ url_for('opportunity.list_opportunities') }}" method="GET">
+                    <div class="mb-3">
+                        <label for="opportunitySearchInput" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="opportunitySearchInput" name="q" value="{{ search_query or '' }}" placeholder="Opportunity name...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="stage" class="form-label">Stage</label>
+                        <select class="form-select" id="stage" name="stage">
+                            <option value="">All Stages</option>
+                            {% for stage in stages %}
+                            <option value="{{ stage }}" {% if current_stage == stage %}selected{% endif %}>{{ stage }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sort" class="form-label">Sort by</label>
+                        <select class="form-select" id="sort" name="sort">
+                            <option value="close_date" {% if request.args.get('sort') == 'close_date' %}selected{% endif %}>Close Date</option>
+                            <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Name</option>
+                            <option value="amount" {% if request.args.get('sort') == 'amount' %}selected{% endif %}>Amount</option>
+                            <option value="stage" {% if request.args.get('sort') == 'stage' %}selected{% endif %}>Stage</option>
+                            <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Date Created</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="order" class="form-label">Order</label>
+                        <select class="form-select" id="order" name="order">
+                            <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
+                            <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descending</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Pipeline Chart</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="pipelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Opportunity List</h5>
+                <div class="d-flex align-items-center">
+                    <select class="form-select form-select-sm me-2" id="bulkActionSelect">
+                        <option value="">Bulk Actions</option>
+                        <option value="change_stage">Change Stage</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Apply</button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="40">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllOpportunities">
+                                        <label class="form-check-label" for="selectAllOpportunities"></label>
+                                    </div>
+                                </th>
+                                <th>Name</th>
+                                <th>Account</th>
+                                <th>Amount</th>
+                                <th>Close Date</th>
+                                <th>Stage</th>
+                                <th>Owner</th>
+                                <th width="120">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for opportunity in opportunities %}
+                            <tr data-opportunity-id="{{ opportunity.id }}">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input opportunity-checkbox" type="checkbox" value="{{ opportunity.id }}" id="opportunity{{ opportunity.id }}">
+                                        <label class="form-check-label" for="opportunity{{ opportunity.id }}"></label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('opportunity.edit_opportunity', opportunity_id=opportunity.id) }}">
+                                        {{ opportunity.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if opportunity.account %}
+                                    <a href="{{ url_for('account.view_account', account_id=opportunity.account.id) }}">
+                                        {{ opportunity.account.name }}
+                                    </a>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>${{ "%.2f"|format(opportunity.amount or 0) }}</td>
+                                <td>{{ opportunity.close_date.strftime('%b %d, %Y') if opportunity.close_date else '-' }}</td>
+                                <td>
+                                    <span class="badge rounded-pill opportunity-stage-badge
+                                        {% if opportunity.stage == 'Qualification' %}bg-primary
+                                        {% elif opportunity.stage == 'Needs Analysis' %}bg-info
+                                        {% elif opportunity.stage == 'Proposal' %}bg-warning
+                                        {% elif opportunity.stage == 'Negotiation' %}bg-secondary
+                                        {% elif opportunity.stage == 'Closed Won' %}bg-success
+                                        {% elif opportunity.stage == 'Closed Lost' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}" 
+                                        data-opportunity-id="{{ opportunity.id }}">
+                                        {{ opportunity.stage }}
+                                    </span>
+                                </td>
+                                <td>{{ opportunity.owner.full_name }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('opportunity.edit_opportunity', opportunity_id=opportunity.id) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteOpportunityModal{{ opportunity.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteOpportunityModal{{ opportunity.id }}" tabindex="-1" aria-labelledby="deleteOpportunityModalLabel{{ opportunity.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteOpportunityModalLabel{{ opportunity.id }}">Delete Opportunity</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the opportunity <strong>{{ opportunity.name }}</strong>?
+                                                    This action cannot be undone.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="{{ url_for('opportunity.delete_opportunity', opportunity_id=opportunity.id) }}" method="POST">
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <p class="mb-0 text-muted">No opportunities found</p>
+                                    <a href="{{ url_for('opportunity.new_opportunity') }}" class="btn btn-sm btn-primary mt-2">
+                                        <i class="fas fa-plus me-2"></i>Add New Opportunity
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Stage Modal -->
+<div class="modal fade" id="changeStageModal" tabindex="-1" aria-labelledby="changeStageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeStageModalLabel">Change Stage</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changeStageForm">
+                <div class="modal-body">
+                    <input type="hidden" id="selectedOpportunitiesIds" name="opportunity_ids">
+                    <div class="mb-3">
+                        <label for="newStageSelect" class="form-label">New Stage</label>
+                        <select class="form-select" id="newStageSelect" name="stage" required>
+                            <option value="" selected disabled>Select new stage</option>
+                            {% for stage in stages %}
+                            <option value="{{ stage }}">{{ stage }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply Stage</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/opportunities.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize pipeline chart
+    initializePipelineChart();
+});
+</script>
+{% endblock %}

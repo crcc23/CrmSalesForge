@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CRM System{% endblock %}</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <style>
+        :root {
+            --tenant-primary-color: {% if session.get('tenant_id') %}{{ tenant.primary_color or '#3498db' }}{% else %}#3498db{% endif %};
+            --tenant-secondary-color: {% if session.get('tenant_id') %}{{ tenant.secondary_color or '#2ecc71' }}{% else %}#2ecc71{% endif %};
+        }
+    </style>
+    {% block additional_head %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <button id="sidebarToggle" class="btn btn-dark d-md-none me-2">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
+                {% if session.get('tenant_id') and tenant.logo_url %}
+                <img src="{{ tenant.logo_url }}" alt="{{ tenant.name }}">
+                {% else %}
+                <i class="fas fa-cube me-2 text-tenant-primary"></i>
+                {% endif %}
+                {{ session.get('tenant_name', 'CRM System') }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="avatar sm me-2">{{ current_user.first_name[0] }}{{ current_user.last_name[0] }}</span>
+                            {{ current_user.first_name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            {% if current_user.role.name == 'Admin' %}
+                            <li><a class="dropdown-item" href="{{ url_for('tenant.settings') }}"><i class="fas fa-cog me-2"></i>Tenant Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('tenant.users') }}"><i class="fas fa-users me-2"></i>Manage Users</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if request.path == url_for('dashboard.index') %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-heading">CRM</li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'prospects' in request.path %}active{% endif %}" href="{{ url_for('prospect.list_prospects') }}">
+                        <i class="fas fa-user-plus"></i>
+                        Prospects
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'opportunities' in request.path %}active{% endif %}" href="{{ url_for('opportunity.list_opportunities') }}">
+                        <i class="fas fa-chart-line"></i>
+                        Opportunities
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'contacts' in request.path %}active{% endif %}" href="{{ url_for('contact.list_contacts') }}">
+                        <i class="fas fa-address-book"></i>
+                        Contacts
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'accounts' in request.path %}active{% endif %}" href="{{ url_for('account.list_accounts') }}">
+                        <i class="fas fa-building"></i>
+                        Accounts
+                    </a>
+                </li>
+                <li class="sidebar-heading">Integrations</li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'integrations' in request.path %}active{% endif %}" href="{{ url_for('integration.index') }}">
+                        <i class="fas fa-plug"></i>
+                        Integrations
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Content -->
+        <div class="content-with-sidebar">
+            <div class="container content-wrapper">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }} alert-dismissible auto-close fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    
+    <div class="auth-container">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible auto-close fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+            
+            {% block auth_content %}{% endblock %}
+        </div>
+    </div>
+    
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,190 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if action == 'edit' %}Edit{% else %}New{% endif %} Opportunity - CRM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">{% if action == 'edit' %}Edit{% else %}New{% endif %} Opportunity</h1>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('opportunity.list_opportunities') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Opportunities
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Opportunity Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="opportunityForm" method="POST" action="{% if action == 'edit' %}{{ url_for('opportunity.edit_opportunity', opportunity_id=opportunity.id) }}{% else %}{{ url_for('opportunity.new_opportunity') }}{% endif %}" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Opportunity Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ opportunity.name if opportunity else '' }}" required>
+                        <div class="invalid-feedback">
+                            Please enter an opportunity name.
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="account_id" class="form-label">Account</label>
+                            <select class="form-select" id="account_id" name="account_id">
+                                <option value="">No Account</option>
+                                {% for account in accounts %}
+                                <option value="{{ account.id }}" {% if opportunity and opportunity.account_id == account.id %}selected{% endif %}>{{ account.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_id" class="form-label">Contact</label>
+                            <select class="form-select" id="contact_id" name="contact_id">
+                                <option value="">No Contact</option>
+                                {% for contact in contacts %}
+                                <option value="{{ contact.id }}" {% if opportunity and opportunity.contact_id == contact.id %}selected{% endif %}>{{ contact.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="amount" name="amount" value="{{ opportunity.amount if opportunity else '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="close_date" class="form-label">Close Date</label>
+                            <input type="date" class="form-control" id="close_date" name="close_date" value="{{ opportunity.close_date.strftime('%Y-%m-%d') if opportunity and opportunity.close_date else '' }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="stage" class="form-label">Stage</label>
+                            <select class="form-select" id="stage" name="stage" required>
+                                {% for stage in stages %}
+                                <option value="{{ stage }}" {% if opportunity and opportunity.stage == stage %}selected{% elif not opportunity and stage == 'Qualification' %}selected{% endif %}>{{ stage }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a stage.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="probability" class="form-label">Probability (%)</label>
+                            <input type="number" min="0" max="100" class="form-control" id="probability" name="probability" value="{{ opportunity.probability if opportunity else '10' }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="owner_id" class="form-label">Owner</label>
+                        <select class="form-select" id="owner_id" name="owner_id" required>
+                            {% for user in users %}
+                            <option value="{{ user.id }}" {% if (opportunity and opportunity.owner_id == user.id) or (not opportunity and user.id == current_user.id) %}selected{% endif %}>{{ user.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select an owner.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ opportunity.description if opportunity else '' }}</textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save Opportunity</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Sales Process</h5>
+            </div>
+            <div class="card-body">
+                <h6>Pipeline Stages</h6>
+                <ul class="list-unstyled">
+                    <li><span class="badge bg-primary me-2">Qualification</span> Identify if prospect is a good fit</li>
+                    <li><span class="badge bg-info me-2">Needs Analysis</span> Understand prospect needs</li>
+                    <li><span class="badge bg-warning me-2">Proposal</span> Formal offer submitted</li>
+                    <li><span class="badge bg-secondary me-2">Negotiation</span> Discussing terms and pricing</li>
+                    <li><span class="badge bg-success me-2">Closed Won</span> Deal successfully closed</li>
+                    <li><span class="badge bg-danger me-2">Closed Lost</span> Deal lost to competitor or abandoned</li>
+                </ul>
+                <hr>
+                <h6>Tips</h6>
+                <ul>
+                    <li>Update close date as you get more information</li>
+                    <li>Keep probability estimates realistic</li>
+                    <li>Document key decision criteria in the description</li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if opportunity %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Opportunity History</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ opportunity.created_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                            <div class="timeline-title">Opportunity Created</div>
+                            <div class="timeline-body">
+                                Created by {{ opportunity.owner.full_name }}
+                            </div>
+                        </div>
+                    </div>
+                    {% if opportunity.created_at != opportunity.updated_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-point"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ opportunity.updated_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                            <div class="timeline-title">Opportunity Updated</div>
+                            <div class="timeline-body">
+                                Last updated by {{ opportunity.owner.full_name }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/opportunities.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup probability based on stage changes
+    const stageSelect = document.getElementById('stage');
+    const probabilityInput = document.getElementById('probability');
+    
+    if (stageSelect && probabilityInput) {
+        stageSelect.addEventListener('change', function() {
+            updateProbabilityFromStage(this.value, probabilityInput);
+        });
+    }
+    
+    // Format amount as currency
+    const amountInput = document.getElementById('amount');
+    if (amountInput) {
+        amountInput.addEventListener('blur', function() {
+            formatAmountInput(this);
+        });
+    }
+});
+</script>
+{% endblock %}
