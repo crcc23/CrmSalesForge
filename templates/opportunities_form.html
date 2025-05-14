@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 
-{% block title %}{% if action == 'edit' %}Edit{% else %}New{% endif %} Opportunity - CRM System{% endblock %}
+{% block title %}{% if action == 'edit' %}Editar{% else %}Nueva{% endif %} Oportunidad - Sistema CRM{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1 class="h3 mb-0">{% if action == 'edit' %}Edit{% else %}New{% endif %} Opportunity</h1>
+        <h1 class="h3 mb-0">{% if action == 'edit' %}Editar{% else %}Nueva{% endif %} Oportunidad</h1>
     </div>
     <div class="col-md-4 text-md-end">
         <a href="{{ url_for('opportunity.list_opportunities') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Opportunities
+            <i class="fas fa-arrow-left me-2"></i>Volver a Oportunidades
         </a>
     </div>
 </div>
@@ -18,31 +18,31 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Opportunity Information</h5>
+                <h5 class="mb-0">Información de la Oportunidad</h5>
             </div>
             <div class="card-body">
                 <form id="opportunityForm" method="POST" action="{% if action == 'edit' %}{{ url_for('opportunity.edit_opportunity', opportunity_id=opportunity.id) }}{% else %}{{ url_for('opportunity.new_opportunity') }}{% endif %}" class="needs-validation" novalidate>
                     <div class="mb-3">
-                        <label for="name" class="form-label">Opportunity Name</label>
+                        <label for="name" class="form-label">Nombre de la Oportunidad</label>
                         <input type="text" class="form-control" id="name" name="name" value="{{ opportunity.name if opportunity else '' }}" required>
                         <div class="invalid-feedback">
-                            Please enter an opportunity name.
+                            Por favor ingresa un nombre para la oportunidad.
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="account_id" class="form-label">Account</label>
+                            <label for="account_id" class="form-label">Cuenta</label>
                             <select class="form-select" id="account_id" name="account_id">
-                                <option value="">No Account</option>
+                                <option value="">Sin Cuenta</option>
                                 {% for account in accounts %}
                                 <option value="{{ account.id }}" {% if opportunity and opportunity.account_id == account.id %}selected{% endif %}>{{ account.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="contact_id" class="form-label">Contact</label>
+                            <label for="contact_id" class="form-label">Contacto</label>
                             <select class="form-select" id="contact_id" name="contact_id">
-                                <option value="">No Contact</option>
+                                <option value="">Sin Contacto</option>
                                 {% for contact in contacts %}
                                 <option value="{{ contact.id }}" {% if opportunity and opportunity.contact_id == contact.id %}selected{% endif %}>{{ contact.full_name }}</option>
                                 {% endfor %}
@@ -51,7 +51,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="amount" class="form-label">Amount</label>
+                            <label for="amount" class="form-label">Monto</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" min="0" class="form-control" id="amount" name="amount" value="{{ opportunity.amount if opportunity else '' }}">
