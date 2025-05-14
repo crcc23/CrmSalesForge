@@ -107,22 +107,22 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Help Information</h5>
+                <h5 class="mb-0">Información de Ayuda</h5>
             </div>
             <div class="card-body">
-                <h6>Prospect Stages</h6>
+                <h6>Etapas del Prospecto</h6>
                 <ul class="list-unstyled">
-                    <li><span class="badge bg-primary me-2">New</span> First contact, not yet engaged</li>
-                    <li><span class="badge bg-info me-2">Contacted</span> Initial outreach made</li>
-                    <li><span class="badge bg-success me-2">Qualified</span> Meets criteria for follow-up</li>
-                    <li><span class="badge bg-danger me-2">Disqualified</span> Not a good fit</li>
+                    <li><span class="badge bg-primary me-2">New</span> Primer contacto, aún no comprometido</li>
+                    <li><span class="badge bg-info me-2">Contacted</span> Contacto inicial realizado</li>
+                    <li><span class="badge bg-success me-2">Qualified</span> Cumple criterios para seguimiento</li>
+                    <li><span class="badge bg-danger me-2">Disqualified</span> No es adecuado</li>
                 </ul>
                 <hr>
-                <h6>Tips</h6>
+                <h6>Consejos</h6>
                 <ul>
-                    <li>Enter as much information as possible to improve follow-up quality</li>
-                    <li>Regular status updates help track prospect journey</li>
-                    <li>Add detailed notes for context when handing over prospects</li>
+                    <li>Ingrese la mayor cantidad de información posible para mejorar la calidad del seguimiento</li>
+                    <li>Las actualizaciones regulares de estado ayudan a seguir el recorrido del prospecto</li>
+                    <li>Agregue notas detalladas para proporcionar contexto al transferir prospectos</li>
                 </ul>
             </div>
         </div>
@@ -130,7 +130,7 @@
         {% if prospect %}
         <div class="card mt-3">
             <div class="card-header">
-                <h5 class="mb-0">Prospect History</h5>
+                <h5 class="mb-0">Historial del Prospecto</h5>
             </div>
             <div class="card-body">
                 <div class="timeline">
@@ -138,9 +138,9 @@
                         <div class="timeline-point"></div>
                         <div class="timeline-content">
                             <div class="timeline-date">{{ prospect.created_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
-                            <div class="timeline-title">Prospect Created</div>
+                            <div class="timeline-title">Prospecto Creado</div>
                             <div class="timeline-body">
-                                Created by {{ prospect.owner.full_name }}
+                                Creado por {{ prospect.owner.full_name }}
                             </div>
                         </div>
                     </div>
@@ -149,9 +149,9 @@
                         <div class="timeline-point"></div>
                         <div class="timeline-content">
                             <div class="timeline-date">{{ prospect.updated_at.strftime('%b %d, %Y, %I:%M %p') }}</div>
-                            <div class="timeline-title">Prospect Updated</div>
+                            <div class="timeline-title">Prospecto Actualizado</div>
                             <div class="timeline-body">
-                                Last updated by {{ prospect.owner.full_name }}
+                                Última actualización por {{ prospect.owner.full_name }}
                             </div>
                         </div>
                     </div>
