@@ -4,6 +4,7 @@ from app import db
 from models import Prospect, Opportunity, Contact, Account, User, Tenant
 from sqlalchemy import func
 import datetime
+from utils.seed_data import create_demo_prospects
 
 # Create blueprint but DON'T register it here - it will be registered in main.py
 dashboard = Blueprint('dashboard', __name__)
@@ -79,3 +80,21 @@ def index():
                           pipeline_amounts=pipeline_amounts,
                           closing_opportunities=closing_opportunities,
                           total_opportunity_amount=total_opportunity_amount)
+
+@dashboard.route('/create_demo_data', methods=['POST'])
+@login_required
+def create_demo_data():
+    tenant_id = session.get('tenant_id')
+    
+    if not tenant_id:
+        flash('Tenant no encontrado. Por favor, inicia sesión de nuevo.', 'danger')
+        return redirect(url_for('auth.logout'))
+    
+    result = create_demo_prospects(tenant_id, current_user.id)
+    
+    if result["success"]:
+        flash(f'Se han creado {result["count"]} prospectos de demostración con éxito.', 'success')
+    else:
+        flash(result["message"], 'warning')
+    
+    return redirect(url_for('dashboard.index'))
