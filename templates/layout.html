@@ -104,6 +104,12 @@
                         Plantillas de Mensajes
                     </a>
                 </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'campaigns' in request.path %}active{% endif %}" href="{{ url_for('campaigns.index') }}">
+                        <i class="fas fa-paper-plane"></i>
+                        Campañas
+                    </a>
+                </li>
             </ul>
         </div>
 
