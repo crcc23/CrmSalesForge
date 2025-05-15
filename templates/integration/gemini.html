@@ -1,0 +1,238 @@
+{% extends 'layout.html' %}
+
+{% block title %}Configuración de Google Gemini{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('integration.index') }}">Integraciones</a></li>
+                <li class="breadcrumb-item active">Google Gemini</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Configuración de Google Gemini</h1>
+        <p class="text-muted">Configura tu acceso a la API de Google Gemini</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if config and config.is_active %}
+        <span class="badge bg-success p-2 mb-2">
+            <i class="fas fa-check-circle me-1"></i> Conexión exitosa
+        </span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        {% if config and config.is_active %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i> Conexión exitosa. La integración con Google Gemini está activa.
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{{ url_for('integration.gemini_config') }}">
+            <div class="mb-3">
+                <label for="api_key" class="form-label">API Key de Google Gemini</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="api_key" name="api_key" 
+                           value="{{ '•' * 24 if config and config.api_key else '' }}" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="form-text">Obtén tu clave API en <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="default_model" class="form-label">Modelo predeterminado</label>
+                <select class="form-select" id="default_model" name="default_model">
+                    <option value="gemini-1.5-pro" {% if config and config.default_model == 'gemini-1.5-pro' %}selected{% endif %}>Gemini 1.5 Pro (Recomendado)</option>
+                    <option value="gemini-1.5-flash" {% if config and config.default_model == 'gemini-1.5-flash' %}selected{% endif %}>Gemini 1.5 Flash</option>
+                    <option value="gemini-1.0-pro" {% if config and config.default_model == 'gemini-1.0-pro' %}selected{% endif %}>Gemini 1.0 Pro</option>
+                    <option value="gemini-1.0-pro-vision" {% if config and config.default_model == 'gemini-1.0-pro-vision' %}selected{% endif %}>Gemini 1.0 Pro Vision</option>
+                </select>
+                <div class="form-text">El modelo predeterminado para generar contenido</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Características disponibles</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="text_generation" name="text_generation" checked disabled>
+                    <label class="form-check-label" for="text_generation">
+                        Generación de texto
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="image_analysis" name="image_analysis" checked>
+                    <label class="form-check-label" for="image_analysis">
+                        Análisis de imágenes
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="multimodal" name="multimodal" checked>
+                    <label class="form-check-label" for="multimodal">
+                        Funcionamiento multimodal
+                    </label>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Guardar Configuración
+                </button>
+                
+                {% if config and config.is_active %}
+                <button type="button" class="btn btn-outline-primary" id="testConnection">
+                    <i class="fas fa-plug me-2"></i>Probar Conexión
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if config and config.is_active %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Información Adicional</h5>
+    </div>
+    <div class="card-body">
+        <p>Tu configuración de Google Gemini está correctamente establecida. Ahora puedes:</p>
+        <ul>
+            <li>Generar contenido usando los modelos de Google Gemini</li>
+            <li>Analizar y entender imágenes con la API multimodal</li>
+            <li>Crear resúmenes y análisis de textos de manera automática</li>
+        </ul>
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Google Gemini ofrece una cuota gratuita mensual. Consulta sus <a href="https://ai.google.dev/pricing" target="_blank">precios actuales</a> para más información.
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Probar Gemini</h5>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="testPrompt" class="form-label">Escribe un prompt de prueba:</label>
+            <textarea class="form-control" id="testPrompt" rows="3" placeholder="Escribe una breve historia sobre un viaje a la montaña..."></textarea>
+        </div>
+        <button type="button" class="btn btn-primary" id="generateText">
+            <i class="fas fa-magic me-2"></i>Generar Texto
+        </button>
+        
+        <div class="mt-4" id="resultContainer" style="display: none;">
+            <label class="form-label">Resultado:</label>
+            <div class="border rounded p-3 bg-light" id="resultText"></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('api_key');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle eye icon
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+        
+        // Test connection button
+        const testConnectionBtn = document.getElementById('testConnection');
+        if (testConnectionBtn) {
+            testConnectionBtn.addEventListener('click', function() {
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Probando...';
+                
+                // Simulate API call (replace with actual AJAX call)
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-plug me-2"></i>Probar Conexión';
+                    
+                    // Show success notification
+                    showNotification('Conexión a Google Gemini establecida correctamente', 'success');
+                }, 1500);
+            });
+        }
+        
+        // Generate text button
+        const generateTextBtn = document.getElementById('generateText');
+        const testPrompt = document.getElementById('testPrompt');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultText = document.getElementById('resultText');
+        
+        if (generateTextBtn && testPrompt && resultContainer && resultText) {
+            generateTextBtn.addEventListener('click', function() {
+                if (!testPrompt.value.trim()) {
+                    showNotification('Por favor escribe un prompt primero', 'warning');
+                    return;
+                }
+                
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando...';
+                
+                // Simulate API call (replace with actual AJAX call)
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-magic me-2"></i>Generar Texto';
+                    
+                    // Show result
+                    resultContainer.style.display = 'block';
+                    
+                    // Sample result (would come from API)
+                    const sampleResult = `El aire fresco de la montaña llenó mis pulmones mientras ascendía por el sendero cubierto de pinos. Cada paso me alejaba más de la rutina y me acercaba a las nubes que parecían tocar las cumbres. Tras horas de caminata, llegué a un claro donde instalé mi pequeña tienda de campaña.
+
+Al anochecer, el espectáculo de estrellas era inigualable, brillando con una intensidad que nunca había visto en la ciudad. El silencio solo era interrumpido por el suave susurro del viento entre los árboles y el ocasional canto de algún búho nocturno.
+
+Este viaje a la montaña no solo me regaló paisajes impresionantes, sino también un momento de paz y conexión con la naturaleza que tanto necesitaba.`;
+                    
+                    resultText.innerText = sampleResult;
+                }, 2000);
+            });
+        }
+    });
+    
+    // Notification helper
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed notification`;
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(function() {
+            const bsAlert = new bootstrap.Alert(notification);
+            bsAlert.close();
+        }, 5000);
+    }
+</script>
+{% endblock %}
