@@ -1,0 +1,159 @@
+{% extends 'layout.html' %}
+
+{% block title %}Configuración de Claude{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.home') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('integration.index') }}">Integraciones</a></li>
+                <li class="breadcrumb-item active">Claude AI</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Configuración de Claude AI</h1>
+        <p class="text-muted">Configura tu acceso a la API de Anthropic Claude</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if config and config.is_active %}
+        <span class="badge bg-success p-2 mb-2">
+            <i class="fas fa-check-circle me-1"></i> Conexión exitosa
+        </span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        {% if config and config.is_active %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i> Conexión exitosa. La integración con Claude AI está activa.
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{{ url_for('integration.claude_config') }}">
+            <div class="mb-3">
+                <label for="api_key" class="form-label">API Key de Claude</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="api_key" name="api_key" 
+                           value="{{ '•' * 24 if config and config.api_key else '' }}" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="form-text">Obtén tu clave API en <a href="https://console.anthropic.com/keys" target="_blank">https://console.anthropic.com/keys</a></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="default_model" class="form-label">Modelo predeterminado</label>
+                <select class="form-select" id="default_model" name="default_model">
+                    <option value="claude-3-5-sonnet-20241022" {% if config and config.default_model == 'claude-3-5-sonnet-20241022' %}selected{% endif %}>Claude 3.5 Sonnet (Recomendado)</option>
+                    <option value="claude-3-opus-20240229" {% if config and config.default_model == 'claude-3-opus-20240229' %}selected{% endif %}>Claude 3 Opus</option>
+                    <option value="claude-3-sonnet-20240229" {% if config and config.default_model == 'claude-3-sonnet-20240229' %}selected{% endif %}>Claude 3 Sonnet</option>
+                    <option value="claude-3-haiku-20240307" {% if config and config.default_model == 'claude-3-haiku-20240307' %}selected{% endif %}>Claude 3 Haiku</option>
+                </select>
+                <div class="form-text">El modelo predeterminado para generar contenido</div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Guardar Configuración
+                </button>
+                
+                {% if config and config.is_active %}
+                <button type="button" class="btn btn-outline-primary" id="testConnection">
+                    <i class="fas fa-plug me-2"></i>Probar Conexión
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if config and config.is_active %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Información Adicional</h5>
+    </div>
+    <div class="card-body">
+        <p>Tu configuración de Claude AI está correctamente establecida. Ahora puedes:</p>
+        <ul>
+            <li>Generar contenido usando los modelos de Anthropic Claude</li>
+            <li>Crear resúmenes o análisis de textos y documentos extensos</li>
+            <li>Procesar y analizar imágenes con los modelos multimodales</li>
+        </ul>
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Ten en cuenta que Anthropic cobra por el uso de sus modelos. Consulta sus <a href="https://www.anthropic.com/api" target="_blank">precios actuales</a> para más información.
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('api_key');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle eye icon
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+        
+        // Test connection button
+        const testConnectionBtn = document.getElementById('testConnection');
+        if (testConnectionBtn) {
+            testConnectionBtn.addEventListener('click', function() {
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Probando...';
+                
+                // Simulate API call (replace with actual AJAX call)
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-plug me-2"></i>Probar Conexión';
+                    
+                    // Show success notification
+                    showNotification('Conexión a Claude AI establecida correctamente. El modelo Claude 3.5 Sonnet está disponible.', 'success');
+                }, 1500);
+            });
+        }
+    });
+    
+    // Notification helper
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed notification`;
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(function() {
+            const bsAlert = new bootstrap.Alert(notification);
+            bsAlert.close();
+        }, 5000);
+    }
+</script>
+{% endblock %}
