@@ -92,6 +92,12 @@
                         Integraciones
                     </a>
                 </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'web-scraping' in request.path %}active{% endif %}" href="{{ url_for('scraping.list_tasks') }}">
+                        <i class="fas fa-spider"></i>
+                        Web Scraping
+                    </a>
+                </li>
             </ul>
         </div>
 

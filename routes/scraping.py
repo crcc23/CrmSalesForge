@@ -16,14 +16,6 @@ def list_tasks():
     """Lista todas las tareas de web scraping"""
     tenant_id = session.get('tenant_id')
     
-    # Verificar que el tenant tiene acceso a la funcionalidad
-    tenant = Tenant.query.get(tenant_id)
-    subscription = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription.includes_web_scraping:
-        flash('Tu plan de suscripción no incluye la funcionalidad de web scraping.', 'warning')
-        return redirect(url_for('dashboard.home'))
-    
     # Obtener tareas
     tasks = WebScrapingTask.query.filter_by(tenant_id=tenant_id).order_by(WebScrapingTask.created_at.desc()).all()
     
@@ -37,14 +29,6 @@ def new_task():
     """Crear una nueva tarea de web scraping"""
     tenant_id = session.get('tenant_id')
     
-    # Verificar que el tenant tiene acceso a la funcionalidad
-    tenant = Tenant.query.get(tenant_id)
-    subscription = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription.includes_web_scraping:
-        flash('Tu plan de suscripción no incluye la funcionalidad de web scraping.', 'warning')
-        return redirect(url_for('dashboard.home'))
-    
     if request.method == 'POST':
         name = request.form.get('name')
         url = request.form.get('url')
@@ -55,14 +39,13 @@ def new_task():
             return redirect(url_for('scraping.new_task'))
         
         # Crear nueva tarea
-        task = WebScrapingTask(
-            tenant_id=tenant_id,
-            user_id=current_user.id,
-            name=name,
-            url=url,
-            frequency=frequency,
-            status='Pending'
-        )
+        task = WebScrapingTask()
+        task.tenant_id = tenant_id
+        task.user_id = current_user.id
+        task.name = name
+        task.url = url
+        task.frequency = frequency
+        task.status = 'Pending'
         
         db.session.add(task)
         db.session.commit()
@@ -146,12 +129,11 @@ def execute_task(task_id):
         summary = content[:200] + '...' if len(content) > 200 else content
         
         # Guardar resultado
-        result = WebScrapingResult(
-            task_id=task.id,
-            status='Completed',
-            content=content,
-            summary=summary
-        )
+        result = WebScrapingResult()
+        result.task_id = task.id
+        result.status = 'Completed'
+        result.content = content
+        result.summary = summary
         
         # Actualizar tarea
         task.status = 'Completed'
@@ -163,11 +145,10 @@ def execute_task(task_id):
         flash('Web scraping ejecutado con éxito.', 'success')
     except Exception as e:
         # Guardar error
-        result = WebScrapingResult(
-            task_id=task.id,
-            status='Failed',
-            error=str(e)
-        )
+        result = WebScrapingResult()
+        result.task_id = task.id
+        result.status = 'Failed'
+        result.error = str(e)
         
         # Actualizar tarea
         task.status = 'Failed'
