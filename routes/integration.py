@@ -211,11 +211,11 @@ def gemini_config():
     
     return render_template('integration/gemini.html', config=config)
 
-# SERP API Google Maps Configuration
-@integration.route('/serp-maps', methods=['GET', 'POST'])
+# SERP API Google Configuration
+@integration.route('/serp-api', methods=['GET', 'POST'])
 @login_required
 def serp_maps_config():
-    """Configure SERP API for Google Maps"""
+    """Configure SERP API for Google Search"""
     tenant_id = get_tenant_id()
     config = SerpMapsConfig.query.filter_by(
         tenant_id=tenant_id,
@@ -240,13 +240,13 @@ def serp_maps_config():
         flash('Configuración de SERP API guardada correctamente', 'success')
         return redirect(url_for('integration.serp_maps_config'))
     
-    return render_template('integration/serp_maps.html', config=config)
+    return render_template('integration/serp_api.html', config=config)
 
-# Notion Configuration
-@integration.route('/notion', methods=['GET', 'POST'])
+# Google Maps API Configuration
+@integration.route('/maps-api', methods=['GET', 'POST'])
 @login_required
 def notion_config():
-    """Configure Notion integration"""
+    """Configure Google Maps API"""
     tenant_id = get_tenant_id()
     config = NotionConfig.query.filter_by(
         tenant_id=tenant_id,
@@ -271,7 +271,7 @@ def notion_config():
         flash('Configuración de Notion guardada correctamente', 'success')
         return redirect(url_for('integration.notion_config'))
     
-    return render_template('integration/notion.html', config=config)
+    return render_template('integration/maps_api.html', config=config)
 
 # API Endpoints for testing connections
 @integration.route('/test-connection/<integration_type>', methods=['POST'])
