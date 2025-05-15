@@ -1,0 +1,275 @@
+{% extends 'layout.html' %}
+
+{% block title %}Detalle de Campaña{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .campaign-status-badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+  .campaign-preview {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1.5rem;
+    background-color: white;
+  }
+  .campaign-preview .campaign-subject {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+  .stats-card {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 0.25rem;
+    background-color: #f8f9fa;
+  }
+  .stats-card .stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  .stats-card .stats-label {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+  }
+  .stats-card .stats-percentage {
+    font-size: 1.2rem;
+    color: #198754;
+  }
+  .stats-card.primary {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+  }
+  .stats-card.success {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+  }
+  .stats-card.warning {
+    background-color: rgba(var(--bs-warning-rgb), 0.1);
+  }
+  .stats-card.danger {
+    background-color: rgba(var(--bs-danger-rgb), 0.1);
+  }
+  .recipients-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{{ campaign.name }}</h2>
+    <div>
+      <a href="{{ url_for('campaigns.index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a campañas
+      </a>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          {% if campaign.status == 'Draft' %}
+            <span class="badge bg-secondary campaign-status-badge">Borrador</span>
+          {% elif campaign.status == 'Scheduled' %}
+            <span class="badge bg-warning campaign-status-badge">Programada</span>
+          {% elif campaign.status == 'Sending' %}
+            <span class="badge bg-primary campaign-status-badge">Enviando</span>
+          {% elif campaign.status == 'Sent' %}
+            <span class="badge bg-success campaign-status-badge">Enviada</span>
+          {% elif campaign.status == 'Failed' %}
+            <span class="badge bg-danger campaign-status-badge">Fallida</span>
+          {% endif %}
+        </div>
+        <div>
+          {% if campaign.status == 'Draft' %}
+            <a href="{{ url_for('campaigns.edit_email_campaign', campaign_id=campaign.id) }}" class="btn btn-outline-primary me-2">
+              <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{{ url_for('campaigns.manage_email_recipients', campaign_id=campaign.id) }}" class="btn btn-outline-primary me-2">
+              <i class="bi bi-people"></i> Destinatarios
+            </a>
+            <a href="{{ url_for('campaigns.schedule_email_campaign', campaign_id=campaign.id) }}" class="btn btn-success">
+              <i class="bi bi-send"></i> Programar Envío
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Detalles de la Campaña</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Nombre:</div>
+            <div class="col-md-9">{{ campaign.name }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Descripción:</div>
+            <div class="col-md-9">{{ campaign.description or 'Sin descripción' }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Fecha de creación:</div>
+            <div class="col-md-9">{{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+          </div>
+          {% if campaign.scheduled_date %}
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Fecha programada:</div>
+            <div class="col-md-9">{{ campaign.scheduled_date.strftime('%d/%m/%Y %H:%M') }}</div>
+          </div>
+          {% endif %}
+          {% if campaign.start_date %}
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Fecha de inicio:</div>
+            <div class="col-md-9">{{ campaign.start_date.strftime('%d/%m/%Y %H:%M') }}</div>
+          </div>
+          {% endif %}
+          {% if campaign.end_date %}
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Fecha de finalización:</div>
+            <div class="col-md-9">{{ campaign.end_date.strftime('%d/%m/%Y %H:%M') }}</div>
+          </div>
+          {% endif %}
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Plantilla:</div>
+            <div class="col-md-9">
+              {% if campaign.template %}
+                <a href="{{ url_for('templates.view_email_template', template_id=campaign.template.id) }}" target="_blank">
+                  {{ campaign.template.name }}
+                </a>
+              {% else %}
+                Contenido personalizado
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Previsualización del Email</h5>
+        </div>
+        <div class="card-body">
+          <div class="campaign-preview">
+            <div class="campaign-subject">
+              <strong>Asunto:</strong> {{ campaign.subject }}
+            </div>
+            <div class="campaign-body">
+              {{ campaign.body_html|safe }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Estadísticas</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="stats-card primary">
+                <div class="stats-number">{{ stats.total }}</div>
+                <div class="stats-label">Total destinatarios</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stats-card">
+                <div class="stats-number">{{ stats.sent }}</div>
+                <div class="stats-label">Enviados</div>
+                <div class="stats-percentage">{{ "%.1f"|format(stats.sent_pct) }}%</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stats-card success">
+                <div class="stats-number">{{ stats.open }}</div>
+                <div class="stats-label">Abiertos</div>
+                <div class="stats-percentage">{{ "%.1f"|format(stats.open_pct) }}%</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stats-card warning">
+                <div class="stats-number">{{ stats.click }}</div>
+                <div class="stats-label">Clicks</div>
+                <div class="stats-percentage">{{ "%.1f"|format(stats.click_pct) }}%</div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="stats-card danger">
+                <div class="stats-number">{{ stats.bounce }}</div>
+                <div class="stats-label">Rebotes</div>
+                <div class="stats-percentage">{{ "%.1f"|format(stats.bounce_pct) }}%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Destinatarios</h5>
+          <span class="badge bg-primary">{{ recipients|length }}</span>
+        </div>
+        <div class="card-body">
+          <div class="recipients-list">
+            {% if recipients %}
+              <div class="list-group">
+                {% for recipient in recipients %}
+                  <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                      <h6 class="mb-1">{{ recipient.recipient_name }}</h6>
+                      <small>
+                        {% if recipient.recipient_type == 'contact' %}
+                          <span class="badge bg-primary">Contacto</span>
+                        {% else %}
+                          <span class="badge bg-warning text-dark">Prospecto</span>
+                        {% endif %}
+                      </small>
+                    </div>
+                    <p class="mb-1">{{ recipient.email }}</p>
+                    <div class="d-flex gap-2 small">
+                      {% if recipient.sent %}
+                        <span class="badge bg-secondary">Enviado</span>
+                      {% endif %}
+                      {% if recipient.opened %}
+                        <span class="badge bg-success">Abierto</span>
+                      {% endif %}
+                      {% if recipient.clicked %}
+                        <span class="badge bg-info">Click</span>
+                      {% endif %}
+                      {% if recipient.bounced %}
+                        <span class="badge bg-danger">Rebotado</span>
+                      {% endif %}
+                      {% if recipient.error_message %}
+                        <span class="badge bg-danger" title="{{ recipient.error_message }}">Error</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="alert alert-info">
+                No hay destinatarios seleccionados para esta campaña.
+                {% if campaign.status == 'Draft' %}
+                <a href="{{ url_for('campaigns.manage_email_recipients', campaign_id=campaign.id) }}" class="alert-link">Agregar destinatarios</a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

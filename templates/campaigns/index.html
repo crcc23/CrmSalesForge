@@ -1,0 +1,316 @@
+{% extends 'layout.html' %}
+
+{% block title %}Campañas{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Campañas</h2>
+    <div>
+      <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-plus-lg"></i> Nueva Campaña
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="{{ url_for('campaigns.create_email_campaign') }}">Campaña de Email</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('campaigns.create_whatsapp_campaign') }}">Campaña de WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <ul class="nav nav-tabs mb-4" id="campaignsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-tab-pane" type="button" role="tab" aria-controls="all-tab-pane" aria-selected="true">
+            Todas
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-tab-pane" type="button" role="tab" aria-controls="email-tab-pane" aria-selected="false">
+            Email
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="whatsapp-tab" data-bs-toggle="tab" data-bs-target="#whatsapp-tab-pane" type="button" role="tab" aria-controls="whatsapp-tab-pane" aria-selected="false">
+            WhatsApp
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tab-content" id="campaignsTabsContent">
+    <!-- Todas las campañas -->
+    <div class="tab-pane fade show active" id="all-tab-pane" role="tabpanel" aria-labelledby="all-tab" tabindex="0">
+      <div class="row">
+        {% if email_campaigns or whatsapp_campaigns %}
+          <div class="col-12">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Fecha de creación</th>
+                    <th>Programada para</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for campaign in email_campaigns %}
+                    <tr>
+                      <td>{{ campaign.name }}</td>
+                      <td><span class="badge bg-info">Email</span></td>
+                      <td>
+                        {% if campaign.status == 'Draft' %}
+                          <span class="badge bg-secondary">Borrador</span>
+                        {% elif campaign.status == 'Scheduled' %}
+                          <span class="badge bg-warning">Programada</span>
+                        {% elif campaign.status == 'Sending' %}
+                          <span class="badge bg-primary">Enviando</span>
+                        {% elif campaign.status == 'Sent' %}
+                          <span class="badge bg-success">Enviada</span>
+                        {% elif campaign.status == 'Failed' %}
+                          <span class="badge bg-danger">Fallida</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                      <td>
+                        {% if campaign.scheduled_date %}
+                          {{ campaign.scheduled_date.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                          --
+                        {% endif %}
+                      </td>
+                      <td>
+                        <a href="{{ url_for('campaigns.view_email_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        {% if campaign.status == 'Draft' %}
+                          <a href="{{ url_for('campaigns.edit_email_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+
+                  {% for campaign in whatsapp_campaigns %}
+                    <tr>
+                      <td>{{ campaign.name }}</td>
+                      <td><span class="badge bg-success">WhatsApp</span></td>
+                      <td>
+                        {% if campaign.status == 'Draft' %}
+                          <span class="badge bg-secondary">Borrador</span>
+                        {% elif campaign.status == 'Scheduled' %}
+                          <span class="badge bg-warning">Programada</span>
+                        {% elif campaign.status == 'Sending' %}
+                          <span class="badge bg-primary">Enviando</span>
+                        {% elif campaign.status == 'Sent' %}
+                          <span class="badge bg-success">Enviada</span>
+                        {% elif campaign.status == 'Failed' %}
+                          <span class="badge bg-danger">Fallida</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                      <td>
+                        {% if campaign.scheduled_date %}
+                          {{ campaign.scheduled_date.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                          --
+                        {% endif %}
+                      </td>
+                      <td>
+                        <a href="{{ url_for('campaigns.view_whatsapp_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        {% if campaign.status == 'Draft' %}
+                          <a href="{{ url_for('campaigns.edit_whatsapp_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="col-12 text-center py-5">
+            <div class="empty-state">
+              <i class="bi bi-megaphone display-1 text-muted"></i>
+              <h3 class="mt-4">Aún no hay campañas</h3>
+              <p class="text-muted">Crea tu primera campaña para comenzar a comunicarte con tus contactos</p>
+              <div class="mt-4">
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-plus-lg"></i> Nueva Campaña
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('campaigns.create_email_campaign') }}">Campaña de Email</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('campaigns.create_whatsapp_campaign') }}">Campaña de WhatsApp</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Campañas de Email -->
+    <div class="tab-pane fade" id="email-tab-pane" role="tabpanel" aria-labelledby="email-tab" tabindex="0">
+      <div class="row">
+        {% if email_campaigns %}
+          <div class="col-12">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Asunto</th>
+                    <th>Estado</th>
+                    <th>Fecha de creación</th>
+                    <th>Programada para</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for campaign in email_campaigns %}
+                    <tr>
+                      <td>{{ campaign.name }}</td>
+                      <td>{{ campaign.subject }}</td>
+                      <td>
+                        {% if campaign.status == 'Draft' %}
+                          <span class="badge bg-secondary">Borrador</span>
+                        {% elif campaign.status == 'Scheduled' %}
+                          <span class="badge bg-warning">Programada</span>
+                        {% elif campaign.status == 'Sending' %}
+                          <span class="badge bg-primary">Enviando</span>
+                        {% elif campaign.status == 'Sent' %}
+                          <span class="badge bg-success">Enviada</span>
+                        {% elif campaign.status == 'Failed' %}
+                          <span class="badge bg-danger">Fallida</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                      <td>
+                        {% if campaign.scheduled_date %}
+                          {{ campaign.scheduled_date.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                          --
+                        {% endif %}
+                      </td>
+                      <td>
+                        <a href="{{ url_for('campaigns.view_email_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        {% if campaign.status == 'Draft' %}
+                          <a href="{{ url_for('campaigns.edit_email_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="col-12 text-center py-5">
+            <div class="empty-state">
+              <i class="bi bi-envelope display-1 text-muted"></i>
+              <h3 class="mt-4">Aún no hay campañas de email</h3>
+              <p class="text-muted">Crea tu primera campaña de email para comenzar a comunicarte con tus contactos</p>
+              <div class="mt-4">
+                <a href="{{ url_for('campaigns.create_email_campaign') }}" class="btn btn-primary">
+                  <i class="bi bi-plus-lg"></i> Nueva Campaña de Email
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Campañas de WhatsApp -->
+    <div class="tab-pane fade" id="whatsapp-tab-pane" role="tabpanel" aria-labelledby="whatsapp-tab" tabindex="0">
+      <div class="row">
+        {% if whatsapp_campaigns %}
+          <div class="col-12">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Estado</th>
+                    <th>Fecha de creación</th>
+                    <th>Programada para</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for campaign in whatsapp_campaigns %}
+                    <tr>
+                      <td>{{ campaign.name }}</td>
+                      <td>
+                        {% if campaign.status == 'Draft' %}
+                          <span class="badge bg-secondary">Borrador</span>
+                        {% elif campaign.status == 'Scheduled' %}
+                          <span class="badge bg-warning">Programada</span>
+                        {% elif campaign.status == 'Sending' %}
+                          <span class="badge bg-primary">Enviando</span>
+                        {% elif campaign.status == 'Sent' %}
+                          <span class="badge bg-success">Enviada</span>
+                        {% elif campaign.status == 'Failed' %}
+                          <span class="badge bg-danger">Fallida</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                      <td>
+                        {% if campaign.scheduled_date %}
+                          {{ campaign.scheduled_date.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                          --
+                        {% endif %}
+                      </td>
+                      <td>
+                        <a href="{{ url_for('campaigns.view_whatsapp_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        {% if campaign.status == 'Draft' %}
+                          <a href="{{ url_for('campaigns.edit_whatsapp_campaign', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% else %}
+          <div class="col-12 text-center py-5">
+            <div class="empty-state">
+              <i class="bi bi-whatsapp display-1 text-muted"></i>
+              <h3 class="mt-4">Aún no hay campañas de WhatsApp</h3>
+              <p class="text-muted">Crea tu primera campaña de WhatsApp para comenzar a comunicarte con tus contactos</p>
+              <div class="mt-4">
+                <a href="{{ url_for('campaigns.create_whatsapp_campaign') }}" class="btn btn-primary">
+                  <i class="bi bi-plus-lg"></i> Nueva Campaña de WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

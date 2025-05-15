@@ -1,0 +1,260 @@
+{% extends 'layout.html' %}
+
+{% block title %}Programar Campaña{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .campaign-steps {
+    margin-bottom: 2rem;
+  }
+  .campaign-steps .step {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    position: relative;
+  }
+  .campaign-steps .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -1rem;
+    width: 2rem;
+    height: 2px;
+    background-color: #dee2e6;
+  }
+  .campaign-steps .step.active {
+    background-color: var(--bs-primary);
+    color: white;
+  }
+  .campaign-steps .step.complete {
+    background-color: var(--bs-success);
+    color: white;
+  }
+  .send-option {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .send-option:hover {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  .send-option.selected {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+  }
+  .send-option .form-check-input:checked + .form-check-label {
+    font-weight: bold;
+  }
+  .schedule-options {
+    padding: 1rem;
+    border-radius: 0.25rem;
+    background-color: rgba(var(--bs-light-rgb), 0.5);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Programar Campaña</h2>
+    <div>
+      <a href="{{ url_for('campaigns.view_email_campaign', campaign_id=campaign.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+      </a>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="campaign-steps d-flex justify-content-between">
+        <div class="step complete">
+          <div class="d-flex align-items-center">
+            <div class="step-circle me-2"><i class="bi bi-check-lg"></i></div>
+            <div>Configuración</div>
+          </div>
+        </div>
+        <div class="step complete">
+          <div class="d-flex align-items-center">
+            <div class="step-circle me-2"><i class="bi bi-check-lg"></i></div>
+            <div>Destinatarios</div>
+          </div>
+        </div>
+        <div class="step active">
+          <div class="d-flex align-items-center">
+            <div class="step-circle me-2">3</div>
+            <div>Programación</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Cuándo enviar la campaña</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('campaigns.schedule_email_campaign', campaign_id=campaign.id) }}">
+            <div class="mb-4">
+              <div class="send-option selected" id="send-now-option">
+                <div class="form-check">
+                  <input class="form-check-input send-type-radio" type="radio" name="send_type" id="send_now" value="now" checked>
+                  <label class="form-check-label" for="send_now">
+                    <h5>Enviar ahora</h5>
+                  </label>
+                </div>
+                <p class="text-muted ms-4">La campaña se enviará inmediatamente después de guardar.</p>
+              </div>
+              
+              <div class="send-option" id="send-later-option">
+                <div class="form-check">
+                  <input class="form-check-input send-type-radio" type="radio" name="send_type" id="send_later" value="later">
+                  <label class="form-check-label" for="send_later">
+                    <h5>Programar para más tarde</h5>
+                  </label>
+                </div>
+                <div class="schedule-options ms-4 mt-3 d-none" id="schedule-options">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label for="scheduled_date" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="scheduled_date" name="scheduled_date" min="{{ today }}">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label for="scheduled_time" class="form-label">Hora</label>
+                        <input type="time" class="form-control" id="scheduled_time" name="scheduled_time">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Resumen de la Campaña</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-sm-3 fw-bold">Nombre:</div>
+                  <div class="col-sm-9">{{ campaign.name }}</div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-3 fw-bold">Asunto:</div>
+                  <div class="col-sm-9">{{ campaign.subject }}</div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-3 fw-bold">Destinatarios:</div>
+                  <div class="col-sm-9">
+                    <span class="badge bg-primary">{{ campaign.recipients.count() }}</span> destinatarios
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-3 fw-bold">Estado:</div>
+                  <div class="col-sm-9">
+                    <span class="badge bg-secondary">Borrador</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle-fill"></i> <strong>Importante:</strong> Una vez iniciado el envío, no se podrá detener ni modificar la campaña. Asegúrate de revisar toda la información antes de programar.
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a href="{{ url_for('campaigns.manage_email_recipients', campaign_id=campaign.id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-chevron-left"></i> Anterior: Destinatarios
+              </a>
+              <button type="submit" class="btn btn-success">Programar Campaña</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Obtener fecha actual para mínimo en calendario
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('scheduled_date').min = today;
+    
+    // Establecer hora por defecto (1 hora desde ahora)
+    const defaultTime = new Date();
+    defaultTime.setHours(defaultTime.getHours() + 1);
+    const hours = String(defaultTime.getHours()).padStart(2, '0');
+    const minutes = String(defaultTime.getMinutes()).padStart(2, '0');
+    document.getElementById('scheduled_time').value = `${hours}:${minutes}`;
+    
+    // Toggle opciones de programación
+    const sendTypeRadios = document.querySelectorAll('.send-type-radio');
+    const scheduleOptions = document.getElementById('schedule-options');
+    const sendNowOption = document.getElementById('send-now-option');
+    const sendLaterOption = document.getElementById('send-later-option');
+    
+    sendTypeRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'later') {
+          scheduleOptions.classList.remove('d-none');
+          sendNowOption.classList.remove('selected');
+          sendLaterOption.classList.add('selected');
+          
+          // Hacer que los campos de fecha y hora sean requeridos
+          document.getElementById('scheduled_date').required = true;
+          document.getElementById('scheduled_time').required = true;
+        } else {
+          scheduleOptions.classList.add('d-none');
+          sendNowOption.classList.add('selected');
+          sendLaterOption.classList.remove('selected');
+          
+          // Quitar requerido de los campos de fecha y hora
+          document.getElementById('scheduled_date').required = false;
+          document.getElementById('scheduled_time').required = false;
+        }
+      });
+    });
+    
+    // Clic en el contenedor activa el radio correspondiente
+    sendNowOption.addEventListener('click', function() {
+      document.getElementById('send_now').checked = true;
+      // Disparar el evento change para actualizar UI
+      document.getElementById('send_now').dispatchEvent(new Event('change'));
+    });
+    
+    sendLaterOption.addEventListener('click', function() {
+      document.getElementById('send_later').checked = true;
+      // Disparar el evento change para actualizar UI
+      document.getElementById('send_later').dispatchEvent(new Event('change'));
+    });
+    
+    // Validar formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const sendType = document.querySelector('input[name="send_type"]:checked').value;
+      
+      if (sendType === 'later') {
+        const scheduledDate = document.getElementById('scheduled_date').value;
+        const scheduledTime = document.getElementById('scheduled_time').value;
+        
+        if (!scheduledDate || !scheduledTime) {
+          e.preventDefault();
+          alert('Por favor selecciona una fecha y hora para programar la campaña.');
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}
