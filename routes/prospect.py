@@ -45,16 +45,12 @@ def list_prospects():
     
     prospects = query.all()
     
-    # Get users for owner selection
-    users = User.query.filter_by(tenant_id=tenant_id, is_active=True).all()
-    
     # Get distinct status values for filtering
     statuses = db.session.query(Prospect.status.distinct()).filter_by(tenant_id=tenant_id).all()
     status_options = [status[0] for status in statuses]
     
     return render_template('prospects.html', 
                           prospects=prospects, 
-                          users=users, 
                           statuses=status_options,
                           current_status=status_filter,
                           search_query=search_query)
@@ -87,9 +83,6 @@ def new_prospect():
         flash('Prospect created successfully.', 'success')
         return redirect(url_for('prospect.list_prospects'))
     
-    # Get users for owner selection
-    users = User.query.filter_by(tenant_id=tenant_id, is_active=True).all()
-    
     # Default prospect status values if none exist yet
     default_statuses = ['New', 'Contacted', 'Qualified', 'Disqualified']
     
@@ -103,7 +96,6 @@ def new_prospect():
     
     return render_template('prospects_form.html', 
                           prospect=None, 
-                          users=users, 
                           statuses=status_options,
                           action='new')
 
@@ -121,7 +113,6 @@ def edit_prospect(prospect_id):
     
     if request.method == 'POST':
         # Update prospect
-        prospect.owner_id = request.form.get('owner_id')
         prospect.first_name = request.form.get('first_name')
         prospect.last_name = request.form.get('last_name')
         prospect.company = request.form.get('company')
@@ -138,9 +129,6 @@ def edit_prospect(prospect_id):
         flash('Prospect updated successfully.', 'success')
         return redirect(url_for('prospect.list_prospects'))
     
-    # Get users for owner selection
-    users = User.query.filter_by(tenant_id=tenant_id, is_active=True).all()
-    
     # Default prospect status values if none exist yet
     default_statuses = ['New', 'Contacted', 'Qualified', 'Disqualified']
     
@@ -154,7 +142,6 @@ def edit_prospect(prospect_id):
     
     return render_template('prospects_form.html', 
                           prospect=prospect, 
-                          users=users, 
                           statuses=status_options,
                           action='edit')
 
