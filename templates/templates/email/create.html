@@ -1,0 +1,169 @@
+{% extends 'layout.html' %}
+
+{% block title %}Nueva Plantilla de Correo Electrónico{% endblock %}
+
+{% block styles %}
+<!-- Include Summernote CSS -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+<style>
+    .note-editor {
+        margin-bottom: 1rem;
+    }
+    .note-editor.note-frame {
+        border-color: #ced4da;
+    }
+    .tag-badge {
+        cursor: pointer;
+        user-select: none;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .variables-container {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 10px;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('templates.index') }}">Plantillas de Mensajes</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('templates.email_templates') }}">Plantillas de Email</a></li>
+                <li class="breadcrumb-item active">Nueva Plantilla</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">Nueva Plantilla de Correo Electrónico</h1>
+        <p class="text-muted">Crea una nueva plantilla para envío de correos electrónicos</p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="post">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="name" class="form-label">Nombre de la Plantilla <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                    <div class="form-text">Nombre descriptivo para identificar esta plantilla</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="subject" class="form-label">Asunto del Correo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="subject" name="subject" required>
+                    <div class="form-text">Asunto que se mostrará en los correos enviados</div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Descripción</label>
+                <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                <div class="form-text">Descripción interna para identificar el propósito de esta plantilla</div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="sender_name" class="form-label">Nombre del Remitente</label>
+                    <input type="text" class="form-control" id="sender_name" name="sender_name">
+                </div>
+                <div class="col-md-6">
+                    <label for="sender_email" class="form-label">Email del Remitente</label>
+                    <input type="email" class="form-control" id="sender_email" name="sender_email">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Variables Disponibles</label>
+                <div class="variables-container">
+                    <p class="small mb-2">Haz clic en una variable para insertarla en el contenido del correo:</p>
+                    <div>
+                        <span class="badge bg-primary tag-badge" data-value="{{nombre}}">{{nombre}}</span>
+                        <span class="badge bg-primary tag-badge" data-value="{{apellido}}">{{apellido}}</span>
+                        <span class="badge bg-primary tag-badge" data-value="{{email}}">{{email}}</span>
+                        <span class="badge bg-primary tag-badge" data-value="{{empresa}}">{{empresa}}</span>
+                        <span class="badge bg-primary tag-badge" data-value="{{telefono}}">{{telefono}}</span>
+                        <span class="badge bg-primary tag-badge" data-value="{{fecha}}">{{fecha}}</span>
+                        <span class="badge bg-primary tag-badge" data-value="{{url_confirmacion}}">{{url_confirmacion}}</span>
+                    </div>
+                </div>
+                <input type="hidden" id="available_variables" name="available_variables" value='{"nombre":"Nombre del contacto","apellido":"Apellido del contacto","email":"Email del contacto","empresa":"Nombre de la empresa","telefono":"Teléfono del contacto","fecha":"Fecha actual","url_confirmacion":"URL de confirmación"}'>
+            </div>
+            
+            <div class="mb-3">
+                <label for="body_html" class="form-label">Contenido del Correo <span class="text-danger">*</span></label>
+                <textarea id="body_html" name="body_html" required></textarea>
+                <div class="form-text">Contenido HTML del correo. Puedes utilizar las variables disponibles.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="body_text" class="form-label">Versión de Texto Plano</label>
+                <textarea class="form-control" id="body_text" name="body_text" rows="5"></textarea>
+                <div class="form-text">Versión alternativa en texto plano (sin formato) para clientes de correo que no soportan HTML.</div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('templates.email_templates') }}" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Plantilla</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include Summernote JS -->
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize Summernote
+        $('#body_html').summernote({
+            height: 300,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            placeholder: 'Escribe el contenido del correo aquí...'
+        });
+        
+        // Variable tags click handler
+        $('.tag-badge').click(function() {
+            const value = $(this).data('value');
+            const editor = $('#body_html');
+            
+            // Insert at cursor position in Summernote
+            editor.summernote('insertText', value);
+        });
+        
+        // Generate plain text version when submitting
+        $('form').submit(function() {
+            if (!$('#body_text').val()) {
+                // Get HTML content
+                const htmlContent = $('#body_html').summernote('code');
+                
+                // Simple conversion (in a real app you'd use a better HTML to text converter)
+                let textContent = htmlContent.replace(/<[^>]+>/g, ' '); // Replace HTML tags with spaces
+                textContent = textContent.replace(/\s+/g, ' '); // Replace multiple spaces with a single space
+                textContent = textContent.trim(); // Trim leading/trailing spaces
+                
+                // Set plain text content
+                $('#body_text').val(textContent);
+            }
+            return true;
+        });
+    });
+</script>
+{% endblock %}

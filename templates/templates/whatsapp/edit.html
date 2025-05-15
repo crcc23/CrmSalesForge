@@ -1,0 +1,309 @@
+{% extends 'layout.html' %}
+
+{% block title %}Editar Plantilla de WhatsApp{% endblock %}
+
+{% block styles %}
+<style>
+    .tag-badge {
+        cursor: pointer;
+        user-select: none;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .variables-container {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 10px;
+        margin-bottom: 1rem;
+    }
+    .preview-container {
+        max-width: 350px;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        padding: 12px;
+        margin: 0 auto;
+        background-color: #e5ded8;
+    }
+    .message-bubble {
+        position: relative;
+        background-color: white;
+        padding: 8px 12px;
+        border-radius: 7.5px;
+        margin-bottom: 10px;
+        max-width: 85%;
+        margin-left: auto;
+        box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+    }
+    .message-bubble-time {
+        font-size: 0.7rem;
+        color: #8a8a8a;
+        text-align: right;
+        margin-top: 3px;
+    }
+    .media-preview {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        max-width: 100%;
+        max-height: 200px;
+        display: block;
+    }
+    #char-count {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('templates.index') }}">Plantillas de Mensajes</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('templates.whatsapp_templates') }}">Plantillas de WhatsApp</a></li>
+                <li class="breadcrumb-item active">Editar Plantilla</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Editar Plantilla de WhatsApp</h1>
+        <p class="text-muted">Modifica la plantilla "{{ template.name }}"</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('templates.preview_whatsapp_template', template_id=template.id) }}" target="_blank" class="btn btn-outline-info">
+            <i class="fas fa-eye me-2"></i>Previsualizar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="post" id="whatsappForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre de la Plantilla <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ template.name }}" required>
+                        <div class="form-text">Nombre descriptivo para identificar esta plantilla</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="description" name="description" rows="2">{{ template.description or '' }}</textarea>
+                        <div class="form-text">Descripción interna para identificar el propósito de esta plantilla</div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="has_media" name="has_media" {% if template.has_media %}checked{% endif %}>
+                        <label class="form-check-label" for="has_media">Incluir multimedia</label>
+                    </div>
+                    
+                    <div id="mediaSection" style="display: {% if template.has_media %}block{% else %}none{% endif %};">
+                        <div class="mb-3">
+                            <label for="media_type" class="form-label">Tipo de Multimedia</label>
+                            <select class="form-select" id="media_type" name="media_type">
+                                <option value="image" {% if template.media_type == 'image' %}selected{% endif %}>Imagen</option>
+                                <option value="video" {% if template.media_type == 'video' %}selected{% endif %}>Video</option>
+                                <option value="document" {% if template.media_type == 'document' %}selected{% endif %}>Documento</option>
+                                <option value="audio" {% if template.media_type == 'audio' %}selected{% endif %}>Audio</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="media_url" class="form-label">URL de Multimedia</label>
+                            <input type="url" class="form-control" id="media_url" name="media_url" value="{{ template.media_url or '' }}" placeholder="https://ejemplo.com/imagen.jpg">
+                            <div class="form-text">URL pública de la imagen, video o documento a enviar</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Variables Disponibles</label>
+                        <div class="variables-container">
+                            <p class="small mb-2">Haz clic en una variable para insertarla en el contenido del mensaje:</p>
+                            <div>
+                                <span class="badge bg-primary tag-badge" data-value="{{nombre}}">{{nombre}}</span>
+                                <span class="badge bg-primary tag-badge" data-value="{{apellido}}">{{apellido}}</span>
+                                <span class="badge bg-primary tag-badge" data-value="{{telefono}}">{{telefono}}</span>
+                                <span class="badge bg-primary tag-badge" data-value="{{empresa}}">{{empresa}}</span>
+                                <span class="badge bg-primary tag-badge" data-value="{{fecha}}">{{fecha}}</span>
+                                <span class="badge bg-primary tag-badge" data-value="{{url}}">{{url}}</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="available_variables" name="available_variables" value='{% if template.available_variables %}{{ template.available_variables|tojson }}{% else %}{"nombre":"Nombre del contacto","apellido":"Apellido del contacto","telefono":"Teléfono del contacto","empresa":"Nombre de la empresa","fecha":"Fecha actual","url":"URL importante"}{% endif %}'>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Contenido del Mensaje <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required maxlength="1000">{{ template.content }}</textarea>
+                        <div class="d-flex justify-content-between">
+                            <div class="form-text">El mensaje que se enviará a los contactos. Puedes utilizar las variables disponibles.</div>
+                            <div id="char-count">0/1000</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('templates.whatsapp_templates') }}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Vista Previa</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="preview-container">
+                    <div class="message-bubble" id="preview-message">
+                        <div id="preview-media-container" style="display: {% if template.has_media %}block{% else %}none{% endif %};">
+                            <img src="{{ template.media_url or 'https://via.placeholder.com/300x200?text=Imagen+de+ejemplo' }}" id="preview-image" class="media-preview" style="display: {% if template.has_media and template.media_type == 'image' %}block{% else %}none{% endif %};" alt="Vista previa">
+                            <div class="bg-dark text-white p-2 rounded media-preview" id="preview-video" style="display: {% if template.has_media and template.media_type == 'video' %}block{% else %}none{% endif %};">
+                                <i class="fas fa-video"></i> Vista previa de video
+                            </div>
+                            <div class="bg-primary text-white p-2 rounded media-preview" id="preview-document" style="display: {% if template.has_media and template.media_type == 'document' %}block{% else %}none{% endif %};">
+                                <i class="fas fa-file-alt"></i> Vista previa de documento
+                            </div>
+                            <div class="bg-secondary text-white p-2 rounded media-preview" id="preview-audio" style="display: {% if template.has_media and template.media_type == 'audio' %}block{% else %}none{% endif %};">
+                                <i class="fas fa-volume-up"></i> Vista previa de audio
+                            </div>
+                        </div>
+                        <div id="preview-content">{{ template.content }}</div>
+                        <div class="message-bubble-time">12:30 PM ✓✓</div>
+                    </div>
+                </div>
+                <p class="text-muted mt-3 small">Esta es una vista previa aproximada de cómo se verá tu mensaje en WhatsApp.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Media toggle
+        $('#has_media').change(function() {
+            if ($(this).is(':checked')) {
+                $('#mediaSection').show();
+            } else {
+                $('#mediaSection').hide();
+            }
+            updatePreview();
+        });
+        
+        // Media type change
+        $('#media_type').change(function() {
+            updatePreview();
+        });
+        
+        // Media URL change
+        $('#media_url').on('input', function() {
+            updatePreview();
+        });
+        
+        // Content change
+        $('#content').on('input', function() {
+            updatePreview();
+            updateCharCount();
+        });
+        
+        // Variable tags click handler
+        $('.tag-badge').click(function() {
+            const value = $(this).data('value');
+            const contentField = $('#content');
+            
+            // Get cursor position
+            const curPos = contentField[0].selectionStart;
+            const text = contentField.val();
+            const textBefore = text.substring(0, curPos);
+            const textAfter = text.substring(curPos);
+            
+            // Insert at cursor position
+            contentField.val(textBefore + value + textAfter);
+            
+            // Update preview
+            updatePreview();
+            updateCharCount();
+            
+            // Set focus back to textarea and place cursor after inserted text
+            contentField.focus();
+            const newPos = curPos + value.length;
+            contentField[0].setSelectionRange(newPos, newPos);
+        });
+        
+        // Update preview function
+        function updatePreview() {
+            // Get content
+            let content = $('#content').val() || 'Escribe tu mensaje para ver una vista previa...';
+            
+            // Replace variables with example values
+            content = content.replace(/\{\{nombre\}\}/g, 'María');
+            content = content.replace(/\{\{apellido\}\}/g, 'García');
+            content = content.replace(/\{\{telefono\}\}/g, '+34 123 456 789');
+            content = content.replace(/\{\{empresa\}\}/g, 'Empresa ABC');
+            content = content.replace(/\{\{fecha\}\}/g, '15/05/2025');
+            content = content.replace(/\{\{url\}\}/g, 'https://ejemplo.com/oferta');
+            
+            // Add line breaks
+            content = content.replace(/\n/g, '<br>');
+            
+            // Update content preview
+            $('#preview-content').html(content);
+            
+            // Handle media preview
+            const hasMedia = $('#has_media').is(':checked');
+            const mediaType = $('#media_type').val();
+            const mediaUrl = $('#media_url').val();
+            
+            if (hasMedia) {
+                $('#preview-media-container').show();
+                
+                // Hide all media previews
+                $('#preview-image, #preview-video, #preview-document, #preview-audio').hide();
+                
+                if (mediaType === 'image' && mediaUrl) {
+                    $('#preview-image').attr('src', mediaUrl).show();
+                } else if (mediaType === 'image') {
+                    $('#preview-image').attr('src', 'https://via.placeholder.com/300x200?text=Imagen+de+ejemplo').show();
+                } else if (mediaType === 'video') {
+                    $('#preview-video').show();
+                } else if (mediaType === 'document') {
+                    $('#preview-document').show();
+                } else if (mediaType === 'audio') {
+                    $('#preview-audio').show();
+                }
+            } else {
+                $('#preview-media-container').hide();
+            }
+        }
+        
+        // Update character count
+        function updateCharCount() {
+            const content = $('#content').val();
+            const count = content ? content.length : 0;
+            $('#char-count').text(count + '/1000');
+            
+            // Change color if approaching limit
+            if (count > 900) {
+                $('#char-count').css('color', '#dc3545');
+            } else if (count > 800) {
+                $('#char-count').css('color', '#fd7e14');
+            } else {
+                $('#char-count').css('color', '#6c757d');
+            }
+        }
+        
+        // Initialize preview
+        updatePreview();
+        updateCharCount();
+    });
+</script>
+{% endblock %}

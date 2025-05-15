@@ -53,3 +53,7 @@ with app.app_context():
     import models
     # Create database tables
     db.create_all()
+    
+    # Register blueprints
+    from routes.templates import templates_bp
+    app.register_blueprint(templates_bp)
