@@ -22,7 +22,29 @@ def get_tenant_id():
 @login_required
 def index():
     """Show list of available integrations"""
-    return render_template('integration/config_list.html')
+    tenant_id = get_tenant_id()
+    
+    # Fetch all configuration objects
+    openai_config = OpenAiConfig.query.filter_by(tenant_id=tenant_id, integration_type='openai').first()
+    claude_config = ClaudeConfig.query.filter_by(tenant_id=tenant_id, integration_type='claude').first()
+    gemini_config = GeminiConfig.query.filter_by(tenant_id=tenant_id, integration_type='gemini').first()
+    smtp_config = SmtpConfig.query.filter_by(tenant_id=tenant_id, integration_type='smtp').first()
+    imap_config = ImapConfig.query.filter_by(tenant_id=tenant_id, integration_type='imap').first()
+    evolution_config = EvolutionApiConfig.query.filter_by(tenant_id=tenant_id, integration_type='evolution_api').first()
+    serp_config = SerpMapsConfig.query.filter_by(tenant_id=tenant_id, integration_type='serp_maps').first()
+    maps_config = SerpMapsConfig.query.filter_by(tenant_id=tenant_id, integration_type='maps').first()
+    notion_config = NotionConfig.query.filter_by(tenant_id=tenant_id, integration_type='notion').first()
+    
+    return render_template('integration/config_list.html',
+                          openai_config=openai_config,
+                          claude_config=claude_config,
+                          gemini_config=gemini_config,
+                          smtp_config=smtp_config,
+                          imap_config=imap_config,
+                          evolution_config=evolution_config,
+                          serp_config=serp_config,
+                          maps_config=maps_config,
+                          notion_config=notion_config)
 
 # Evolution API Configuration
 @integration.route('/evolution-api', methods=['GET', 'POST'])

@@ -1,100 +1,88 @@
 {% extends 'layout.html' %}
 
-{% block title %}Configuración de Integraciones{% endblock %}
+{% block title %}Integraciones{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-md-6">
-        <h1 class="h3 mb-0">Configuración de Integraciones</h1>
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Integraciones</li>
+            </ol>
+        </nav>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Integraciones Disponibles</h5>
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Integraciones</h1>
+        <p class="text-muted">Gestiona tus conexiones a servicios externos</p>
+    </div>
+</div>
+
+<!-- Servicios de IA -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Servicios de Inteligencia Artificial</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://cdn.icon-icons.com/icons2/2699/PNG/512/openai_logo_icon_168760.png" alt="OpenAI" class="img-fluid mb-3" style="height: 60px;">
+                        <h5>OpenAI</h5>
+                        <p class="mb-4">Configura la conexión con OpenAI para generación de contenido.</p>
+                        {% if openai_config and openai_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#openaiModal">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
-                                <h5>Email SMTP</h5>
-                                <p class="text-muted">Configura tu servidor de correo saliente</p>
-                                <a href="{{ url_for('integration.smtp_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://anthropic.com/images/logo.svg" alt="Claude" class="img-fluid mb-3" style="height: 60px;">
+                        <h5>Claude (Anthropic)</h5>
+                        <p class="mb-4">Integra Claude AI para generación de texto avanzada.</p>
+                        {% if claude_config and claude_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#claudeModal">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-inbox fa-3x text-primary mb-3"></i>
-                                <h5>Email IMAP</h5>
-                                <p class="text-muted">Configura tu servidor de correo entrante</p>
-                                <a href="{{ url_for('integration.imap_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
-                                <h5>OpenAI</h5>
-                                <p class="text-muted">Conecta con la API de OpenAI (GPT)</p>
-                                <a href="{{ url_for('integration.openai_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-comment-alt fa-3x text-primary mb-3"></i>
-                                <h5>Claude AI</h5>
-                                <p class="text-muted">Conecta con la API de Anthropic Claude</p>
-                                <a href="{{ url_for('integration.claude_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fab fa-google fa-3x text-primary mb-3"></i>
-                                <h5>Google Gemini</h5>
-                                <p class="text-muted">Conecta con la API de Google Gemini</p>
-                                <a href="{{ url_for('integration.gemini_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fab fa-whatsapp fa-3x text-primary mb-3"></i>
-                                <h5>Evolution API</h5>
-                                <p class="text-muted">Configura WhatsApp con Evolution API</p>
-                                <a href="{{ url_for('integration.evolution_api_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-search fa-3x text-primary mb-3"></i>
-                                <h5>SERP API Google</h5>
-                                <p class="text-muted">Configura la API de búsqueda de Google</p>
-                                <a href="{{ url_for('integration.serp_maps_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-map-marked-alt fa-3x text-primary mb-3"></i>
-                                <h5>Google Maps API</h5>
-                                <p class="text-muted">Configura la API de Google Maps</p>
-                                <a href="{{ url_for('integration.notion_config') }}" class="btn btn-primary">Configurar</a>
-                            </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://cdn.icon-icons.com/icons2/2642/PNG/512/google_logo_g_icon_159348.png" alt="Gemini" class="img-fluid mb-3" style="height: 60px;">
+                        <h5>Google Gemini</h5>
+                        <p class="mb-4">Utiliza Gemini de Google para generar y analizar contenido.</p>
+                        {% if gemini_config and gemini_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#geminiModal">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -102,4 +90,158 @@
         </div>
     </div>
 </div>
+
+<!-- Servicios de Comunicación -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Servicios de Comunicación</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-envelope fa-3x mb-3 text-primary"></i>
+                        <h5>Correo Electrónico (SMTP/IMAP)</h5>
+                        <p class="mb-4">Configura la conexión para envío y recepción de emails.</p>
+                        {% if smtp_config and smtp_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#smtpImapModal">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fab fa-whatsapp fa-3x mb-3 text-success"></i>
+                        <h5>WhatsApp Business (Evolution API)</h5>
+                        <p class="mb-4">Conecta con WhatsApp a través de Evolution API.</p>
+                        {% if evolution_config and evolution_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#evolutionModal">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Servicios de Búsqueda y Mapas -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Servicios de Búsqueda y Mapas</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x mb-3 text-primary"></i>
+                        <h5>SERP API Google</h5>
+                        <p class="mb-4">Accede a resultados de búsqueda estructurados de Google.</p>
+                        {% if serp_config and serp_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#serpModal">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marked-alt fa-3x mb-3 text-success"></i>
+                        <h5>Google Maps API</h5>
+                        <p class="mb-4">Integra funcionalidades de mapas y geolocalización.</p>
+                        {% if maps_config and maps_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mapsModal">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Base de Datos y Almacenamiento -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Base de Datos y Almacenamiento</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database fa-3x mb-3 text-primary"></i>
+                        <h5>Base de Datos PostgreSQL</h5>
+                        <p class="mb-4">Estado de la conexión a la base de datos principal.</p>
+                        {% if true %}
+                            <span class="badge bg-success mb-3">Conectado</span>
+                        {% else %}
+                            <span class="badge bg-danger mb-3">Error de conexión</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <a href="#" class="btn btn-outline-secondary">
+                                <i class="fas fa-info-circle me-2"></i>Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" alt="Notion" class="img-fluid mb-3" style="height: 60px;">
+                        <h5>Notion</h5>
+                        <p class="mb-4">Sincroniza datos entre tu CRM y Notion.</p>
+                        {% if notion_config and notion_config.is_active %}
+                            <span class="badge bg-success mb-3">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-3">No configurado</span>
+                        {% endif %}
+                        <div class="d-grid">
+                            <a href="{{ url_for('integration.notion_config') }}" class="btn btn-primary">
+                                <i class="fas fa-cog me-2"></i>Configurar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/integration-modals.js') }}"></script>
 {% endblock %}
