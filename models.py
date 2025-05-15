@@ -1,5 +1,6 @@
 from app import db
 from flask_login import UserMixin
+from sqlalchemy.dialects.postgresql import JSONB
 import datetime
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -251,6 +252,51 @@ class WhatsAppCampaignRecipient(db.Model):
     sent_at = db.Column(db.DateTime, nullable=True)
     delivered_at = db.Column(db.DateTime, nullable=True)
     read_at = db.Column(db.DateTime, nullable=True)
+
+# Message templates
+class MessageTemplate(db.Model):
+    """Base model for email and WhatsApp message templates"""
+    id = db.Column(db.Integer, primary_key=True)
+    tenant_id = db.Column(db.Integer, db.ForeignKey('tenant.id'))
+    template_type = db.Column(db.String(20))  # 'email' or 'whatsapp'
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    is_active = db.Column(db.Boolean, default=True)
+    
+    __mapper_args__ = {
+        'polymorphic_on': template_type,
+        'polymorphic_identity': 'message_template'
+    }
+
+class EmailTemplate(MessageTemplate):
+    """Email message template"""
+    id = db.Column(db.Integer, db.ForeignKey('message_template.id'), primary_key=True)
+    subject = db.Column(db.String(200), nullable=False)
+    body_html = db.Column(db.Text, nullable=False)
+    body_text = db.Column(db.Text)
+    sender_name = db.Column(db.String(100))
+    sender_email = db.Column(db.String(100))
+    available_variables = db.Column(JSONB)
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'email'
+    }
+
+class WhatsAppTemplate(MessageTemplate):
+    """WhatsApp message template"""
+    id = db.Column(db.Integer, db.ForeignKey('message_template.id'), primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    has_media = db.Column(db.Boolean, default=False)
+    media_type = db.Column(db.String(20))  # 'image', 'video', 'document', etc.
+    media_url = db.Column(db.String(255))
+    available_variables = db.Column(JSONB)
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'whatsapp'
+    }
 
 # AI Generated Content
 class AIContent(db.Model):
