@@ -3,26 +3,77 @@
 {% block title %}Editar Plantilla de Correo Electrónico{% endblock %}
 
 {% block styles %}
-<!-- Include Summernote CSS -->
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+<!-- Estilos personalizados para el editor -->
 <style>
-    .note-editor {
-        margin-bottom: 1rem;
+    .editor-toolbar {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem 0.25rem 0 0;
+        padding: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 0;
     }
-    .note-editor.note-frame {
-        border-color: #ced4da;
+    
+    .toolbar-group {
+        display: flex;
+        border-right: 1px solid #dee2e6;
+        padding-right: 10px;
+        margin-right: 10px;
     }
+    
+    .toolbar-group:last-child {
+        border-right: none;
+    }
+    
+    .editor-toolbar button {
+        background: transparent;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 5px 10px;
+        cursor: pointer;
+        color: #495057;
+    }
+    
+    .editor-toolbar button:hover {
+        background-color: #e9ecef;
+    }
+    
+    .editor-toolbar select {
+        height: 37px;
+        border-color: #dee2e6;
+    }
+    
+    .editor-content {
+        border: 1px solid #ced4da;
+        border-top: none;
+        border-radius: 0 0 0.25rem 0.25rem;
+        padding: 15px;
+        min-height: 300px;
+        background-color: white;
+    }
+    
     .tag-badge {
         cursor: pointer;
         user-select: none;
         margin-right: 5px;
         margin-bottom: 5px;
     }
+    
     .variables-container {
         border: 1px solid #ced4da;
         border-radius: 0.25rem;
         padding: 10px;
         margin-bottom: 1rem;
+    }
+    
+    [contenteditable="true"]:focus {
+        outline: none;
+    }
+    
+    .highlight {
+        background-color: #fff3cd;
     }
 </style>
 {% endblock %}
@@ -104,8 +155,66 @@
             </div>
             
             <div class="mb-3">
-                <label for="body_html" class="form-label">Contenido del Correo <span class="text-danger">*</span></label>
-                <textarea id="body_html" name="body_html" required>{{ template.body_html|safe }}</textarea>
+                <label for="emailEditor" class="form-label">Contenido del Correo <span class="text-danger">*</span></label>
+                
+                <!-- Barra de herramientas del editor -->
+                <div class="editor-toolbar">
+                    <div class="toolbar-group">
+                        <button type="button" id="bold-btn" title="Negrita"><i class="fas fa-bold"></i></button>
+                        <button type="button" id="italic-btn" title="Cursiva"><i class="fas fa-italic"></i></button>
+                        <button type="button" id="underline-btn" title="Subrayado"><i class="fas fa-underline"></i></button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <select id="font-family" class="form-select form-select-sm me-2" style="width: 120px;">
+                            <option value="Verdana">Verdana</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Helvetica">Helvetica</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Courier New">Courier New</option>
+                        </select>
+                        
+                        <select id="font-size" class="form-select form-select-sm" style="width: 60px;">
+                            <option value="1">8</option>
+                            <option value="2">10</option>
+                            <option value="3">12</option>
+                            <option value="4">14</option>
+                            <option value="5">18</option>
+                            <option value="6">24</option>
+                            <option value="7">36</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button type="button" id="text-color" title="Color de texto"><i class="fas fa-palette"></i></button>
+                        <button type="button" id="bg-color" title="Color de fondo"><i class="fas fa-fill-drip"></i></button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button type="button" id="align-left" title="Alinear a la izquierda"><i class="fas fa-align-left"></i></button>
+                        <button type="button" id="align-center" title="Centrar"><i class="fas fa-align-center"></i></button>
+                        <button type="button" id="align-right" title="Alinear a la derecha"><i class="fas fa-align-right"></i></button>
+                        <button type="button" id="align-justify" title="Justificar"><i class="fas fa-align-justify"></i></button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button type="button" id="insert-link" title="Insertar enlace"><i class="fas fa-link"></i></button>
+                        <button type="button" id="insert-table" title="Insertar tabla"><i class="fas fa-table"></i></button>
+                        <button type="button" id="insert-image" title="Insertar imagen"><i class="fas fa-image"></i></button>
+                    </div>
+                    
+                    <div class="toolbar-group">
+                        <button type="button" id="bullet-list" title="Lista con viñetas"><i class="fas fa-list-ul"></i></button>
+                        <button type="button" id="numbered-list" title="Lista numerada"><i class="fas fa-list-ol"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Área editable del contenido -->
+                <div id="emailEditor" class="editor-content" contenteditable="true">{{ template.body_html|safe }}</div>
+                
+                <!-- Campo oculto que guarda el HTML para enviar al servidor -->
+                <input type="hidden" id="body_html" name="body_html" required>
+                
                 <div class="form-text">Contenido HTML del correo. Puedes utilizar las variables disponibles.</div>
             </div>
             
@@ -125,50 +234,136 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Include Summernote JS -->
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize Summernote
-        $('#body_html').summernote({
-            height: 300,
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['bold', 'underline', 'clear']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['insert', ['link', 'picture']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ],
-            placeholder: 'Escribe el contenido del correo aquí...'
+        // Editor functions
+        function execCommand(command, value = null) {
+            document.execCommand(command, false, value);
+            focusEditor();
+        }
+        
+        function focusEditor() {
+            document.getElementById('emailEditor').focus();
+        }
+        
+        // Obtener selección actual
+        function getSelectionRange() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                return selection.getRangeAt(0);
+            }
+            return null;
+        }
+        
+        // Handlers para botones de formato básico
+        $('#bold-btn').click(() => execCommand('bold'));
+        $('#italic-btn').click(() => execCommand('italic'));
+        $('#underline-btn').click(() => execCommand('underline'));
+        
+        // Handlers para alineación
+        $('#align-left').click(() => execCommand('justifyLeft'));
+        $('#align-center').click(() => execCommand('justifyCenter'));
+        $('#align-right').click(() => execCommand('justifyRight'));
+        $('#align-justify').click(() => execCommand('justifyFull'));
+        
+        // Handlers para listas
+        $('#bullet-list').click(() => execCommand('insertUnorderedList'));
+        $('#numbered-list').click(() => execCommand('insertOrderedList'));
+        
+        // Cambiar fuente
+        $('#font-family').change(function() {
+            execCommand('fontName', $(this).val());
         });
         
-        // Variable tags click handler
+        // Cambiar tamaño de fuente
+        $('#font-size').change(function() {
+            execCommand('fontSize', $(this).val());
+        });
+        
+        // Color de texto y fondo con selector de color
+        $('#text-color').click(function() {
+            const color = prompt('Ingrese el color en formato hexadecimal (ej: #FF0000 para rojo)', '#000000');
+            if (color) {
+                execCommand('foreColor', color);
+            }
+        });
+        
+        $('#bg-color').click(function() {
+            const color = prompt('Ingrese el color en formato hexadecimal (ej: #FFFF00 para amarillo)', '#FFFF00');
+            if (color) {
+                execCommand('hiliteColor', color);
+            }
+        });
+        
+        // Insertar enlace
+        $('#insert-link').click(function() {
+            const url = prompt('Ingrese la URL del enlace:', 'https://');
+            if (url) {
+                execCommand('createLink', url);
+            }
+        });
+        
+        // Insertar imagen
+        $('#insert-image').click(function() {
+            const url = prompt('Ingrese la URL de la imagen:', 'https://');
+            if (url) {
+                execCommand('insertImage', url);
+            }
+        });
+        
+        // Insertar tabla simple
+        $('#insert-table').click(function() {
+            const rows = prompt('Número de filas:', '3');
+            const cols = prompt('Número de columnas:', '3');
+            
+            if (rows && cols) {
+                let tableHTML = '<table style="width:100%; border-collapse:collapse;">';
+                
+                for (let i = 0; i < parseInt(rows); i++) {
+                    tableHTML += '<tr>';
+                    for (let j = 0; j < parseInt(cols); j++) {
+                        tableHTML += '<td style="border:1px solid #ced4da; padding:8px;">Celda</td>';
+                    }
+                    tableHTML += '</tr>';
+                }
+                
+                tableHTML += '</table><br>';
+                
+                // Insertar la tabla usando el método de inserción de HTML
+                document.execCommand('insertHTML', false, tableHTML);
+            }
+        });
+        
+        // Manejador para las etiquetas de variables
         $('.tag-badge').click(function() {
             const value = $(this).data('value');
-            const editor = $('#body_html');
             
-            // Insert at cursor position in Summernote
-            editor.summernote('insertText', value);
+            // Insertar el valor en la posición del cursor en el editor
+            execCommand('insertText', value);
         });
         
-        // Generate plain text version when submitting
-        $('form').submit(function() {
+        // Actualizar el campo oculto y generar texto plano al enviar el formulario
+        $('form').submit(function(e) {
+            // Guardar el contenido HTML en el campo oculto
+            const htmlContent = $('#emailEditor').html();
+            $('#body_html').val(htmlContent);
+            
+            // Generar versión de texto plano si no está definida
             if (!$('#body_text').val()) {
-                // Get HTML content
-                const htmlContent = $('#body_html').summernote('code');
+                // Conversión simple de HTML a texto
+                let textContent = htmlContent.replace(/<[^>]+>/g, ' '); // Reemplazar etiquetas HTML por espacios
+                textContent = textContent.replace(/\s+/g, ' '); // Reemplazar múltiples espacios por uno solo
+                textContent = textContent.trim(); // Eliminar espacios al inicio y final
                 
-                // Simple conversion (in a real app you'd use a better HTML to text converter)
-                let textContent = htmlContent.replace(/<[^>]+>/g, ' '); // Replace HTML tags with spaces
-                textContent = textContent.replace(/\s+/g, ' '); // Replace multiple spaces with a single space
-                textContent = textContent.trim(); // Trim leading/trailing spaces
-                
-                // Set plain text content
+                // Establecer el contenido de texto plano
                 $('#body_text').val(textContent);
             }
+            
             return true;
         });
+        
+        // Enfoque inicial en el editor
+        focusEditor();
     });
 </script>
 {% endblock %}
