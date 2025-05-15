@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from sqlalchemy.dialects.postgresql import JSONB
 import datetime
 import json
+import enum
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Subscription Plans
@@ -187,55 +188,157 @@ class Activity(db.Model):
     
     user = db.relationship('User', backref='activities')
 
-# Email Campaign
-class EmailCampaign(db.Model):
+# Campaigns
+class CampaignStatus(enum.Enum):
+    DRAFT = 'Draft'
+    SCHEDULED = 'Scheduled'
+    SENDING = 'Sending'
+    COMPLETED = 'Completed'
+    PAUSED = 'Paused'
+    CANCELLED = 'Cancelled'
+    ERROR = 'Error'
+
+class Campaign(db.Model):
+    """Base model for email and WhatsApp campaigns"""
     id = db.Column(db.Integer, primary_key=True)
     tenant_id = db.Column(db.Integer, db.ForeignKey('tenant.id'), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    campaign_type = db.Column(db.String(20), nullable=False)  # 'email' or 'whatsapp'
     name = db.Column(db.String(100), nullable=False)
-    subject = db.Column(db.String(255), nullable=False)
-    body = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text)
     status = db.Column(db.String(50), default='Draft')
     scheduled_date = db.Column(db.DateTime, nullable=True)
-    sent_date = db.Column(db.DateTime, nullable=True)
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    target_audience = db.Column(db.String(50))  # 'all_contacts', 'all_prospects', 'filtered'
+    audience_filter = db.Column(JSONB)  # Filter criteria in JSON format
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
-    owner = db.relationship('User', backref='email_campaigns')
-    recipients = db.relationship('EmailCampaignRecipient', backref='campaign', lazy='dynamic')
+    owner = db.relationship('User', backref='campaigns')
+    
+    __mapper_args__ = {
+        'polymorphic_on': campaign_type,
+        'polymorphic_identity': 'campaign'
+    }
+    
+    @property
+    def sent_count(self):
+        """Count how many messages have been sent"""
+        raise NotImplementedError("Subclasses must implement this")
+    
+    @property
+    def total_recipients(self):
+        """Count total number of recipients"""
+        raise NotImplementedError("Subclasses must implement this")
+    
+    @property
+    def progress(self):
+        """Calculate campaign progress as percentage"""
+        total = self.total_recipients
+        if total == 0:
+            return 0
+        return int((self.sent_count / total) * 100)
+
+# Email Campaign
+class EmailCampaign(Campaign):
+    __tablename__ = 'email_campaign'
+    id = db.Column(db.Integer, db.ForeignKey('campaign.id'), primary_key=True)
+    template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=True)
+    subject = db.Column(db.String(255), nullable=False)
+    body_html = db.Column(db.Text, nullable=False)
+    body_text = db.Column(db.Text)
+    sender_name = db.Column(db.String(100))
+    sender_email = db.Column(db.String(120))
+    reply_to = db.Column(db.String(120))
+    track_opens = db.Column(db.Boolean, default=True)
+    track_clicks = db.Column(db.Boolean, default=True)
+    custom_variables = db.Column(JSONB)  # Custom variables for template
+    
+    template = db.relationship('EmailTemplate')
+    recipients = db.relationship('EmailCampaignRecipient', backref='campaign', lazy='dynamic', 
+                                cascade='all, delete-orphan')
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'email'
+    }
+    
+    @property
+    def sent_count(self):
+        return self.recipients.filter_by(sent=True).count()
+    
+    @property
+    def total_recipients(self):
+        return self.recipients.count()
+    
+    @property
+    def opened_count(self):
+        return self.recipients.filter_by(opened=True).count()
+    
+    @property
+    def clicked_count(self):
+        return self.recipients.filter_by(clicked=True).count()
+    
+    @property
+    def bounced_count(self):
+        return self.recipients.filter_by(bounced=True).count()
 
 # Email Campaign Recipients
 class EmailCampaignRecipient(db.Model):
+    __tablename__ = 'email_campaign_recipient'
     id = db.Column(db.Integer, primary_key=True)
     campaign_id = db.Column(db.Integer, db.ForeignKey('email_campaign.id'), nullable=False)
     recipient_type = db.Column(db.String(50), nullable=False)  # 'contact', 'prospect'
     recipient_id = db.Column(db.Integer, nullable=False)
+    recipient_name = db.Column(db.String(100))
     email = db.Column(db.String(120), nullable=False)
     sent = db.Column(db.Boolean, default=False)
     opened = db.Column(db.Boolean, default=False)
     clicked = db.Column(db.Boolean, default=False)
     bounced = db.Column(db.Boolean, default=False)
     unsubscribed = db.Column(db.Boolean, default=False)
+    error_message = db.Column(db.String(255))
+    custom_fields = db.Column(JSONB)  # Specific data for this recipient
     sent_at = db.Column(db.DateTime, nullable=True)
     opened_at = db.Column(db.DateTime, nullable=True)
     clicked_at = db.Column(db.DateTime, nullable=True)
-
-# WhatsApp Campaign
-class WhatsAppCampaign(db.Model):
-    __tablename__ = 'whatsapp_campaign'
-    id = db.Column(db.Integer, primary_key=True)
-    tenant_id = db.Column(db.Integer, db.ForeignKey('tenant.id'), nullable=False)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(50), default='Draft')
-    scheduled_date = db.Column(db.DateTime, nullable=True)
-    sent_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+# WhatsApp Campaign
+class WhatsAppCampaign(Campaign):
+    __tablename__ = 'whatsapp_campaign'
+    id = db.Column(db.Integer, db.ForeignKey('campaign.id'), primary_key=True)
+    template_id = db.Column(db.Integer, db.ForeignKey('message_template.id'), nullable=True)
+    message = db.Column(db.Text, nullable=False)
+    has_media = db.Column(db.Boolean, default=False)
+    media_type = db.Column(db.String(20))  # 'image', 'video', 'document', etc.
+    media_url = db.Column(db.String(255))
+    custom_variables = db.Column(JSONB)  # Custom variables for template
     
-    owner = db.relationship('User', backref='whatsapp_campaigns')
-    recipients = db.relationship('WhatsAppCampaignRecipient', backref='campaign', lazy='dynamic')
+    template = db.relationship('WhatsAppTemplate')
+    recipients = db.relationship('WhatsAppCampaignRecipient', backref='campaign', lazy='dynamic',
+                                cascade='all, delete-orphan')
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'whatsapp'
+    }
+    
+    @property
+    def sent_count(self):
+        return self.recipients.filter_by(sent=True).count()
+    
+    @property
+    def total_recipients(self):
+        return self.recipients.count()
+    
+    @property
+    def delivered_count(self):
+        return self.recipients.filter_by(delivered=True).count()
+    
+    @property
+    def read_count(self):
+        return self.recipients.filter_by(read=True).count()
 
 # WhatsApp Campaign Recipients
 class WhatsAppCampaignRecipient(db.Model):
@@ -244,14 +347,19 @@ class WhatsAppCampaignRecipient(db.Model):
     campaign_id = db.Column(db.Integer, db.ForeignKey('whatsapp_campaign.id'), nullable=False)
     recipient_type = db.Column(db.String(50), nullable=False)  # 'contact', 'prospect'
     recipient_id = db.Column(db.Integer, nullable=False)
+    recipient_name = db.Column(db.String(100))
     phone = db.Column(db.String(20), nullable=False)
     sent = db.Column(db.Boolean, default=False)
     delivered = db.Column(db.Boolean, default=False)
     read = db.Column(db.Boolean, default=False)
     replied = db.Column(db.Boolean, default=False)
+    error_message = db.Column(db.String(255))
+    custom_fields = db.Column(JSONB)  # Specific data for this recipient
     sent_at = db.Column(db.DateTime, nullable=True)
     delivered_at = db.Column(db.DateTime, nullable=True)
     read_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
 # Message templates
 class MessageTemplate(db.Model):
