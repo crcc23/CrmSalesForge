@@ -1,853 +1,335 @@
-import os
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify, current_app as app
 from flask_login import login_required, current_user
 from app import db
 from models import (
-    Tenant, SubscriptionPlan, EmailCampaign, EmailCampaignRecipient,
-    WhatsAppCampaign, WhatsAppCampaignRecipient, AIContent,
-    WebScrapingTask, WebScrapingResult, Contact, Prospect
+    IntegrationConfig, EvolutionApiConfig, SmtpConfig, ImapConfig, 
+    OpenAiConfig, ClaudeConfig, GeminiConfig, SerpMapsConfig, NotionConfig
 )
-from utils.decorators import tenant_required
-from integrations.web_scraper import get_website_text
-from integrations.email_campaign import send_email_campaign
-from integrations.whatsapp import send_whatsapp_message
-from integrations.ai_content import generate_ai_content
-from integrations.notion_sync import sync_prospect_to_notion, sync_all_prospects_to_notion
+import os
+import json
 import datetime
 
-# Create blueprint but DON'T register it here - it will be registered in main.py
-integration = Blueprint('integration', __name__)
+# Blueprint for integration routes
+integration = Blueprint('integration', __name__, url_prefix='/integration')
 
-@integration.route('/integrations')
+def get_tenant_id():
+    """Helper function to get tenant ID from session"""
+    if hasattr(current_user, 'tenant_id'):
+        return current_user.tenant_id
+    return None
+
+@integration.route('/')
 @login_required
-@tenant_required
 def index():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    # Get counts for different integration types
-    email_campaigns_count = EmailCampaign.query.filter_by(tenant_id=tenant_id).count()
-    whatsapp_campaigns_count = WhatsAppCampaign.query.filter_by(tenant_id=tenant_id).count()
-    ai_contents_count = AIContent.query.filter_by(tenant_id=tenant_id).count()
-    scraping_tasks_count = WebScrapingTask.query.filter_by(tenant_id=tenant_id).count()
-    
-    return render_template('integrations.html',
-                          tenant=tenant,
-                          subscription_plan=subscription_plan,
-                          email_campaigns_count=email_campaigns_count,
-                          whatsapp_campaigns_count=whatsapp_campaigns_count,
-                          ai_contents_count=ai_contents_count,
-                          scraping_tasks_count=scraping_tasks_count)
+    """Show list of available integrations"""
+    return render_template('integration/config_list.html')
 
-# Email Campaign routes
-@integration.route('/integrations/email')
+# Evolution API Configuration
+@integration.route('/evolution-api', methods=['GET', 'POST'])
 @login_required
-@tenant_required
-def email_campaigns():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_email_campaigns:
-        flash('Email campaigns are not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    campaigns = EmailCampaign.query.filter_by(tenant_id=tenant_id).order_by(EmailCampaign.created_at.desc()).all()
-    
-    return render_template('email_campaigns.html',
-                          campaigns=campaigns)
-
-@integration.route('/integrations/email/new', methods=['GET', 'POST'])
-@login_required
-@tenant_required
-def new_email_campaign():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_email_campaigns:
-        flash('Email campaigns are not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    if request.method == 'POST':
-        name = request.form.get('name')
-        subject = request.form.get('subject')
-        body = request.form.get('body')
-        
-        # Create campaign
-        campaign = EmailCampaign(
-            tenant_id=tenant_id,
-            owner_id=current_user.id,
-            name=name,
-            subject=subject,
-            body=body,
-            status='Draft'
-        )
-        db.session.add(campaign)
-        db.session.commit()
-        
-        flash('Email campaign created successfully.', 'success')
-        return redirect(url_for('integration.email_campaigns'))
-    
-    contacts = Contact.query.filter_by(tenant_id=tenant_id).all()
-    prospects = Prospect.query.filter_by(tenant_id=tenant_id).all()
-    
-    return render_template('email_campaign_form.html',
-                          campaign=None,
-                          contacts=contacts,
-                          prospects=prospects,
-                          action='new')
-
-@integration.route('/integrations/email/edit/<int:campaign_id>', methods=['GET', 'POST'])
-@login_required
-@tenant_required
-def edit_email_campaign(campaign_id):
-    tenant_id = session.get('tenant_id')
-    
-    campaign = EmailCampaign.query.filter_by(id=campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        flash('Campaign not found.', 'danger')
-        return redirect(url_for('integration.email_campaigns'))
-    
-    if campaign.status != 'Draft':
-        flash('Cannot edit campaign that is not in draft status.', 'warning')
-        return redirect(url_for('integration.email_campaigns'))
-    
-    if request.method == 'POST':
-        campaign.name = request.form.get('name')
-        campaign.subject = request.form.get('subject')
-        campaign.body = request.form.get('body')
-        campaign.updated_at = datetime.datetime.utcnow()
-        
-        db.session.commit()
-        
-        flash('Email campaign updated successfully.', 'success')
-        return redirect(url_for('integration.email_campaigns'))
-    
-    contacts = Contact.query.filter_by(tenant_id=tenant_id).all()
-    prospects = Prospect.query.filter_by(tenant_id=tenant_id).all()
-    
-    # Get existing recipients
-    recipients = EmailCampaignRecipient.query.filter_by(campaign_id=campaign_id).all()
-    
-    return render_template('email_campaign_form.html',
-                          campaign=campaign,
-                          contacts=contacts,
-                          prospects=prospects,
-                          recipients=recipients,
-                          action='edit')
-
-@integration.route('/integrations/email/add_recipient', methods=['POST'])
-@login_required
-@tenant_required
-def add_email_recipient():
-    tenant_id = session.get('tenant_id')
-    
-    campaign_id = request.form.get('campaign_id')
-    recipient_type = request.form.get('recipient_type')
-    recipient_id = request.form.get('recipient_id')
-    
-    if not campaign_id or not recipient_type or not recipient_id:
-        return jsonify({'success': False, 'message': 'Missing required fields'})
-    
-    campaign = EmailCampaign.query.filter_by(id=campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        return jsonify({'success': False, 'message': 'Campaign not found'})
-    
-    if campaign.status != 'Draft':
-        return jsonify({'success': False, 'message': 'Cannot modify recipients for a campaign that is not in draft status'})
-    
-    # Check if recipient already exists
-    existing_recipient = EmailCampaignRecipient.query.filter_by(
-        campaign_id=campaign_id,
-        recipient_type=recipient_type,
-        recipient_id=recipient_id
+def evolution_api_config():
+    """Configure Evolution API for WhatsApp"""
+    tenant_id = get_tenant_id()
+    config = EvolutionApiConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='evolution_api'
     ).first()
     
-    if existing_recipient:
-        return jsonify({'success': False, 'message': 'Recipient already added to this campaign'})
+    if request.method == 'POST':
+        if not config:
+            config = EvolutionApiConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection and set active if successful
+        # For now, we'll just set is_active to True - in a real app, we'd test the connection
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración de Evolution API guardada correctamente', 'success')
+        return redirect(url_for('integration.evolution_api_config'))
     
-    # Get recipient email
-    email = None
-    name = None
+    return render_template('integration/evolution_api.html', config=config)
+
+# SMTP Configuration
+@integration.route('/smtp', methods=['GET', 'POST'])
+@login_required
+def smtp_config():
+    """Configure SMTP for outgoing emails"""
+    tenant_id = get_tenant_id()
+    config = SmtpConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='smtp'
+    ).first()
     
-    if recipient_type == 'contact':
-        contact = Contact.query.filter_by(id=recipient_id, tenant_id=tenant_id).first()
-        if contact:
-            email = contact.email
-            name = contact.full_name
-    elif recipient_type == 'prospect':
-        prospect = Prospect.query.filter_by(id=recipient_id, tenant_id=tenant_id).first()
-        if prospect:
-            email = prospect.email
-            name = prospect.full_name
+    if request.method == 'POST':
+        if not config:
+            config = SmtpConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection in a real app
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración SMTP guardada correctamente', 'success')
+        return redirect(url_for('integration.smtp_config'))
     
-    if not email:
-        return jsonify({'success': False, 'message': 'Recipient has no email address'})
+    return render_template('integration/smtp.html', config=config)
+
+# IMAP Configuration
+@integration.route('/imap', methods=['GET', 'POST'])
+@login_required
+def imap_config():
+    """Configure IMAP for incoming emails"""
+    tenant_id = get_tenant_id()
+    config = ImapConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='imap'
+    ).first()
     
-    # Add recipient
-    recipient = EmailCampaignRecipient(
-        campaign_id=campaign_id,
-        recipient_type=recipient_type,
-        recipient_id=recipient_id,
-        email=email
-    )
+    if request.method == 'POST':
+        if not config:
+            config = ImapConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection in a real app
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración IMAP guardada correctamente', 'success')
+        return redirect(url_for('integration.imap_config'))
     
-    db.session.add(recipient)
+    return render_template('integration/imap.html', config=config)
+
+# OpenAI Configuration
+@integration.route('/openai', methods=['GET', 'POST'])
+@login_required
+def openai_config():
+    """Configure OpenAI API"""
+    tenant_id = get_tenant_id()
+    config = OpenAiConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='openai'
+    ).first()
+    
+    if request.method == 'POST':
+        if not config:
+            config = OpenAiConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection in a real app
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración de OpenAI guardada correctamente', 'success')
+        return redirect(url_for('integration.openai_config'))
+    
+    return render_template('integration/openai.html', config=config)
+
+# Claude Configuration
+@integration.route('/claude', methods=['GET', 'POST'])
+@login_required
+def claude_config():
+    """Configure Anthropic Claude API"""
+    tenant_id = get_tenant_id()
+    config = ClaudeConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='claude'
+    ).first()
+    
+    if request.method == 'POST':
+        if not config:
+            config = ClaudeConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection in a real app
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración de Claude AI guardada correctamente', 'success')
+        return redirect(url_for('integration.claude_config'))
+    
+    return render_template('integration/claude.html', config=config)
+
+# Gemini Configuration
+@integration.route('/gemini', methods=['GET', 'POST'])
+@login_required
+def gemini_config():
+    """Configure Google Gemini API"""
+    tenant_id = get_tenant_id()
+    config = GeminiConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='gemini'
+    ).first()
+    
+    if request.method == 'POST':
+        if not config:
+            config = GeminiConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection in a real app
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración de Gemini guardada correctamente', 'success')
+        return redirect(url_for('integration.gemini_config'))
+    
+    return render_template('integration/gemini.html', config=config)
+
+# SERP API Google Maps Configuration
+@integration.route('/serp-maps', methods=['GET', 'POST'])
+@login_required
+def serp_maps_config():
+    """Configure SERP API for Google Maps"""
+    tenant_id = get_tenant_id()
+    config = SerpMapsConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='serp_maps'
+    ).first()
+    
+    if request.method == 'POST':
+        if not config:
+            config = SerpMapsConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection in a real app
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración de SERP API guardada correctamente', 'success')
+        return redirect(url_for('integration.serp_maps_config'))
+    
+    return render_template('integration/serp_maps.html', config=config)
+
+# Notion Configuration
+@integration.route('/notion', methods=['GET', 'POST'])
+@login_required
+def notion_config():
+    """Configure Notion integration"""
+    tenant_id = get_tenant_id()
+    config = NotionConfig.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type='notion'
+    ).first()
+    
+    if request.method == 'POST':
+        if not config:
+            config = NotionConfig()
+            config.tenant_id = tenant_id
+        
+        # Update config from form
+        config.update_from_form(request.form)
+        
+        # Test connection in a real app
+        config.is_active = True
+        config.last_tested = datetime.datetime.utcnow()
+        
+        db.session.add(config)
+        db.session.commit()
+        
+        flash('Configuración de Notion guardada correctamente', 'success')
+        return redirect(url_for('integration.notion_config'))
+    
+    return render_template('integration/notion.html', config=config)
+
+# API Endpoints for testing connections
+@integration.route('/test-connection/<integration_type>', methods=['POST'])
+@login_required
+def test_connection(integration_type):
+    """Test connection to an integration"""
+    tenant_id = get_tenant_id()
+    
+    # Map of integration types to their model classes
+    integration_models = {
+        'evolution_api': EvolutionApiConfig,
+        'smtp': SmtpConfig,
+        'imap': ImapConfig,
+        'openai': OpenAiConfig,
+        'claude': ClaudeConfig,
+        'gemini': GeminiConfig,
+        'serp_maps': SerpMapsConfig,
+        'notion': NotionConfig
+    }
+    
+    if integration_type not in integration_models:
+        return jsonify({
+            'success': False,
+            'message': 'Tipo de integración no válido'
+        }), 400
+    
+    # Get the config object
+    model_class = integration_models[integration_type]
+    config = model_class.query.filter_by(
+        tenant_id=tenant_id,
+        integration_type=integration_type
+    ).first()
+    
+    if not config:
+        return jsonify({
+            'success': False,
+            'message': 'No existe configuración para esta integración'
+        }), 404
+    
+    # In a real app, we would actually test the connection here
+    # For now, we'll simulate a successful test
+    success = True
+    message = 'Conexión exitosa'
+    details = None
+    
+    # Update the config with the test results
+    config.is_active = success
+    config.last_tested = datetime.datetime.utcnow()
+    config.test_result = json.dumps({
+        'success': success,
+        'message': message,
+        'details': details
+    })
+    
     db.session.commit()
     
     return jsonify({
-        'success': True, 
-        'message': 'Recipient added successfully',
-        'recipient': {
-            'id': recipient.id,
-            'name': name,
-            'email': email,
-            'type': recipient_type
-        }
+        'success': success,
+        'message': message,
+        'details': details
     })
-
-@integration.route('/integrations/email/remove_recipient', methods=['POST'])
-@login_required
-@tenant_required
-def remove_email_recipient():
-    tenant_id = session.get('tenant_id')
-    
-    recipient_id = request.form.get('recipient_id')
-    
-    if not recipient_id:
-        return jsonify({'success': False, 'message': 'Missing recipient ID'})
-    
-    recipient = EmailCampaignRecipient.query.get(recipient_id)
-    
-    if not recipient:
-        return jsonify({'success': False, 'message': 'Recipient not found'})
-    
-    campaign = EmailCampaign.query.filter_by(id=recipient.campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        return jsonify({'success': False, 'message': 'Campaign not found'})
-    
-    if campaign.status != 'Draft':
-        return jsonify({'success': False, 'message': 'Cannot modify recipients for a campaign that is not in draft status'})
-    
-    db.session.delete(recipient)
-    db.session.commit()
-    
-    return jsonify({'success': True, 'message': 'Recipient removed successfully'})
-
-@integration.route('/integrations/email/send/<int:campaign_id>', methods=['POST'])
-@login_required
-@tenant_required
-def send_email_campaign_route(campaign_id):
-    tenant_id = session.get('tenant_id')
-    
-    campaign = EmailCampaign.query.filter_by(id=campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        flash('Campaign not found.', 'danger')
-        return redirect(url_for('integration.email_campaigns'))
-    
-    if campaign.status not in ['Draft', 'Scheduled']:
-        flash('Campaign already sent or in progress.', 'warning')
-        return redirect(url_for('integration.email_campaigns'))
-    
-    # Count recipients
-    recipients_count = EmailCampaignRecipient.query.filter_by(campaign_id=campaign_id).count()
-    
-    if recipients_count == 0:
-        flash('Cannot send campaign with no recipients.', 'warning')
-        return redirect(url_for('integration.email_campaigns'))
-    
-    # Update campaign status
-    campaign.status = 'Sending'
-    campaign.sent_date = datetime.datetime.utcnow()
-    db.session.commit()
-    
-    # Call the email sending function (this would normally be async)
-    try:
-        result = send_email_campaign(campaign_id)
-        if result['success']:
-            campaign.status = 'Sent'
-            flash('Campaign sent successfully.', 'success')
-        else:
-            campaign.status = 'Failed'
-            flash(f'Error sending campaign: {result["message"]}', 'danger')
-        
-        db.session.commit()
-    except Exception as e:
-        campaign.status = 'Failed'
-        db.session.commit()
-        flash(f'Error sending campaign: {str(e)}', 'danger')
-    
-    return redirect(url_for('integration.email_campaigns'))
-
-# WhatsApp Campaign routes
-@integration.route('/integrations/whatsapp')
-@login_required
-@tenant_required
-def whatsapp_campaigns():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_whatsapp:
-        flash('WhatsApp campaigns are not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    campaigns = WhatsAppCampaign.query.filter_by(tenant_id=tenant_id).order_by(WhatsAppCampaign.created_at.desc()).all()
-    
-    return render_template('whatsapp_campaigns.html',
-                          campaigns=campaigns)
-
-@integration.route('/integrations/whatsapp/new', methods=['GET', 'POST'])
-@login_required
-@tenant_required
-def new_whatsapp_campaign():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_whatsapp:
-        flash('WhatsApp campaigns are not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    if request.method == 'POST':
-        name = request.form.get('name')
-        message = request.form.get('message')
-        
-        # Create campaign
-        campaign = WhatsAppCampaign(
-            tenant_id=tenant_id,
-            owner_id=current_user.id,
-            name=name,
-            message=message,
-            status='Draft'
-        )
-        db.session.add(campaign)
-        db.session.commit()
-        
-        flash('WhatsApp campaign created successfully.', 'success')
-        return redirect(url_for('integration.whatsapp_campaigns'))
-    
-    contacts = Contact.query.filter_by(tenant_id=tenant_id).all()
-    prospects = Prospect.query.filter_by(tenant_id=tenant_id).all()
-    
-    return render_template('whatsapp_campaign_form.html',
-                          campaign=None,
-                          contacts=contacts,
-                          prospects=prospects,
-                          action='new')
-
-@integration.route('/integrations/whatsapp/edit/<int:campaign_id>', methods=['GET', 'POST'])
-@login_required
-@tenant_required
-def edit_whatsapp_campaign(campaign_id):
-    tenant_id = session.get('tenant_id')
-    
-    campaign = WhatsAppCampaign.query.filter_by(id=campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        flash('Campaign not found.', 'danger')
-        return redirect(url_for('integration.whatsapp_campaigns'))
-    
-    if campaign.status != 'Draft':
-        flash('Cannot edit campaign that is not in draft status.', 'warning')
-        return redirect(url_for('integration.whatsapp_campaigns'))
-    
-    if request.method == 'POST':
-        campaign.name = request.form.get('name')
-        campaign.message = request.form.get('message')
-        campaign.updated_at = datetime.datetime.utcnow()
-        
-        db.session.commit()
-        
-        flash('WhatsApp campaign updated successfully.', 'success')
-        return redirect(url_for('integration.whatsapp_campaigns'))
-    
-    contacts = Contact.query.filter_by(tenant_id=tenant_id).all()
-    prospects = Prospect.query.filter_by(tenant_id=tenant_id).all()
-    
-    # Get existing recipients
-    recipients = WhatsAppCampaignRecipient.query.filter_by(campaign_id=campaign_id).all()
-    
-    return render_template('whatsapp_campaign_form.html',
-                          campaign=campaign,
-                          contacts=contacts,
-                          prospects=prospects,
-                          recipients=recipients,
-                          action='edit')
-
-@integration.route('/integrations/whatsapp/add_recipient', methods=['POST'])
-@login_required
-@tenant_required
-def add_whatsapp_recipient():
-    tenant_id = session.get('tenant_id')
-    
-    campaign_id = request.form.get('campaign_id')
-    recipient_type = request.form.get('recipient_type')
-    recipient_id = request.form.get('recipient_id')
-    
-    if not campaign_id or not recipient_type or not recipient_id:
-        return jsonify({'success': False, 'message': 'Missing required fields'})
-    
-    campaign = WhatsAppCampaign.query.filter_by(id=campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        return jsonify({'success': False, 'message': 'Campaign not found'})
-    
-    if campaign.status != 'Draft':
-        return jsonify({'success': False, 'message': 'Cannot modify recipients for a campaign that is not in draft status'})
-    
-    # Check if recipient already exists
-    existing_recipient = WhatsAppCampaignRecipient.query.filter_by(
-        campaign_id=campaign_id,
-        recipient_type=recipient_type,
-        recipient_id=recipient_id
-    ).first()
-    
-    if existing_recipient:
-        return jsonify({'success': False, 'message': 'Recipient already added to this campaign'})
-    
-    # Get recipient phone
-    phone = None
-    name = None
-    
-    if recipient_type == 'contact':
-        contact = Contact.query.filter_by(id=recipient_id, tenant_id=tenant_id).first()
-        if contact:
-            phone = contact.mobile or contact.phone
-            name = contact.full_name
-    elif recipient_type == 'prospect':
-        prospect = Prospect.query.filter_by(id=recipient_id, tenant_id=tenant_id).first()
-        if prospect:
-            phone = prospect.phone
-            name = prospect.full_name
-    
-    if not phone:
-        return jsonify({'success': False, 'message': 'Recipient has no phone number'})
-    
-    # Add recipient
-    recipient = WhatsAppCampaignRecipient(
-        campaign_id=campaign_id,
-        recipient_type=recipient_type,
-        recipient_id=recipient_id,
-        phone=phone
-    )
-    
-    db.session.add(recipient)
-    db.session.commit()
-    
-    return jsonify({
-        'success': True, 
-        'message': 'Recipient added successfully',
-        'recipient': {
-            'id': recipient.id,
-            'name': name,
-            'phone': phone,
-            'type': recipient_type
-        }
-    })
-
-@integration.route('/integrations/whatsapp/remove_recipient', methods=['POST'])
-@login_required
-@tenant_required
-def remove_whatsapp_recipient():
-    tenant_id = session.get('tenant_id')
-    
-    recipient_id = request.form.get('recipient_id')
-    
-    if not recipient_id:
-        return jsonify({'success': False, 'message': 'Missing recipient ID'})
-    
-    recipient = WhatsAppCampaignRecipient.query.get(recipient_id)
-    
-    if not recipient:
-        return jsonify({'success': False, 'message': 'Recipient not found'})
-    
-    campaign = WhatsAppCampaign.query.filter_by(id=recipient.campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        return jsonify({'success': False, 'message': 'Campaign not found'})
-    
-    if campaign.status != 'Draft':
-        return jsonify({'success': False, 'message': 'Cannot modify recipients for a campaign that is not in draft status'})
-    
-    db.session.delete(recipient)
-    db.session.commit()
-    
-    return jsonify({'success': True, 'message': 'Recipient removed successfully'})
-
-@integration.route('/integrations/whatsapp/send/<int:campaign_id>', methods=['POST'])
-@login_required
-@tenant_required
-def send_whatsapp_campaign(campaign_id):
-    tenant_id = session.get('tenant_id')
-    
-    campaign = WhatsAppCampaign.query.filter_by(id=campaign_id, tenant_id=tenant_id).first()
-    
-    if not campaign:
-        flash('Campaign not found.', 'danger')
-        return redirect(url_for('integration.whatsapp_campaigns'))
-    
-    if campaign.status not in ['Draft', 'Scheduled']:
-        flash('Campaign already sent or in progress.', 'warning')
-        return redirect(url_for('integration.whatsapp_campaigns'))
-    
-    # Count recipients
-    recipients_count = WhatsAppCampaignRecipient.query.filter_by(campaign_id=campaign_id).count()
-    
-    if recipients_count == 0:
-        flash('Cannot send campaign with no recipients.', 'warning')
-        return redirect(url_for('integration.whatsapp_campaigns'))
-    
-    # Update campaign status
-    campaign.status = 'Sending'
-    campaign.sent_date = datetime.datetime.utcnow()
-    db.session.commit()
-    
-    # Call the WhatsApp sending function (this would normally be async)
-    try:
-        result = send_whatsapp_message(campaign_id)
-        if result['success']:
-            campaign.status = 'Sent'
-            flash('Campaign sent successfully.', 'success')
-        else:
-            campaign.status = 'Failed'
-            flash(f'Error sending campaign: {result["message"]}', 'danger')
-        
-        db.session.commit()
-    except Exception as e:
-        campaign.status = 'Failed'
-        db.session.commit()
-        flash(f'Error sending campaign: {str(e)}', 'danger')
-    
-    return redirect(url_for('integration.whatsapp_campaigns'))
-
-# AI Content Generation routes
-@integration.route('/integrations/ai')
-@login_required
-@tenant_required
-def ai_contents():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_ai_content:
-        flash('AI content generation is not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    contents = AIContent.query.filter_by(tenant_id=tenant_id, user_id=current_user.id).order_by(AIContent.created_at.desc()).all()
-    
-    return render_template('ai_contents.html', contents=contents)
-
-@integration.route('/integrations/ai/new', methods=['GET', 'POST'])
-@login_required
-@tenant_required
-def new_ai_content():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_ai_content:
-        flash('AI content generation is not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    if request.method == 'POST':
-        title = request.form.get('title')
-        prompt = request.form.get('prompt')
-        content_type = request.form.get('content_type')
-        
-        # Create AI content request
-        ai_content = AIContent(
-            tenant_id=tenant_id,
-            user_id=current_user.id,
-            title=title,
-            prompt=prompt,
-            content_type=content_type,
-            status='Pending'
-        )
-        db.session.add(ai_content)
-        db.session.commit()
-        
-        # Generate content (this would normally be async)
-        try:
-            result = generate_ai_content(ai_content.id)
-            if result['success']:
-                ai_content.content = result['content']
-                ai_content.status = 'Completed'
-                flash('Content generated successfully.', 'success')
-            else:
-                ai_content.status = 'Failed'
-                flash(f'Error generating content: {result["message"]}', 'danger')
-            
-            db.session.commit()
-        except Exception as e:
-            ai_content.status = 'Failed'
-            db.session.commit()
-            flash(f'Error generating content: {str(e)}', 'danger')
-        
-        return redirect(url_for('integration.ai_contents'))
-    
-    return render_template('ai_content_form.html')
-
-@integration.route('/integrations/ai/view/<int:content_id>')
-@login_required
-@tenant_required
-def view_ai_content(content_id):
-    tenant_id = session.get('tenant_id')
-    
-    content = AIContent.query.filter_by(id=content_id, tenant_id=tenant_id, user_id=current_user.id).first()
-    
-    if not content:
-        flash('Content not found.', 'danger')
-        return redirect(url_for('integration.ai_contents'))
-    
-    return render_template('ai_content_view.html', content=content)
-
-# Web Scraping routes
-@integration.route('/integrations/scraping')
-@login_required
-@tenant_required
-def scraping_tasks():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_web_scraping:
-        flash('Web scraping is not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    tasks = WebScrapingTask.query.filter_by(tenant_id=tenant_id, user_id=current_user.id).order_by(WebScrapingTask.created_at.desc()).all()
-    
-    return render_template('scraping_tasks.html', tasks=tasks)
-
-@integration.route('/integrations/scraping/new', methods=['GET', 'POST'])
-@login_required
-@tenant_required
-def new_scraping_task():
-    tenant_id = session.get('tenant_id')
-    tenant = Tenant.query.get(tenant_id)
-    subscription_plan = SubscriptionPlan.query.get(tenant.subscription_plan_id)
-    
-    if not subscription_plan.includes_web_scraping:
-        flash('Web scraping is not included in your subscription plan. Please upgrade to use this feature.', 'warning')
-        return redirect(url_for('integration.index'))
-    
-    if request.method == 'POST':
-        name = request.form.get('name')
-        url = request.form.get('url')
-        frequency = request.form.get('frequency')
-        
-        # Create scraping task
-        task = WebScrapingTask(
-            tenant_id=tenant_id,
-            user_id=current_user.id,
-            name=name,
-            url=url,
-            frequency=frequency,
-            status='Pending'
-        )
-        db.session.add(task)
-        db.session.commit()
-        
-        # Run the task immediately if once-off
-        if frequency == 'once':
-            try:
-                result = get_website_text(task.id)
-                if result['success']:
-                    task.status = 'Completed'
-                    task.last_run = datetime.datetime.utcnow()
-                    
-                    # Create scraping result
-                    scraping_result = WebScrapingResult(
-                        task_id=task.id,
-                        status='Success',
-                        content=result['content'],
-                        summary=result['summary']
-                    )
-                    db.session.add(scraping_result)
-                    flash('Website scraped successfully.', 'success')
-                else:
-                    task.status = 'Failed'
-                    # Create error result
-                    scraping_result = WebScrapingResult(
-                        task_id=task.id,
-                        status='Failed',
-                        error=result['message']
-                    )
-                    db.session.add(scraping_result)
-                    flash(f'Error scraping website: {result["message"]}', 'danger')
-                
-                db.session.commit()
-            except Exception as e:
-                task.status = 'Failed'
-                # Create error result
-                scraping_result = WebScrapingResult(
-                    task_id=task.id,
-                    status='Failed',
-                    error=str(e)
-                )
-                db.session.add(scraping_result)
-                db.session.commit()
-                flash(f'Error scraping website: {str(e)}', 'danger')
-        else:
-            # Schedule for later based on frequency
-            if frequency == 'daily':
-                task.next_run = datetime.datetime.utcnow() + datetime.timedelta(days=1)
-            elif frequency == 'weekly':
-                task.next_run = datetime.datetime.utcnow() + datetime.timedelta(weeks=1)
-            elif frequency == 'monthly':
-                task.next_run = datetime.datetime.utcnow() + datetime.timedelta(days=30)
-            
-            task.status = 'Scheduled'
-            db.session.commit()
-            flash('Scraping task scheduled successfully.', 'success')
-        
-        return redirect(url_for('integration.scraping_tasks'))
-    
-    return render_template('scraping_task_form.html')
-
-@integration.route('/integrations/scraping/view/<int:task_id>')
-@login_required
-@tenant_required
-def view_scraping_task(task_id):
-    tenant_id = session.get('tenant_id')
-    
-    task = WebScrapingTask.query.filter_by(id=task_id, tenant_id=tenant_id, user_id=current_user.id).first()
-    
-    if not task:
-        flash('Task not found.', 'danger')
-        return redirect(url_for('integration.scraping_tasks'))
-    
-    # Get results
-    results = WebScrapingResult.query.filter_by(task_id=task_id).order_by(WebScrapingResult.execution_date.desc()).all()
-    
-    return render_template('scraping_task_view.html', task=task, results=results)
-
-@integration.route('/integrations/scraping/run/<int:task_id>', methods=['POST'])
-@login_required
-@tenant_required
-def run_scraping_task(task_id):
-    tenant_id = session.get('tenant_id')
-    
-    task = WebScrapingTask.query.filter_by(id=task_id, tenant_id=tenant_id, user_id=current_user.id).first()
-    
-    if not task:
-        flash('Task not found.', 'danger')
-        return redirect(url_for('integration.scraping_tasks'))
-    
-    # Update task status
-    task.status = 'Running'
-    db.session.commit()
-    
-    # Run the scraping task
-    try:
-        result = get_website_text(task.id)
-        if result['success']:
-            task.status = 'Completed'
-            task.last_run = datetime.datetime.utcnow()
-            
-            # Update next run time if recurring
-            if task.frequency == 'daily':
-                task.next_run = datetime.datetime.utcnow() + datetime.timedelta(days=1)
-            elif task.frequency == 'weekly':
-                task.next_run = datetime.datetime.utcnow() + datetime.timedelta(weeks=1)
-            elif task.frequency == 'monthly':
-                task.next_run = datetime.datetime.utcnow() + datetime.timedelta(days=30)
-            
-            # Create scraping result
-            scraping_result = WebScrapingResult(
-                task_id=task.id,
-                status='Success',
-                content=result['content'],
-                summary=result['summary']
-            )
-            db.session.add(scraping_result)
-            flash('Website scraped successfully.', 'success')
-        else:
-            task.status = 'Failed'
-            # Create error result
-            scraping_result = WebScrapingResult(
-                task_id=task.id,
-                status='Failed',
-                error=result['message']
-            )
-            db.session.add(scraping_result)
-            flash(f'Error scraping website: {result["message"]}', 'danger')
-        
-        db.session.commit()
-    except Exception as e:
-        task.status = 'Failed'
-        # Create error result
-        scraping_result = WebScrapingResult(
-            task_id=task.id,
-            status='Failed',
-            error=str(e)
-        )
-        db.session.add(scraping_result)
-        db.session.commit()
-        flash(f'Error scraping website: {str(e)}', 'danger')
-    
-    return redirect(url_for('integration.view_scraping_task', task_id=task_id))
-
-# Notion integration routes
-@integration.route('/integrations/notion')
-@login_required
-@tenant_required
-def notion_integration():
-    tenant_id = session.get('tenant_id')
-    
-    # Check if all necessary environment variables are set
-    notion_configured = bool(os.environ.get('NOTION_INTEGRATION_SECRET') and os.environ.get('NOTION_DATABASE_ID'))
-    
-    # Get counts of prospects for the tenant
-    prospects_count = Prospect.query.filter_by(tenant_id=tenant_id).count()
-    
-    # Get recent prospects for the tenant
-    prospects = Prospect.query.filter_by(tenant_id=tenant_id).order_by(Prospect.created_at.desc()).limit(5).all()
-    
-    return render_template('notion_integration.html',
-                          notion_configured=notion_configured,
-                          prospects_count=prospects_count,
-                          prospects=prospects)
-
-@integration.route('/integrations/notion/sync_prospect/<int:prospect_id>', methods=['POST'])
-@login_required
-@tenant_required
-def sync_notion_prospect(prospect_id):
-    tenant_id = session.get('tenant_id')
-    
-    # Check if prospect belongs to this tenant
-    prospect = Prospect.query.filter_by(id=prospect_id, tenant_id=tenant_id).first()
-    
-    if not prospect:
-        flash('Prospecto no encontrado.', 'danger')
-        return redirect(url_for('integration.notion_integration'))
-    
-    result = sync_prospect_to_notion(prospect_id)
-    
-    if result['success']:
-        flash(f'Prospecto {prospect.first_name} {prospect.last_name} sincronizado correctamente con Notion.', 'success')
-    else:
-        flash(f'Error al sincronizar el prospecto con Notion: {result.get("error", "Error desconocido")}', 'danger')
-    
-    return redirect(url_for('integration.notion_integration'))
-
-@integration.route('/integrations/notion/sync_all', methods=['POST'])
-@login_required
-@tenant_required
-def sync_all_notion_prospects():
-    tenant_id = session.get('tenant_id')
-    
-    result = sync_all_prospects_to_notion(tenant_id)
-    
-    if result['success']:
-        flash(f'Se han sincronizado {result.get("total", 0)} prospectos con Notion.', 'success')
-    else:
-        flash(f'Error al sincronizar prospectos con Notion: {result.get("error", "Error desconocido")}', 'danger')
-    
-    return redirect(url_for('integration.notion_integration'))

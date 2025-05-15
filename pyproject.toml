@@ -15,4 +15,6 @@ dependencies = [
     "sqlalchemy>=2.0.40",
     "requests>=2.32.3",
     "notion-client>=2.3.0",
+    "openai>=1.78.1",
+    "anthropic>=0.51.0",
 ]

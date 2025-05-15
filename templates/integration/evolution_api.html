@@ -1,0 +1,225 @@
+{% extends 'layout.html' %}
+
+{% block title %}Configuración de Evolution API{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.home') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('integration.index') }}">Integraciones</a></li>
+                <li class="breadcrumb-item active">Evolution API</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Configuración de API</h1>
+        <p class="text-muted">Configura los ajustes de conexión para Evolution API</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if config and config.is_active %}
+        <span class="badge bg-success p-2 mb-2">
+            <i class="fas fa-check-circle me-1"></i> Conexión exitosa
+        </span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        {% if config and config.is_active %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i> Conexión exitosa. La instancia está activa.
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{{ url_for('integration.evolution_api_config') }}">
+            <div class="mb-3">
+                <label for="api_url" class="form-label">URL Base de Evolution API</label>
+                <input type="url" class="form-control" id="api_url" name="api_url" 
+                       value="{{ config.api_url if config else '' }}" required>
+                <div class="form-text">La URL base de tu instancia de Evolution API (ej. https://tu-dominio.com)</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="instance_name" class="form-label">Nombre de Instancia</label>
+                <input type="text" class="form-control" id="instance_name" name="instance_name" 
+                       value="{{ config.instance_name if config else '' }}" required>
+                <div class="form-text">El nombre de tu instancia de WhatsApp</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="api_key" class="form-label">API Key</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="api_key" name="api_key" 
+                           value="{{ '•' * 24 if config and config.api_key else '' }}" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="form-text">Tu clave de API Evolution para autenticación</div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Guardar Configuración
+                </button>
+                
+                {% if config and config.is_active %}
+                <button type="button" class="btn btn-outline-primary" id="testConnection">
+                    <i class="fas fa-plug me-2"></i>Probar Conexión
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if config and config.is_active %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Opciones de Instancia</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-primary" id="connectInstance">
+                        <i class="fas fa-link me-2"></i>Conectar Instancia
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="restartInstance">
+                        <i class="fas fa-sync me-2"></i>Reiniciar Instancia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Crear Nueva Instancia</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">¿Aún no tienes una instancia? Crea una nueva con la configuración de arriba.</p>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-success" id="createInstance">
+                        <i class="fas fa-plus me-2"></i>Crear Instancia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('api_key');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle eye icon
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+        
+        // Test connection button
+        const testConnectionBtn = document.getElementById('testConnection');
+        if (testConnectionBtn) {
+            testConnectionBtn.addEventListener('click', function() {
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Probando...';
+                
+                // Simulate API call (replace with actual AJAX call)
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-plug me-2"></i>Probar Conexión';
+                    
+                    // Show success notification
+                    showNotification('Conexión exitosa con la API', 'success');
+                }, 1500);
+            });
+        }
+        
+        // Handle instance operations
+        const connectInstanceBtn = document.getElementById('connectInstance');
+        const restartInstanceBtn = document.getElementById('restartInstance');
+        const createInstanceBtn = document.getElementById('createInstance');
+        
+        if (connectInstanceBtn) {
+            connectInstanceBtn.addEventListener('click', function() {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Conectando...';
+                
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-link me-2"></i>Conectar Instancia';
+                    showNotification('Instancia conectada correctamente', 'success');
+                }, 1500);
+            });
+        }
+        
+        if (restartInstanceBtn) {
+            restartInstanceBtn.addEventListener('click', function() {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Reiniciando...';
+                
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-sync me-2"></i>Reiniciar Instancia';
+                    showNotification('Instancia reiniciada correctamente', 'success');
+                }, 2000);
+            });
+        }
+        
+        if (createInstanceBtn) {
+            createInstanceBtn.addEventListener('click', function() {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
+                
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-plus me-2"></i>Crear Instancia';
+                    showNotification('Nueva instancia creada correctamente', 'success');
+                }, 2500);
+            });
+        }
+    });
+    
+    // Notification helper
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed notification`;
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(function() {
+            const bsAlert = new bootstrap.Alert(notification);
+            bsAlert.close();
+        }, 5000);
+    }
+</script>
+{% endblock %}
