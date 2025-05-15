@@ -1,0 +1,153 @@
+{% extends 'layout.html' %}
+
+{% block title %}Web Scraping{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="h3 mb-0">Web Scraping</h1>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{{ url_for('scraping.new_task') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nueva Tarea
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Tareas de Web Scraping</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if tasks %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>URL</th>
+                        <th>Frecuencia</th>
+                        <th>Estado</th>
+                        <th>Última Ejecución</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('scraping.view_task', task_id=task.id) }}">
+                                {{ task.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <small class="text-truncate d-inline-block" style="max-width: 250px;">
+                                <a href="{{ task.url }}" target="_blank" rel="noopener noreferrer">
+                                    {{ task.url }}
+                                </a>
+                            </small>
+                        </td>
+                        <td>{{ task.frequency or 'Una vez' }}</td>
+                        <td>
+                            <span class="badge rounded-pill
+                                {% if task.status == 'Completed' %}bg-success
+                                {% elif task.status == 'Running' %}bg-info
+                                {% elif task.status == 'Failed' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ task.status }}
+                            </span>
+                        </td>
+                        <td>{{ task.last_run.strftime('%d/%m/%Y %H:%M') if task.last_run else 'Nunca' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('scraping.view_task', task_id=task.id) }}" class="btn btn-outline-primary" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('scraping.edit_task', task_id=task.id) }}" class="btn btn-outline-secondary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ url_for('scraping.execute_task', task_id=task.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-outline-info" title="Ejecutar Ahora">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTaskModal{{ task.id }}" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteTaskModal{{ task.id }}" tabindex="-1" aria-labelledby="deleteTaskModalLabel{{ task.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteTaskModalLabel{{ task.id }}">Eliminar Tarea</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>¿Estás seguro de que quieres eliminar la tarea <strong>{{ task.name }}</strong>?</p>
+                                            <p class="text-danger">Esta acción no se puede deshacer y también eliminará todos los resultados asociados.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <form action="{{ url_for('scraping.delete_task', task_id=task.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-spider fa-3x text-muted"></i>
+            </div>
+            <h4>No hay tareas de web scraping</h4>
+            <p class="text-muted">Crea tu primera tarea para comenzar a extraer información de sitios web.</p>
+            <a href="{{ url_for('scraping.new_task') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Nueva Tarea
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">¿Qué es Web Scraping?</h5>
+    </div>
+    <div class="card-body">
+        <p>El <strong>Web Scraping</strong> es una técnica para extraer información de sitios web de forma automatizada. Permite obtener datos estructurados de páginas web para su posterior análisis.</p>
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="mb-3 text-center">
+                    <i class="fas fa-globe fa-2x text-primary"></i>
+                </div>
+                <h5 class="text-center">Extrae Información</h5>
+                <p class="text-center">Obtén el contenido de cualquier sitio web para su análisis.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3 text-center">
+                    <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+                </div>
+                <h5 class="text-center">Programación</h5>
+                <p class="text-center">Programa la extracción para ejecutarse periódicamente.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3 text-center">
+                    <i class="fas fa-search fa-2x text-primary"></i>
+                </div>
+                <h5 class="text-center">Análisis de Datos</h5>
+                <p class="text-center">Analiza la información extraída para tomar mejores decisiones.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

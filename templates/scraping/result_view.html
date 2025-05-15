@@ -1,0 +1,168 @@
+{% extends 'layout.html' %}
+
+{% block title %}Resultado de Web Scraping{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.home') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('scraping.list_tasks') }}">Web Scraping</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('scraping.view_task', task_id=result.task.id) }}">{{ result.task.name }}</a></li>
+                <li class="breadcrumb-item active">Resultado</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="h3 mb-0">Resultado de Scraping</h1>
+        <p class="text-muted">{{ result.execution_date.strftime('%d/%m/%Y %H:%M') }}</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{{ url_for('scraping.view_task', task_id=result.task.id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a la Tarea
+        </a>
+        {% if result.status == 'Completed' %}
+        <form action="{{ url_for('scraping.execute_task', task_id=result.task.id) }}" method="POST" style="display: inline-block;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-play me-2"></i>Ejecutar de Nuevo
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Detalles del Resultado</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-muted">Estado</h6>
+                    <span class="badge rounded-pill
+                        {% if result.status == 'Completed' %}bg-success
+                        {% elif result.status == 'Running' %}bg-info
+                        {% elif result.status == 'Failed' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ result.status }}
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Tarea</h6>
+                    <p>
+                        <a href="{{ url_for('scraping.view_task', task_id=result.task.id) }}">
+                            {{ result.task.name }}
+                        </a>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">URL</h6>
+                    <p>
+                        <a href="{{ result.task.url }}" target="_blank" rel="noopener noreferrer">
+                            {{ result.task.url }}
+                            <i class="fas fa-external-link-alt ms-1"></i>
+                        </a>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Fecha de Ejecución</h6>
+                    <p>{{ result.execution_date.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                
+                {% if result.status == 'Failed' and result.error %}
+                <div class="alert alert-danger">
+                    <h6>Error</h6>
+                    <p class="mb-0">{{ result.error }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Contenido Extraído</h5>
+                <button id="copyBtn" class="btn btn-sm btn-outline-secondary" title="Copiar al portapapeles">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                {% if result.content %}
+                <div id="contentArea" class="p-3 bg-light text-dark rounded" style="height: 500px; overflow-y: auto; white-space: pre-wrap;">{{ result.content }}</div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-file-alt fa-3x text-muted"></i>
+                    </div>
+                    <h5>No hay contenido</h5>
+                    <p class="text-muted">No se pudo extraer contenido de este sitio web.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if result.content %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Información para Usar</h5>
+            </div>
+            <div class="card-body">
+                <p>Este texto contiene el contenido principal extraído de la página. Puedes:</p>
+                <ul>
+                    <li>Copiarlo y pegarlo en otros documentos</li>
+                    <li>Analizar la información para identificar tendencias</li>
+                    <li>Extraer datos específicos para tu investigación</li>
+                    <li>Compararlo con resultados anteriores</li>
+                </ul>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Si planeas usar regularmente esta información, considera programar la tarea para que se ejecute periódicamente.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyBtn = document.getElementById('copyBtn');
+        const contentArea = document.getElementById('contentArea');
+        
+        if (copyBtn && contentArea) {
+            copyBtn.addEventListener('click', function() {
+                // Create a temporary textarea element
+                const textarea = document.createElement('textarea');
+                textarea.value = contentArea.textContent;
+                document.body.appendChild(textarea);
+                
+                // Select and copy the text
+                textarea.select();
+                document.execCommand('copy');
+                
+                // Remove the temporary element
+                document.body.removeChild(textarea);
+                
+                // Show feedback
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+                
+                setTimeout(function() {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+    });
+</script>
+{% endblock %}

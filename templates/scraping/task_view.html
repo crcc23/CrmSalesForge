@@ -1,0 +1,165 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ task.name }} - Web Scraping{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.home') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('scraping.list_tasks') }}">Web Scraping</a></li>
+                <li class="breadcrumb-item active">{{ task.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="h3 mb-0">{{ task.name }}</h1>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <form action="{{ url_for('scraping.execute_task', task_id=task.id) }}" method="POST" style="display: inline-block;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-play me-2"></i>Ejecutar Ahora
+            </button>
+        </form>
+        <a href="{{ url_for('scraping.edit_task', task_id=task.id) }}" class="btn btn-secondary">
+            <i class="fas fa-edit me-2"></i>Editar
+        </a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteTaskModal">
+            <i class="fas fa-trash me-2"></i>Eliminar
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Detalles de la Tarea</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-muted">URL del Sitio Web</h6>
+                    <p>
+                        <a href="{{ task.url }}" target="_blank" rel="noopener noreferrer">
+                            {{ task.url }}
+                            <i class="fas fa-external-link-alt ms-1"></i>
+                        </a>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Estado</h6>
+                    <span class="badge rounded-pill
+                        {% if task.status == 'Completed' %}bg-success
+                        {% elif task.status == 'Running' %}bg-info
+                        {% elif task.status == 'Failed' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ task.status }}
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Frecuencia</h6>
+                    <p>{{ task.frequency or 'Una vez' }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Creado el</h6>
+                    <p>{{ task.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                
+                {% if task.last_run %}
+                <div class="mb-3">
+                    <h6 class="text-muted">Última Ejecución</h6>
+                    <p>{{ task.last_run.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                {% endif %}
+                
+                {% if task.next_run %}
+                <div class="mb-3">
+                    <h6 class="text-muted">Próxima Ejecución</h6>
+                    <p>{{ task.next_run.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Resultados</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if results %}
+                <div class="list-group list-group-flush">
+                    {% for result in results %}
+                    <a href="{{ url_for('scraping.view_result', result_id=result.id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <span class="badge rounded-pill
+                                    {% if result.status == 'Completed' %}bg-success
+                                    {% elif result.status == 'Running' %}bg-info
+                                    {% elif result.status == 'Failed' %}bg-danger
+                                    {% else %}bg-secondary{% endif %} me-2">
+                                    {{ result.status }}
+                                </span>
+                                Ejecución del {{ result.execution_date.strftime('%d/%m/%Y') }}
+                            </h6>
+                            <small>{{ result.execution_date.strftime('%H:%M') }}</small>
+                        </div>
+                        {% if result.summary %}
+                            <p class="mb-1 text-truncate">{{ result.summary }}</p>
+                        {% elif result.error %}
+                            <p class="mb-1 text-danger">Error: {{ result.error }}</p>
+                        {% else %}
+                            <p class="mb-1 text-muted">Sin contenido</p>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-file-alt fa-3x text-muted"></i>
+                    </div>
+                    <h5>No hay resultados</h5>
+                    <p class="text-muted">Esta tarea aún no ha sido ejecutada.</p>
+                    <form action="{{ url_for('scraping.execute_task', task_id=task.id) }}" method="POST">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play me-2"></i>Ejecutar Ahora
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-labelledby="deleteTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTaskModalLabel">Eliminar Tarea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que quieres eliminar la tarea <strong>{{ task.name }}</strong>?</p>
+                <p class="text-danger">Esta acción no se puede deshacer y también eliminará todos los resultados asociados.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('scraping.delete_task', task_id=task.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

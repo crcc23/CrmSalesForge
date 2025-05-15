@@ -1,0 +1,124 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ 'Editar' if task else 'Nueva' }} Tarea de Web Scraping{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard.home') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('scraping.list_tasks') }}">Web Scraping</a></li>
+                <li class="breadcrumb-item active">{{ 'Editar' if task else 'Nueva' }} Tarea</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">{{ 'Editar' if task else 'Nueva' }} Tarea de Web Scraping</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Detalles de la Tarea</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('scraping.edit_task', task_id=task.id) if task else url_for('scraping.new_task') }}" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre de la Tarea</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ task.name if task else '' }}" required>
+                        <div class="form-text">Un nombre descriptivo para identificar esta tarea.</div>
+                        <div class="invalid-feedback">
+                            Por favor ingrese un nombre para la tarea.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL del Sitio Web</label>
+                        <input type="url" class="form-control" id="url" name="url" value="{{ task.url if task else '' }}" required>
+                        <div class="form-text">La dirección URL completa del sitio web del que deseas extraer información.</div>
+                        <div class="invalid-feedback">
+                            Por favor ingrese una URL válida.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="frequency" class="form-label">Frecuencia</label>
+                        <select class="form-select" id="frequency" name="frequency">
+                            <option value="once" {% if task and task.frequency == 'once' %}selected{% endif %}>Una vez</option>
+                            <option value="daily" {% if task and task.frequency == 'daily' %}selected{% endif %}>Diariamente</option>
+                            <option value="weekly" {% if task and task.frequency == 'weekly' %}selected{% endif %}>Semanalmente</option>
+                            <option value="monthly" {% if task and task.frequency == 'monthly' %}selected{% endif %}>Mensualmente</option>
+                        </select>
+                        <div class="form-text">Con qué frecuencia debe ejecutarse esta tarea.</div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Guardar Tarea</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Consejos</h5>
+            </div>
+            <div class="card-body">
+                <h6>Cómo funciona</h6>
+                <p>El sistema extraerá el contenido principal del sitio web, ignorando elementos como menús, barras laterales y pies de página.</p>
+                
+                <h6>Tipos de sitios recomendados</h6>
+                <ul>
+                    <li>Artículos de noticias</li>
+                    <li>Publicaciones de blogs</li>
+                    <li>Páginas de productos</li>
+                    <li>Información de contacto</li>
+                </ul>
+                
+                <h6>Limitaciones</h6>
+                <p>El sistema puede tener dificultades con:</p>
+                <ul>
+                    <li>Sitios que requieren inicio de sesión</li>
+                    <li>Contenido cargado dinámicamente con JavaScript</li>
+                    <li>Sitios con medidas anti-scraping</li>
+                </ul>
+                
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Recuerda usar web scraping de manera ética y respetando los términos de servicio de los sitios web.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Validation script for form
+    (function() {
+        'use strict'
+        
+        var forms = document.querySelectorAll('.needs-validation')
+        
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}
