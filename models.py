@@ -244,10 +244,34 @@ class Campaign(db.Model):
 class EmailCampaign(Campaign):
     __tablename__ = 'email_campaign'
     id = db.Column(db.Integer, db.ForeignKey('campaign.id'), primary_key=True)
-    template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=True)
-    subject = db.Column(db.String(255), nullable=False)
-    body_html = db.Column(db.Text, nullable=False)
-    body_text = db.Column(db.Text)
+    # Plantilla inicial
+    initial_template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=True)
+    initial_subject = db.Column(db.String(255), nullable=False)
+    initial_body_html = db.Column(db.Text, nullable=False)
+    initial_body_text = db.Column(db.Text)
+    
+    # Plantilla de seguimiento 1
+    follow_up1_template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=True)
+    follow_up1_subject = db.Column(db.String(255), nullable=True)
+    follow_up1_body_html = db.Column(db.Text, nullable=True)
+    follow_up1_body_text = db.Column(db.Text, nullable=True)
+    follow_up1_delay_days = db.Column(db.Integer, default=3)  # Días de espera después del inicial
+    
+    # Plantilla de seguimiento 2
+    follow_up2_template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=True)
+    follow_up2_subject = db.Column(db.String(255), nullable=True)
+    follow_up2_body_html = db.Column(db.Text, nullable=True)
+    follow_up2_body_text = db.Column(db.Text, nullable=True)
+    follow_up2_delay_days = db.Column(db.Integer, default=7)  # Días de espera después del inicial
+    
+    # Plantilla de seguimiento 3
+    follow_up3_template_id = db.Column(db.Integer, db.ForeignKey('email_template.id'), nullable=True)
+    follow_up3_subject = db.Column(db.String(255), nullable=True)
+    follow_up3_body_html = db.Column(db.Text, nullable=True)
+    follow_up3_body_text = db.Column(db.Text, nullable=True)
+    follow_up3_delay_days = db.Column(db.Integer, default=14)  # Días de espera después del inicial
+    
+    # Configuración general
     sender_name = db.Column(db.String(100))
     sender_email = db.Column(db.String(120))
     reply_to = db.Column(db.String(120))
@@ -255,7 +279,11 @@ class EmailCampaign(Campaign):
     track_clicks = db.Column(db.Boolean, default=True)
     custom_variables = db.Column(JSONB)  # Custom variables for template
     
-    template = db.relationship('EmailTemplate')
+    # Relaciones
+    initial_template = db.relationship('EmailTemplate', foreign_keys=[initial_template_id])
+    follow_up1_template = db.relationship('EmailTemplate', foreign_keys=[follow_up1_template_id])
+    follow_up2_template = db.relationship('EmailTemplate', foreign_keys=[follow_up2_template_id])
+    follow_up3_template = db.relationship('EmailTemplate', foreign_keys=[follow_up3_template_id])
     recipients = db.relationship('EmailCampaignRecipient', backref='campaign', lazy='dynamic', 
                                 cascade='all, delete-orphan')
     
@@ -292,16 +320,78 @@ class EmailCampaignRecipient(db.Model):
     recipient_id = db.Column(db.Integer, nullable=False)
     recipient_name = db.Column(db.String(100))
     email = db.Column(db.String(120), nullable=False)
-    sent = db.Column(db.Boolean, default=False)
-    opened = db.Column(db.Boolean, default=False)
-    clicked = db.Column(db.Boolean, default=False)
+    
+    # Email inicial
+    initial_sent = db.Column(db.Boolean, default=False)
+    initial_sent_at = db.Column(db.DateTime, nullable=True)
+    initial_opened = db.Column(db.Boolean, default=False)
+    initial_opened_at = db.Column(db.DateTime, nullable=True)
+    initial_clicked = db.Column(db.Boolean, default=False)
+    initial_clicked_at = db.Column(db.DateTime, nullable=True)
+    
+    # Email de seguimiento 1
+    follow_up1_sent = db.Column(db.Boolean, default=False)
+    follow_up1_sent_at = db.Column(db.DateTime, nullable=True)
+    follow_up1_opened = db.Column(db.Boolean, default=False)
+    follow_up1_opened_at = db.Column(db.DateTime, nullable=True)
+    follow_up1_clicked = db.Column(db.Boolean, default=False)
+    follow_up1_clicked_at = db.Column(db.DateTime, nullable=True)
+    
+    # Email de seguimiento 2
+    follow_up2_sent = db.Column(db.Boolean, default=False)
+    follow_up2_sent_at = db.Column(db.DateTime, nullable=True)
+    follow_up2_opened = db.Column(db.Boolean, default=False)
+    follow_up2_opened_at = db.Column(db.DateTime, nullable=True)
+    follow_up2_clicked = db.Column(db.Boolean, default=False)
+    follow_up2_clicked_at = db.Column(db.DateTime, nullable=True)
+    
+    # Email de seguimiento 3
+    follow_up3_sent = db.Column(db.Boolean, default=False)
+    follow_up3_sent_at = db.Column(db.DateTime, nullable=True)
+    follow_up3_opened = db.Column(db.Boolean, default=False)
+    follow_up3_opened_at = db.Column(db.DateTime, nullable=True)
+    follow_up3_clicked = db.Column(db.Boolean, default=False)
+    follow_up3_clicked_at = db.Column(db.DateTime, nullable=True)
+    
+    # Estado general
     bounced = db.Column(db.Boolean, default=False)
     unsubscribed = db.Column(db.Boolean, default=False)
+    responded = db.Column(db.Boolean, default=False)  # Si el usuario respondió a algún email
+    responded_at = db.Column(db.DateTime, nullable=True)
     error_message = db.Column(db.String(255))
-    custom_fields = db.Column(JSONB)  # Specific data for this recipient
-    sent_at = db.Column(db.DateTime, nullable=True)
-    opened_at = db.Column(db.DateTime, nullable=True)
-    clicked_at = db.Column(db.DateTime, nullable=True)
+    custom_fields = db.Column(JSONB)  # Datos específicos para este destinatario
+    
+    # Propiedades para compatibilidad
+    @property
+    def sent(self):
+        return self.initial_sent
+    
+    @property
+    def opened(self):
+        return self.initial_opened or self.follow_up1_opened or self.follow_up2_opened or self.follow_up3_opened
+    
+    @property
+    def clicked(self):
+        return self.initial_clicked or self.follow_up1_clicked or self.follow_up2_clicked or self.follow_up3_clicked
+    
+    @property
+    def sent_at(self):
+        return self.initial_sent_at
+    
+    @property
+    def opened_at(self):
+        """Devuelve la fecha más reciente de apertura de cualquier email"""
+        dates = [d for d in [self.initial_opened_at, self.follow_up1_opened_at, 
+                          self.follow_up2_opened_at, self.follow_up3_opened_at] if d]
+        return max(dates) if dates else None
+    
+    @property
+    def clicked_at(self):
+        """Devuelve la fecha más reciente de clic en cualquier email"""
+        dates = [d for d in [self.initial_clicked_at, self.follow_up1_clicked_at, 
+                          self.follow_up2_clicked_at, self.follow_up3_clicked_at] if d]
+        return max(dates) if dates else None
+    
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 

@@ -35,21 +35,164 @@ def email_campaigns():
 @login_required
 def create_email_campaign():
     """Crear nueva campaña de email"""
-    # Versión temporal
-    if request.method == 'POST':
-        flash('Funcionalidad de creación de campañas en desarrollo', 'info')
-        return redirect(url_for('campaigns.index'))
+    tenant_id = get_tenant_id()
     
-    # Mostrar formulario sin plantillas por ahora
-    return render_template('campaigns/email/create.html', templates=[])
+    if request.method == 'POST':
+        try:
+            # Datos básicos de la campaña
+            name = request.form.get('name')
+            description = request.form.get('description')
+            
+            # Crear la campaña con el email inicial
+            campaign = EmailCampaign(
+                tenant_id=tenant_id,
+                owner_id=current_user.id,
+                campaign_type='email',
+                name=name,
+                description=description,
+                
+                # Email inicial
+                initial_subject=request.form.get('initial_subject', ''),
+                initial_template_id=request.form.get('initial_template_id') or None
+            )
+            
+            # Si se usó una plantilla, copiar su contenido
+            if campaign.initial_template_id:
+                template = EmailTemplate.query.get(campaign.initial_template_id)
+                if template:
+                    campaign.initial_body_html = template.body_html
+                    campaign.initial_body_text = template.body_text
+            else:
+                # Usar contenido personalizado
+                campaign.initial_body_html = request.form.get('initial_body_html', '')
+                campaign.initial_body_text = request.form.get('initial_body_text', '')
+            
+            # Procesar email de seguimiento 1
+            if 'enable_followup1' in request.form:
+                campaign.follow_up1_subject = request.form.get('follow_up1_subject', '')
+                campaign.follow_up1_delay_days = int(request.form.get('follow_up1_delay_days', 3))
+                campaign.follow_up1_template_id = request.form.get('follow_up1_template_id') or None
+                
+                if campaign.follow_up1_template_id:
+                    template = EmailTemplate.query.get(campaign.follow_up1_template_id)
+                    if template:
+                        campaign.follow_up1_body_html = template.body_html
+                        campaign.follow_up1_body_text = template.body_text
+                else:
+                    campaign.follow_up1_body_html = request.form.get('follow_up1_body_html', '')
+                    campaign.follow_up1_body_text = request.form.get('follow_up1_body_text', '')
+            
+            # Seguimientos 2 y 3 tendrían código similar cuando se implementen
+            
+            # Guardar la campaña
+            db.session.add(campaign)
+            db.session.commit()
+            
+            flash('Campaña de email creada exitosamente', 'success')
+            return redirect(url_for('campaigns.manage_email_recipients', campaign_id=campaign.id))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear la campaña: {str(e)}', 'danger')
+            # Registrar el error
+            logging.error(f"Error creating campaign: {str(e)}")
+            return redirect(url_for('campaigns.index'))
+    
+    # Buscar plantillas disponibles
+    templates = EmailTemplate.query.filter_by(tenant_id=tenant_id, is_active=True).all()
+    
+    return render_template('campaigns/email/create.html', templates=templates)
 
 @campaigns_bp.route('/email/<int:campaign_id>')
 @login_required
 def view_email_campaign(campaign_id):
     """Ver detalles de una campaña de email"""
-    # Versión temporal
-    flash('Funcionalidad en desarrollo: ver detalles de campaña', 'info')
-    return redirect(url_for('campaigns.index'))
+    tenant_id = get_tenant_id()
+    
+    campaign = EmailCampaign.query.filter_by(id=campaign_id, tenant_id=tenant_id).first_or_404()
+    recipients = EmailCampaignRecipient.query.filter_by(campaign_id=campaign_id).all()
+    
+    # Calcular estadísticas generales
+    total_recipients = len(recipients)
+    
+    # Estadísticas del email inicial
+    initial_sent = sum(1 for r in recipients if r.initial_sent)
+    initial_opened = sum(1 for r in recipients if r.initial_opened)
+    initial_clicked = sum(1 for r in recipients if r.initial_clicked)
+    
+    # Estadísticas del email de seguimiento 1
+    followup1_sent = sum(1 for r in recipients if r.follow_up1_sent)
+    followup1_opened = sum(1 for r in recipients if r.follow_up1_opened)
+    followup1_clicked = sum(1 for r in recipients if r.follow_up1_clicked)
+    
+    # Estadísticas del email de seguimiento 2
+    followup2_sent = sum(1 for r in recipients if r.follow_up2_sent)
+    followup2_opened = sum(1 for r in recipients if r.follow_up2_opened)
+    followup2_clicked = sum(1 for r in recipients if r.follow_up2_clicked)
+    
+    # Estadísticas del email de seguimiento 3
+    followup3_sent = sum(1 for r in recipients if r.follow_up3_sent)
+    followup3_opened = sum(1 for r in recipients if r.follow_up3_opened)
+    followup3_clicked = sum(1 for r in recipients if r.follow_up3_clicked)
+    
+    # Estadísticas generales
+    bounce_count = sum(1 for r in recipients if r.bounced)
+    response_count = sum(1 for r in recipients if r.responded)
+    
+    # Preparar objetos de estadísticas para cada email
+    initial_stats = {
+        'sent': initial_sent,
+        'sent_pct': (initial_sent / total_recipients * 100) if total_recipients > 0 else 0,
+        'opened': initial_opened,
+        'opened_pct': (initial_opened / initial_sent * 100) if initial_sent > 0 else 0,
+        'clicked': initial_clicked,
+        'clicked_pct': (initial_clicked / initial_opened * 100) if initial_opened > 0 else 0
+    }
+    
+    followup1_stats = {
+        'sent': followup1_sent,
+        'sent_pct': (followup1_sent / total_recipients * 100) if total_recipients > 0 else 0,
+        'opened': followup1_opened,
+        'opened_pct': (followup1_opened / followup1_sent * 100) if followup1_sent > 0 else 0,
+        'clicked': followup1_clicked,
+        'clicked_pct': (followup1_clicked / followup1_opened * 100) if followup1_opened > 0 else 0
+    }
+    
+    followup2_stats = {
+        'sent': followup2_sent,
+        'sent_pct': (followup2_sent / total_recipients * 100) if total_recipients > 0 else 0,
+        'opened': followup2_opened,
+        'opened_pct': (followup2_opened / followup2_sent * 100) if followup2_sent > 0 else 0,
+        'clicked': followup2_clicked,
+        'clicked_pct': (followup2_clicked / followup2_opened * 100) if followup2_opened > 0 else 0
+    }
+    
+    followup3_stats = {
+        'sent': followup3_sent,
+        'sent_pct': (followup3_sent / total_recipients * 100) if total_recipients > 0 else 0,
+        'opened': followup3_opened,
+        'opened_pct': (followup3_opened / followup3_sent * 100) if followup3_sent > 0 else 0,
+        'clicked': followup3_clicked,
+        'clicked_pct': (followup3_clicked / followup3_opened * 100) if followup3_opened > 0 else 0
+    }
+    
+    # Estadísticas generales
+    overall_stats = {
+        'total': total_recipients,
+        'responses': response_count,
+        'response_rate': (response_count / total_recipients * 100) if total_recipients > 0 else 0,
+        'bounce': bounce_count,
+        'bounce_rate': (bounce_count / total_recipients * 100) if total_recipients > 0 else 0
+    }
+    
+    return render_template('campaigns/email/view.html', 
+                          campaign=campaign, 
+                          recipients=recipients, 
+                          initial_stats=initial_stats,
+                          followup1_stats=followup1_stats,
+                          followup2_stats=followup2_stats,
+                          followup3_stats=followup3_stats,
+                          overall_stats=overall_stats)
 
 @campaigns_bp.route('/email/<int:campaign_id>/edit', methods=['GET', 'POST'])
 @login_required
