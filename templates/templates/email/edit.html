@@ -5,53 +5,68 @@
 {% block styles %}
 <!-- Estilos personalizados para el editor -->
 <style>
-    .editor-toolbar {
-        background-color: #f8f9fa;
+    .email-editor-container {
         border: 1px solid #ced4da;
-        border-radius: 0.25rem 0.25rem 0 0;
-        padding: 10px;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+        background-color: #fff;
+    }
+    
+    .email-editor-toolbar {
         display: flex;
         flex-wrap: wrap;
-        gap: 5px;
-        margin-bottom: 0;
+        border-bottom: 1px solid #ced4da;
+        padding: 10px;
+        background-color: #f8f9fa;
     }
     
-    .toolbar-group {
-        display: flex;
-        border-right: 1px solid #dee2e6;
-        padding-right: 10px;
-        margin-right: 10px;
-    }
-    
-    .toolbar-group:last-child {
-        border-right: none;
-    }
-    
-    .editor-toolbar button {
+    .toolbar-button {
         background: transparent;
-        border: 1px solid #dee2e6;
-        border-radius: 0.25rem;
-        padding: 5px 10px;
+        border: none;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #212529;
         cursor: pointer;
-        color: #495057;
+        margin-right: 5px;
+        border-radius: 3px;
     }
     
-    .editor-toolbar button:hover {
+    .toolbar-button:hover {
         background-color: #e9ecef;
     }
     
-    .editor-toolbar select {
-        height: 37px;
-        border-color: #dee2e6;
+    .toolbar-button.active {
+        background-color: #e9ecef;
+    }
+    
+    .toolbar-select {
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        height: 36px;
+        border-radius: 3px;
+        padding: 0 8px;
+        margin-right: 10px;
+        font-size: 14px;
+    }
+    
+    .toolbar-divider {
+        width: 1px;
+        background-color: #ced4da;
+        height: 36px;
+        margin: 0 10px;
     }
     
     .editor-content {
-        border: 1px solid #ced4da;
-        border-top: none;
-        border-radius: 0 0 0.25rem 0.25rem;
         padding: 15px;
         min-height: 300px;
         background-color: white;
+    }
+    
+    [contenteditable="true"]:focus {
+        outline: none;
     }
     
     .tag-badge {
@@ -68,12 +83,8 @@
         margin-bottom: 1rem;
     }
     
-    [contenteditable="true"]:focus {
-        outline: none;
-    }
-    
-    .highlight {
-        background-color: #fff3cd;
+    .highlighted-text {
+        background-color: #ffff00;
     }
 </style>
 {% endblock %}
@@ -157,16 +168,15 @@
             <div class="mb-3">
                 <label for="emailEditor" class="form-label">Contenido del Correo <span class="text-danger">*</span></label>
                 
-                <!-- Barra de herramientas del editor -->
-                <div class="editor-toolbar">
-                    <div class="toolbar-group">
-                        <button type="button" id="bold-btn" title="Negrita"><i class="fas fa-bold"></i></button>
-                        <button type="button" id="italic-btn" title="Cursiva"><i class="fas fa-italic"></i></button>
-                        <button type="button" id="underline-btn" title="Subrayado"><i class="fas fa-underline"></i></button>
-                    </div>
-                    
-                    <div class="toolbar-group">
-                        <select id="font-family" class="form-select form-select-sm me-2" style="width: 120px;">
+                <!-- Contenedor del editor de email -->
+                <div class="email-editor-container">
+                    <!-- Barra de herramientas simplificada -->
+                    <div class="email-editor-toolbar">
+                        <button type="button" class="toolbar-button" id="bold-btn" title="Negrita"><strong>B</strong></button>
+                        <button type="button" class="toolbar-button" id="italic-btn" title="Cursiva"><em>I</em></button>
+                        <button type="button" class="toolbar-button" id="underline-btn" title="Subrayado"><u>U</u></button>
+                        
+                        <select id="font-family" class="toolbar-select" style="width: 120px;">
                             <option value="Verdana">Verdana</option>
                             <option value="Arial">Arial</option>
                             <option value="Helvetica">Helvetica</option>
@@ -174,43 +184,50 @@
                             <option value="Courier New">Courier New</option>
                         </select>
                         
-                        <select id="font-size" class="form-select form-select-sm" style="width: 60px;">
-                            <option value="1">8</option>
+                        <select id="font-size" class="toolbar-select" style="width: 60px;">
                             <option value="2">10</option>
                             <option value="3">12</option>
                             <option value="4">14</option>
                             <option value="5">18</option>
-                            <option value="6">24</option>
-                            <option value="7">36</option>
                         </select>
+                        
+                        <div class="toolbar-divider"></div>
+                        
+                        <button type="button" class="toolbar-button" id="align-left" title="Alinear a la izquierda">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                        <button type="button" class="toolbar-button" id="align-center" title="Centrar">
+                            <i class="fas fa-align-center"></i>
+                        </button>
+                        <button type="button" class="toolbar-button" id="align-right" title="Alinear a la derecha">
+                            <i class="fas fa-align-right"></i>
+                        </button>
+                        <button type="button" class="toolbar-button" id="align-justify" title="Justificar">
+                            <i class="fas fa-align-justify"></i>
+                        </button>
+                        
+                        <div class="toolbar-divider"></div>
+                        
+                        <button type="button" class="toolbar-button" id="insert-link" title="Insertar enlace">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button type="button" class="toolbar-button" id="insert-table" title="Insertar tabla">
+                            <i class="fas fa-table"></i>
+                        </button>
+                        
+                        <div class="toolbar-divider"></div>
+                        
+                        <button type="button" class="toolbar-button" id="bullet-list" title="Lista con viñetas">
+                            <i class="fas fa-list-ul"></i>
+                        </button>
+                        <button type="button" class="toolbar-button" id="numbered-list" title="Lista numerada">
+                            <i class="fas fa-list-ol"></i>
+                        </button>
                     </div>
                     
-                    <div class="toolbar-group">
-                        <button type="button" id="text-color" title="Color de texto"><i class="fas fa-palette"></i></button>
-                        <button type="button" id="bg-color" title="Color de fondo"><i class="fas fa-fill-drip"></i></button>
-                    </div>
-                    
-                    <div class="toolbar-group">
-                        <button type="button" id="align-left" title="Alinear a la izquierda"><i class="fas fa-align-left"></i></button>
-                        <button type="button" id="align-center" title="Centrar"><i class="fas fa-align-center"></i></button>
-                        <button type="button" id="align-right" title="Alinear a la derecha"><i class="fas fa-align-right"></i></button>
-                        <button type="button" id="align-justify" title="Justificar"><i class="fas fa-align-justify"></i></button>
-                    </div>
-                    
-                    <div class="toolbar-group">
-                        <button type="button" id="insert-link" title="Insertar enlace"><i class="fas fa-link"></i></button>
-                        <button type="button" id="insert-table" title="Insertar tabla"><i class="fas fa-table"></i></button>
-                        <button type="button" id="insert-image" title="Insertar imagen"><i class="fas fa-image"></i></button>
-                    </div>
-                    
-                    <div class="toolbar-group">
-                        <button type="button" id="bullet-list" title="Lista con viñetas"><i class="fas fa-list-ul"></i></button>
-                        <button type="button" id="numbered-list" title="Lista numerada"><i class="fas fa-list-ol"></i></button>
-                    </div>
+                    <!-- Área editable del contenido -->
+                    <div id="emailEditor" class="editor-content" contenteditable="true">{{ template.body_html|safe }}</div>
                 </div>
-                
-                <!-- Área editable del contenido -->
-                <div id="emailEditor" class="editor-content" contenteditable="true">{{ template.body_html|safe }}</div>
                 
                 <!-- Campo oculto que guarda el HTML para enviar al servidor -->
                 <input type="hidden" id="body_html" name="body_html" required>
