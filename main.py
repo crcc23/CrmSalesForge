@@ -8,6 +8,7 @@ from routes.contact import contact
 from routes.account import account
 from routes.integration import integration
 from routes.scraping import scraping
+from routes.templates import templates_bp
 
 # Register all blueprints
 app.register_blueprint(auth)
@@ -19,6 +20,7 @@ app.register_blueprint(contact)
 app.register_blueprint(account)
 app.register_blueprint(integration)
 app.register_blueprint(scraping)
+app.register_blueprint(templates_bp)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
