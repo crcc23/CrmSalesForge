@@ -1,9 +1,9 @@
 // Prospects JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize status chart if it exists
+    // Initialize status chart only if it exists
     const statusChartElement = document.getElementById('statusChart');
-    if (statusChartElement) {
+    if (statusChartElement && typeof Chart !== 'undefined') {
         initializeStatusChart();
     }
 
@@ -112,60 +112,79 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize status chart
 function initializeStatusChart() {
+    // Verificar si el elemento existe
+    const statusChartElement = document.getElementById('statusChart');
+    if (!statusChartElement) {
+        console.log('Status chart element not found');
+        return;
+    }
+    
     // Fetch status counts
     ajaxRequest('/api/prospects/status_counts', 'GET', null, 
         function(response) {
-            const statusChartElement = document.getElementById('statusChart');
-            const ctx = statusChartElement.getContext('2d');
-            
-            // Convert the response to arrays for the chart
-            const labels = Object.keys(response);
-            const data = Object.values(response);
-            
-            const backgroundColors = [
-                'rgba(52, 152, 219, 0.7)',
-                'rgba(46, 204, 113, 0.7)',
-                'rgba(155, 89, 182, 0.7)',
-                'rgba(52, 73, 94, 0.7)',
-                'rgba(241, 196, 15, 0.7)',
-                'rgba(230, 126, 34, 0.7)',
-                'rgba(231, 76, 60, 0.7)'
-            ];
-            
-            const borderColors = [
-                'rgba(52, 152, 219, 1)',
-                'rgba(46, 204, 113, 1)',
-                'rgba(155, 89, 182, 1)',
-                'rgba(52, 73, 94, 1)',
-                'rgba(241, 196, 15, 1)',
-                'rgba(230, 126, 34, 1)',
-                'rgba(231, 76, 60, 1)'
-            ];
-            
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors.slice(0, labels.length),
-                        borderColor: borderColors.slice(0, labels.length),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: 'rgba(255, 255, 255, 0.7)'
+            try {
+                const ctx = statusChartElement.getContext('2d');
+                if (!ctx) {
+                    console.log('Could not get 2d context for status chart');
+                    return;
+                }
+                
+                // Convert the response to arrays for the chart
+                const labels = Object.keys(response);
+                const data = Object.values(response);
+                
+                if (labels.length === 0) {
+                    console.log('No data available for chart');
+                    return;
+                }
+                
+                const backgroundColors = [
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(46, 204, 113, 0.7)',
+                    'rgba(155, 89, 182, 0.7)',
+                    'rgba(52, 73, 94, 0.7)',
+                    'rgba(241, 196, 15, 0.7)',
+                    'rgba(230, 126, 34, 0.7)',
+                    'rgba(231, 76, 60, 0.7)'
+                ];
+                
+                const borderColors = [
+                    'rgba(52, 152, 219, 1)',
+                    'rgba(46, 204, 113, 1)',
+                    'rgba(155, 89, 182, 1)',
+                    'rgba(52, 73, 94, 1)',
+                    'rgba(241, 196, 15, 1)',
+                    'rgba(230, 126, 34, 1)',
+                    'rgba(231, 76, 60, 1)'
+                ];
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors.slice(0, labels.length),
+                            borderColor: borderColors.slice(0, labels.length),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            } catch (e) {
+                console.error('Error initializing chart:', e);
+            }
         },
         function(error) {
             console.error('Error fetching status counts:', error);

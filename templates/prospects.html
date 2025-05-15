@@ -22,21 +22,21 @@
         <form id="prospectSearchForm" action="{{ url_for('prospect.list_prospects') }}" method="GET" class="row">
             <div class="col-md-3 mb-3">
                 <label for="prospectSearchInput" class="form-label">Buscar</label>
-                <input type="text" class="form-control" id="prospectSearchInput" name="q" value="{{ search_query or '' }}" placeholder="Nombre, email, empresa...">
+                <input type="text" class="form-control" id="prospectSearchInput" name="q" value="{{ request.args.get('q', '') }}" placeholder="Nombre, email, empresa...">
             </div>
             <div class="col-md-3 mb-3">
                 <label for="status" class="form-label">Estado</label>
                 <select class="form-select" id="status" name="status">
                     <option value="">Todos los Estados</option>
                     {% for status in statuses %}
-                    <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>{{ status }}</option>
+                    <option value="{{ status }}" {% if request.args.get('status') == status %}selected{% endif %}>{{ status }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-2 mb-3">
                 <label for="sort" class="form-label">Ordenar por</label>
                 <select class="form-select" id="sort" name="sort">
-                    <option value="created_at" {% if request.args.get('sort') == 'created_at' %}selected{% endif %}>Fecha de Creación</option>
+                    <option value="created_at" {% if request.args.get('sort') == 'created_at' or not request.args.get('sort') %}selected{% endif %}>Fecha de Creación</option>
                     <option value="last_name" {% if request.args.get('sort') == 'last_name' %}selected{% endif %}>Apellido</option>
                     <option value="company" {% if request.args.get('sort') == 'company' %}selected{% endif %}>Empresa</option>
                     <option value="status" {% if request.args.get('sort') == 'status' %}selected{% endif %}>Estado</option>
@@ -45,7 +45,7 @@
             <div class="col-md-2 mb-3">
                 <label for="order" class="form-label">Orden</label>
                 <select class="form-select" id="order" name="order">
-                    <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Descendente</option>
+                    <option value="desc" {% if request.args.get('order') == 'desc' or not request.args.get('order') %}selected{% endif %}>Descendente</option>
                     <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascendente</option>
                 </select>
             </div>
