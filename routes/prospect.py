@@ -124,6 +124,28 @@ def edit_prospect(prospect_id):
         prospect.notes = request.form.get('notes')
         prospect.updated_at = datetime.datetime.utcnow()
         
+        # Check if interaction should be updated
+        update_interaction = request.form.get('update_interaction')
+        if update_interaction:
+            interaction_notes = request.form.get('interaction_notes', '')
+            prospect.last_interaction_date = datetime.datetime.utcnow()
+            
+            # Optionally log this interaction in Activity model if needed
+            # activity = Activity(
+            #     tenant_id=tenant_id,
+            #     user_id=current_user.id,
+            #     activity_type='Interaction',
+            #     subject=f"Interaction with {prospect.full_name}",
+            #     description=interaction_notes,
+            #     related_to_type='prospect',
+            #     related_to_id=prospect.id,
+            #     completed=True,
+            #     completed_date=datetime.datetime.utcnow()
+            # )
+            # db.session.add(activity)
+            
+            flash('Interaction registered successfully.', 'info')
+        
         db.session.commit()
         
         flash('Prospect updated successfully.', 'success')

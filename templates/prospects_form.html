@@ -86,6 +86,27 @@
                         <label for="notes" class="form-label">Notas</label>
                         <textarea class="form-control" id="notes" name="notes" rows="3">{{ prospect.notes if prospect else '' }}</textarea>
                     </div>
+                    
+                    {% if prospect %}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Interacción</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="update_interaction" name="update_interaction">
+                                    <label class="form-check-label" for="update_interaction">Registrar interacción ahora</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="interaction_notes" class="form-label">Detalles de la interacción</label>
+                                <textarea class="form-control" id="interaction_notes" name="interaction_notes" rows="2"></textarea>
+                                <div class="form-text">Estos detalles no se guardarán como parte de las notas del prospecto</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">Guardar Prospecto</button>
                     </div>
