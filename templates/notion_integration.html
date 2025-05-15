@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block title %}Integración con Notion - CRM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-0">Integración con Notion</h1>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('integration.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Integraciones
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Acerca de la Integración con Notion</h5>
+            </div>
+            <div class="card-body">
+                <p>Esta integración te permite sincronizar tus prospectos del CRM con una base de datos de Notion. 
+                   Esto te facilitará la gestión y visualización de la información desde la interfaz de Notion.</p>
+
+                <div class="alert alert-info">
+                    <h6 class="fw-bold"><i class="fas fa-info-circle me-2"></i>¿Qué puedes hacer con esta integración?</h6>
+                    <ul class="mb-0 mt-2">
+                        <li>Sincronizar prospectos individuales con Notion</li>
+                        <li>Sincronizar todos tus prospectos a la vez</li>
+                        <li>Mantener una copia actualizada de tus prospectos en Notion</li>
+                        <li>Aprovechar las herramientas de visualización y organización de Notion</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Estado de la Integración</h5>
+            </div>
+            <div class="card-body">
+                {% if notion_configured %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i> La integración con Notion está correctamente configurada.
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i> La integración con Notion no está completamente configurada.
+                    <p class="mb-0 mt-2">Asegúrate de que las siguientes variables de entorno estén configuradas:</p>
+                    <ul class="mb-0 mt-1">
+                        <li>NOTION_INTEGRATION_SECRET</li>
+                        <li>NOTION_DATABASE_ID</li>
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <h6 class="mt-3">Estadísticas</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-3 text-center">
+                                <h3 class="mb-0">{{ prospects_count }}</h3>
+                                <p class="mb-0 text-muted">Prospectos Disponibles</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Acciones</h5>
+            </div>
+            <div class="card-body">
+                <p>Selecciona una acción para sincronizar tus prospectos con Notion:</p>
+                
+                <form action="{{ url_for('integration.sync_all_notion_prospects') }}" method="POST" class="mb-3">
+                    <button type="submit" class="btn btn-primary w-100 mb-2" {% if not notion_configured %}disabled{% endif %}>
+                        <i class="fas fa-sync me-2"></i> Sincronizar Todos los Prospectos
+                    </button>
+                    <small class="d-block text-muted mb-3">Esta acción enviará todos tus prospectos a la base de datos de Notion.</small>
+                </form>
+                
+                <hr>
+                
+                <h6>Prospectos Recientes</h6>
+                {% set recent_prospects = prospects[:5] if prospects and prospects|length > 0 else [] %}
+                
+                {% if recent_prospects %}
+                <div class="list-group">
+                    {% for prospect in recent_prospects %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <span>{{ prospect.first_name }} {{ prospect.last_name }}</span>
+                            <small class="d-block text-muted">{{ prospect.company or 'Sin empresa' }}</small>
+                        </div>
+                        <form action="{{ url_for('integration.sync_notion_prospect', prospect_id=prospect.id) }}" method="POST">
+                            <button type="submit" class="btn btn-sm btn-outline-primary" {% if not notion_configured %}disabled{% endif %}>
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-light">
+                    <p class="mb-0">No hay prospectos disponibles para sincronizar.</p>
+                </div>
+                {% endif %}
+                
+                <a href="{{ url_for('prospect.list_prospects') }}" class="btn btn-link text-decoration-none mt-2">
+                    <i class="fas fa-external-link-alt me-1"></i> Ver todos los prospectos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Notion integration page loaded.');
+    });
+</script>
+{% endblock %}

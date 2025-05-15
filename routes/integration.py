@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import login_required, current_user
 from app import db
@@ -11,6 +12,7 @@ from integrations.web_scraper import get_website_text
 from integrations.email_campaign import send_email_campaign
 from integrations.whatsapp import send_whatsapp_message
 from integrations.ai_content import generate_ai_content
+from integrations.notion_sync import sync_prospect_to_notion, sync_all_prospects_to_notion
 import datetime
 
 # Create blueprint but DON'T register it here - it will be registered in main.py
@@ -791,3 +793,61 @@ def run_scraping_task(task_id):
         flash(f'Error scraping website: {str(e)}', 'danger')
     
     return redirect(url_for('integration.view_scraping_task', task_id=task_id))
+
+# Notion integration routes
+@integration.route('/integrations/notion')
+@login_required
+@tenant_required
+def notion_integration():
+    tenant_id = session.get('tenant_id')
+    
+    # Check if all necessary environment variables are set
+    notion_configured = bool(os.environ.get('NOTION_INTEGRATION_SECRET') and os.environ.get('NOTION_DATABASE_ID'))
+    
+    # Get counts of prospects for the tenant
+    prospects_count = Prospect.query.filter_by(tenant_id=tenant_id).count()
+    
+    # Get recent prospects for the tenant
+    prospects = Prospect.query.filter_by(tenant_id=tenant_id).order_by(Prospect.created_at.desc()).limit(5).all()
+    
+    return render_template('notion_integration.html',
+                          notion_configured=notion_configured,
+                          prospects_count=prospects_count,
+                          prospects=prospects)
+
+@integration.route('/integrations/notion/sync_prospect/<int:prospect_id>', methods=['POST'])
+@login_required
+@tenant_required
+def sync_notion_prospect(prospect_id):
+    tenant_id = session.get('tenant_id')
+    
+    # Check if prospect belongs to this tenant
+    prospect = Prospect.query.filter_by(id=prospect_id, tenant_id=tenant_id).first()
+    
+    if not prospect:
+        flash('Prospecto no encontrado.', 'danger')
+        return redirect(url_for('integration.notion_integration'))
+    
+    result = sync_prospect_to_notion(prospect_id)
+    
+    if result['success']:
+        flash(f'Prospecto {prospect.first_name} {prospect.last_name} sincronizado correctamente con Notion.', 'success')
+    else:
+        flash(f'Error al sincronizar el prospecto con Notion: {result.get("error", "Error desconocido")}', 'danger')
+    
+    return redirect(url_for('integration.notion_integration'))
+
+@integration.route('/integrations/notion/sync_all', methods=['POST'])
+@login_required
+@tenant_required
+def sync_all_notion_prospects():
+    tenant_id = session.get('tenant_id')
+    
+    result = sync_all_prospects_to_notion(tenant_id)
+    
+    if result['success']:
+        flash(f'Se han sincronizado {result.get("total", 0)} prospectos con Notion.', 'success')
+    else:
+        flash(f'Error al sincronizar prospectos con Notion: {result.get("error", "Error desconocido")}', 'danger')
+    
+    return redirect(url_for('integration.notion_integration'))

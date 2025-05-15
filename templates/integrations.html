@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+
+{% block title %}Integraciones - CRM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="h3 mb-0">Integraciones del Sistema</h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Integraciones Disponibles</h5>
+            </div>
+            <div class="card-body">
+                <p>Tu plan de suscripción actual te permite acceder a las siguientes integraciones:</p>
+                
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">
+                    <!-- Email Campaigns -->
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-0">Campañas de Email</h5>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-envelope fa-2x text-primary"></i>
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text">Envía campañas de email a tus contactos y prospectos. Seguimiento de aperturas, clics y más.</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">{{ email_campaigns_count }} campañas</small>
+                                    <a href="{{ url_for('integration.email_campaigns') }}" class="btn btn-outline-primary btn-sm">Gestionar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- WhatsApp -->
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-0">WhatsApp</h5>
+                                    </div>
+                                    <div>
+                                        <i class="fab fa-whatsapp fa-2x text-success"></i>
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text">Envía mensajes de WhatsApp a tus contactos y prospectos. Seguimiento de entregas, lecturas y más.</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">{{ whatsapp_campaigns_count }} campañas</small>
+                                    <a href="{{ url_for('integration.whatsapp_campaigns') }}" class="btn btn-outline-primary btn-sm">Gestionar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Content -->
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-0">Contenido IA</h5>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-robot fa-2x text-info"></i>
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text">Genera contenido con inteligencia artificial para tus emails, mensajes, publicaciones y más.</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">{{ ai_contents_count }} contenidos</small>
+                                    <a href="{{ url_for('integration.ai_contents') }}" class="btn btn-outline-primary btn-sm">Gestionar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Web Scraping -->
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-0">Web Scraping</h5>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-spider fa-2x text-warning"></i>
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text">Extrae información de sitios web automáticamente. Ideal para investigación y generación de leads.</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">{{ scraping_tasks_count }} tareas</small>
+                                    <a href="{{ url_for('integration.web_scraping_tasks') }}" class="btn btn-outline-primary btn-sm">Gestionar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notion Integration -->
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-0">Notion</h5>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-clipboard-list fa-2x text-secondary"></i>
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text">Sincroniza tus prospectos con Notion para una gestión más visual y colaborativa.</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">Sincronización directa</small>
+                                    <a href="{{ url_for('integration.notion_integration') }}" class="btn btn-outline-primary btn-sm">Gestionar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Información sobre las Integraciones</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6 class="alert-heading fw-bold"><i class="fas fa-info-circle me-2"></i>¿Cómo funcionan las integraciones?</h6>
+                    <p>Las integraciones te permiten conectar tu CRM con otras herramientas y servicios para expandir su funcionalidad. 
+                       Cada integración ofrece características únicas que pueden ayudarte a automatizar tareas y mejorar la productividad.</p>
+                </div>
+                
+                <h6 class="mt-4">Ventajas de usar integraciones</h6>
+                <ul>
+                    <li><strong>Automatización:</strong> Reduce tareas manuales y errores humanos</li>
+                    <li><strong>Consistencia:</strong> Mantén la información sincronizada entre diferentes plataformas</li>
+                    <li><strong>Productividad:</strong> Ahorra tiempo y enfócate en tareas de mayor valor</li>
+                    <li><strong>Visibilidad:</strong> Obtén una vista más completa de tus datos y actividades</li>
+                </ul>
+                
+                <h6 class="mt-4">Soporte</h6>
+                <p>Si necesitas ayuda para configurar o utilizar alguna de las integraciones, contacta a nuestro equipo de soporte.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
