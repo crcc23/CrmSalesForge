@@ -139,6 +139,7 @@ class Prospect(db.Model):
     source = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(50), nullable=False, default='New')
     notes = db.Column(db.Text, nullable=True)
+    last_interaction_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
