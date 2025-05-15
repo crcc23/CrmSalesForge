@@ -201,15 +201,15 @@
             <div class="mb-3">
                 <label class="form-label">Variables Disponibles</label>
                 <div class="variables-container">
-                    <p class="small mb-2">Haz clic en una variable para insertarla en el contenido del correo:</p>
+                    <p class="small mb-2 text-muted">Haz clic en una variable para insertarla en el contenido del correo:</p>
                     <div>
-                        <span class="badge bg-primary tag-badge" data-value="{{nombre}}">{{nombre}}</span>
-                        <span class="badge bg-primary tag-badge" data-value="{{apellido}}">{{apellido}}</span>
-                        <span class="badge bg-primary tag-badge" data-value="{{email}}">{{email}}</span>
-                        <span class="badge bg-primary tag-badge" data-value="{{empresa}}">{{empresa}}</span>
-                        <span class="badge bg-primary tag-badge" data-value="{{telefono}}">{{telefono}}</span>
-                        <span class="badge bg-primary tag-badge" data-value="{{fecha}}">{{fecha}}</span>
-                        <span class="badge bg-primary tag-badge" data-value="{{url_confirmacion}}">{{url_confirmacion}}</span>
+                        <span class="tag-badge" data-value="{{nombre}}">{{nombre}}</span>
+                        <span class="tag-badge" data-value="{{apellido}}">{{apellido}}</span>
+                        <span class="tag-badge" data-value="{{email}}">{{email}}</span>
+                        <span class="tag-badge" data-value="{{empresa}}">{{empresa}}</span>
+                        <span class="tag-badge" data-value="{{telefono}}">{{telefono}}</span>
+                        <span class="tag-badge" data-value="{{fecha}}">{{fecha}}</span>
+                        <span class="tag-badge" data-value="{{url_confirmacion}}">{{url_confirmacion}}</span>
                     </div>
                 </div>
                 <input type="hidden" id="available_variables" name="available_variables" value='{% if template.available_variables %}{{ template.available_variables|tojson }}{% else %}{"nombre":"Nombre del contacto","apellido":"Apellido del contacto","email":"Email del contacto","empresa":"Nombre de la empresa","telefono":"Teléfono del contacto","fecha":"Fecha actual","url_confirmacion":"URL de confirmación"}{% endif %}'>
@@ -342,15 +342,6 @@
             document.getElementById('emailEditor').focus();
         }
         
-        // Obtener selección actual
-        function getSelectionRange() {
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                return selection.getRangeAt(0);
-            }
-            return null;
-        }
-        
         // Handlers para botones de formato básico
         $('#bold-btn').click(() => execCommand('bold'));
         $('#italic-btn').click(() => execCommand('italic'));
@@ -360,7 +351,6 @@
         $('#align-left').click(() => execCommand('justifyLeft'));
         $('#align-center').click(() => execCommand('justifyCenter'));
         $('#align-right').click(() => execCommand('justifyRight'));
-        $('#align-justify').click(() => execCommand('justifyFull'));
         
         // Handlers para listas
         $('#bullet-list').click(() => execCommand('insertUnorderedList'));
@@ -376,34 +366,11 @@
             execCommand('fontSize', $(this).val());
         });
         
-        // Color de texto y fondo con selector de color
-        $('#text-color').click(function() {
-            const color = prompt('Ingrese el color en formato hexadecimal (ej: #FF0000 para rojo)', '#000000');
-            if (color) {
-                execCommand('foreColor', color);
-            }
-        });
-        
-        $('#bg-color').click(function() {
-            const color = prompt('Ingrese el color en formato hexadecimal (ej: #FFFF00 para amarillo)', '#FFFF00');
-            if (color) {
-                execCommand('hiliteColor', color);
-            }
-        });
-        
         // Insertar enlace
         $('#insert-link').click(function() {
             const url = prompt('Ingrese la URL del enlace:', 'https://');
             if (url) {
                 execCommand('createLink', url);
-            }
-        });
-        
-        // Insertar imagen
-        $('#insert-image').click(function() {
-            const url = prompt('Ingrese la URL de la imagen:', 'https://');
-            if (url) {
-                execCommand('insertImage', url);
             }
         });
         
@@ -418,7 +385,7 @@
                 for (let i = 0; i < parseInt(rows); i++) {
                     tableHTML += '<tr>';
                     for (let j = 0; j < parseInt(cols); j++) {
-                        tableHTML += '<td style="border:1px solid #ced4da; padding:8px;">Celda</td>';
+                        tableHTML += '<td style="border:1px solid #e1e4e8; padding:8px;">Celda</td>';
                     }
                     tableHTML += '</tr>';
                 }
@@ -456,6 +423,16 @@
             }
             
             return true;
+        });
+        
+        // Añadir clase activa al hacer clic en botones de la barra de herramientas
+        $('.toolbar-button').click(function() {
+            // Para botones de formato que necesitan estado activo/inactivo
+            if ($(this).attr('id') === 'bold-btn' || 
+                $(this).attr('id') === 'italic-btn' || 
+                $(this).attr('id') === 'underline-btn') {
+                $(this).toggleClass('active');
+            }
         });
         
         // Enfoque inicial en el editor
