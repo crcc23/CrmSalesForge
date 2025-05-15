@@ -5,16 +5,26 @@
 {% block styles %}
 <style>
     .tag-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        margin: 0 6px 6px 0;
+        background-color: #0366d6;
+        color: white;
+        border-radius: 4px;
+        font-size: 13px;
         cursor: pointer;
         user-select: none;
-        margin-right: 5px;
-        margin-bottom: 5px;
+        transition: background-color 0.2s ease;
+    }
+    .tag-badge:hover {
+        background-color: #0255b3;
     }
     .variables-container {
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        padding: 10px;
-        margin-bottom: 1rem;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 1.5rem;
+        background-color: #f8f9fa;
     }
     .preview-container {
         max-width: 350px;
@@ -124,14 +134,14 @@
                     <div class="mb-3">
                         <label class="form-label">Variables Disponibles</label>
                         <div class="variables-container">
-                            <p class="small mb-2">Haz clic en una variable para insertarla en el contenido del mensaje:</p>
+                            <p class="small mb-2 text-muted">Haz clic en una variable para insertarla en el contenido del mensaje:</p>
                             <div>
-                                <span class="badge bg-primary tag-badge" data-value="{{nombre}}">{{nombre}}</span>
-                                <span class="badge bg-primary tag-badge" data-value="{{apellido}}">{{apellido}}</span>
-                                <span class="badge bg-primary tag-badge" data-value="{{telefono}}">{{telefono}}</span>
-                                <span class="badge bg-primary tag-badge" data-value="{{empresa}}">{{empresa}}</span>
-                                <span class="badge bg-primary tag-badge" data-value="{{fecha}}">{{fecha}}</span>
-                                <span class="badge bg-primary tag-badge" data-value="{{url}}">{{url}}</span>
+                                <span class="tag-badge" data-value="{{nombre}}">{{nombre}}</span>
+                                <span class="tag-badge" data-value="{{apellido}}">{{apellido}}</span>
+                                <span class="tag-badge" data-value="{{telefono}}">{{telefono}}</span>
+                                <span class="tag-badge" data-value="{{empresa}}">{{empresa}}</span>
+                                <span class="tag-badge" data-value="{{fecha}}">{{fecha}}</span>
+                                <span class="tag-badge" data-value="{{url}}">{{url}}</span>
                             </div>
                         </div>
                         <input type="hidden" id="available_variables" name="available_variables" value='{% if template.available_variables %}{{ template.available_variables|tojson }}{% else %}{"nombre":"Nombre del contacto","apellido":"Apellido del contacto","telefono":"Teléfono del contacto","empresa":"Nombre de la empresa","fecha":"Fecha actual","url":"URL importante"}{% endif %}'>
