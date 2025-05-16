@@ -11,6 +11,7 @@ from routes.scraping import scraping
 from routes.templates import templates_bp
 from routes.campaigns import campaigns_bp
 from routes.content_writer import content_writer_bp
+from routes.client_settings import client_settings_bp
 
 # Register all blueprints
 app.register_blueprint(auth)
@@ -25,6 +26,7 @@ app.register_blueprint(scraping)
 app.register_blueprint(templates_bp)
 app.register_blueprint(campaigns_bp)
 app.register_blueprint(content_writer_bp)
+app.register_blueprint(client_settings_bp)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

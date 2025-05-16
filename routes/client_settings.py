@@ -28,14 +28,13 @@ def index():
     settings = ClientSettings.query.filter_by(tenant_id=tenant_id).first()
     if not settings:
         # Crear un registro de ajustes por defecto si no existe
-        settings = ClientSettings(
-            tenant_id=tenant_id,
-            company_name=tenant.name,
-            language='es',
-            currency='EUR',
-            timezone='Europe/Madrid',
-            date_format='DD/MM/YYYY'
-        )
+        settings = ClientSettings()
+        settings.tenant_id = tenant_id
+        settings.company_name = tenant.name
+        settings.language = 'es'
+        settings.currency = 'EUR'
+        settings.timezone = 'Europe/Madrid'
+        settings.date_format = 'DD/MM/YYYY'
         db.session.add(settings)
         db.session.commit()
     

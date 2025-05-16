@@ -1,0 +1,344 @@
+{% extends 'layout.html' %}
+
+{% block title %}Preferencias{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .settings-container {
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .settings-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .settings-header i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+    color: var(--bs-primary);
+  }
+  
+  .settings-card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .settings-card-header {
+    background-color: var(--bs-primary);
+    color: #fff;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .settings-card-body {
+    padding: 20px;
+  }
+  
+  .form-section-title {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    color: var(--bs-primary);
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .color-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-left: 10px;
+    border: 1px solid #dee2e6;
+  }
+  
+  .color-input-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .theme-preview {
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin-top: 20px;
+  }
+  
+  .theme-preview-header {
+    padding: 10px 15px;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 10px;
+    color: #fff;
+    font-weight: 600;
+  }
+  
+  .theme-preview-button {
+    padding: 8px 15px;
+    border-radius: 4px;
+    color: #fff;
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: 600;
+  }
+  
+  .theme-preview-accent {
+    width: 100%;
+    height: 5px;
+    border-radius: 2px;
+    margin-top: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="settings-header">
+    <h2 class="mb-0"><i class="fas fa-sliders-h"></i> Preferencias</h2>
+  </div>
+
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('client_settings.index') }}">Ajustes</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Preferencias</li>
+    </ol>
+  </nav>
+
+  <div class="settings-container">
+    <div class="row">
+      <div class="col-md-8">
+        <form method="POST" action="{{ url_for('client_settings.preferences') }}">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <i class="fas fa-globe-americas mr-2"></i> Configuración regional
+            </div>
+            <div class="settings-card-body">
+              <h5 class="form-section-title">Idioma y formato</h5>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="language" class="form-label">Idioma</label>
+                    <select class="form-select" id="language" name="language">
+                      {% for lang in languages %}
+                      <option value="{{ lang.value }}" {% if settings.language == lang.value %}selected{% endif %}>{{ lang.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Idioma principal de la interfaz</small>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="timezone" class="form-label">Zona horaria</label>
+                    <select class="form-select" id="timezone" name="timezone">
+                      {% for tz in timezones %}
+                      <option value="{{ tz.value }}" {% if settings.timezone == tz.value %}selected{% endif %}>{{ tz.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Todas las fechas se mostrarán en esta zona horaria</small>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="date_format" class="form-label">Formato de fecha</label>
+                    <select class="form-select" id="date_format" name="date_format">
+                      {% for format in date_formats %}
+                      <option value="{{ format.value }}" {% if settings.date_format == format.value %}selected{% endif %}>{{ format.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Cómo se mostrarán las fechas en todo el sistema</small>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="currency" class="form-label">Moneda predeterminada</label>
+                    <select class="form-select" id="currency" name="currency">
+                      {% for currency in currencies %}
+                      <option value="{{ currency.value }}" {% if settings.currency == currency.value %}selected{% endif %}>{{ currency.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Se usará para todas las transacciones y oportunidades</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <i class="fas fa-paint-brush mr-2"></i> Personalización de la interfaz
+            </div>
+            <div class="settings-card-body">
+              <h5 class="form-section-title">Colores y tema</h5>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="primary_color" class="form-label">Color primario</label>
+                    <div class="color-input-group">
+                      <input type="color" class="form-control form-control-color" id="primary_color" name="primary_color" value="{{ tenant.primary_color or '#3498db' }}" title="Elegir color primario">
+                      <div class="color-preview" style="background-color: {{ tenant.primary_color or '#3498db' }};"></div>
+                    </div>
+                    <small class="form-text text-muted">Color principal de la interfaz</small>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="secondary_color" class="form-label">Color secundario</label>
+                    <div class="color-input-group">
+                      <input type="color" class="form-control form-control-color" id="secondary_color" name="secondary_color" value="{{ tenant.secondary_color or '#2ecc71' }}" title="Elegir color secundario">
+                      <div class="color-preview" style="background-color: {{ tenant.secondary_color or '#2ecc71' }};"></div>
+                    </div>
+                    <small class="form-text text-muted">Color complementario de la interfaz</small>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Vista previa del tema -->
+              <div class="theme-preview">
+                <h6 class="mb-3">Vista previa del tema</h6>
+                <div class="theme-preview-header" style="background-color: {{ tenant.primary_color or '#3498db' }};">
+                  Encabezado
+                </div>
+                <div>
+                  <div class="theme-preview-button" style="background-color: {{ tenant.primary_color or '#3498db' }};">
+                    Botón primario
+                  </div>
+                  <div class="theme-preview-button" style="background-color: {{ tenant.secondary_color or '#2ecc71' }};">
+                    Botón secundario
+                  </div>
+                </div>
+                <div class="theme-preview-accent" style="background-color: {{ tenant.secondary_color or '#2ecc71' }};"></div>
+              </div>
+              
+              <div class="mt-4">
+                <small class="text-muted">Los cambios en el tema se aplicarán en todos los usuarios de su organización</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <i class="fas fa-bell mr-2"></i> Preferencias de notificaciones
+            </div>
+            <div class="settings-card-body">
+              <h5 class="form-section-title">Notificaciones</h5>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" checked>
+                <label class="form-check-label" for="email_notifications">
+                  Recibir notificaciones por email
+                </label>
+                <div class="form-text text-muted">Recibirá un email cuando haya acciones importantes en su cuenta</div>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="system_notifications" name="system_notifications" checked>
+                <label class="form-check-label" for="system_notifications">
+                  Notificaciones del sistema
+                </label>
+                <div class="form-text text-muted">Recibirá notificaciones dentro de la aplicación</div>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="product_updates" name="product_updates" checked>
+                <label class="form-check-label" for="product_updates">
+                  Actualizaciones de producto
+                </label>
+                <div class="form-text text-muted">Recibir información sobre nuevas funciones y mejoras</div>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="marketing_communications" name="marketing_communications">
+                <label class="form-check-label" for="marketing_communications">
+                  Comunicaciones de marketing
+                </label>
+                <div class="form-text text-muted">Recibir ofertas especiales y contenido promocional</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('client_settings.index') }}" class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-1"></i> Volver
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i> Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <i class="fas fa-info-circle mr-2"></i> Información
+          </div>
+          <div class="settings-card-body">
+            <h5 class="mb-3">Personalización</h5>
+            <p>Personaliza la experiencia de tu organización configurando el idioma, formato de fecha, moneda y colores del tema.</p>
+            
+            <h6 class="mt-4 mb-2">Zona horaria</h6>
+            <p class="text-muted">La zona horaria afecta a cómo se muestran las fechas y horas en todo el sistema. Asegúrate de seleccionar la correcta para tu ubicación.</p>
+            
+            <h6 class="mt-4 mb-2">Tema personalizado</h6>
+            <p class="text-muted">Los colores seleccionados se aplicarán a toda la interfaz, creando una experiencia de marca consistente para todos los usuarios de tu organización.</p>
+            
+            <h6 class="mt-4 mb-2">Notificaciones</h6>
+            <p class="text-muted">Configura qué tipos de notificaciones quieres recibir. Puedes desactivar las que no te interesen en cualquier momento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar vista previa del tema cuando cambien los colores
+    const primaryColorInput = document.getElementById('primary_color');
+    const secondaryColorInput = document.getElementById('secondary_color');
+    const primaryColorPreview = primaryColorInput.nextElementSibling;
+    const secondaryColorPreview = secondaryColorInput.nextElementSibling;
+    
+    // Elementos de la vista previa
+    const previewHeader = document.querySelector('.theme-preview-header');
+    const previewPrimaryButton = document.querySelector('.theme-preview-button:nth-child(1)');
+    const previewSecondaryButton = document.querySelector('.theme-preview-button:nth-child(2)');
+    const previewAccent = document.querySelector('.theme-preview-accent');
+    
+    // Actualizar colores en la vista previa
+    primaryColorInput.addEventListener('input', function() {
+      const color = this.value;
+      primaryColorPreview.style.backgroundColor = color;
+      previewHeader.style.backgroundColor = color;
+      previewPrimaryButton.style.backgroundColor = color;
+    });
+    
+    secondaryColorInput.addEventListener('input', function() {
+      const color = this.value;
+      secondaryColorPreview.style.backgroundColor = color;
+      previewSecondaryButton.style.backgroundColor = color;
+      previewAccent.style.backgroundColor = color;
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}
