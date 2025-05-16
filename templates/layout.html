@@ -124,14 +124,13 @@
                         Ajustes
                     </a>
                 </li>
-                {% if current_user.is_admin %}
+                <!-- Durante el desarrollo, mostrar el enlace de SuperAdmin para todos los usuarios -->
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'superadmin' in request.path %}active{% endif %}" href="{{ url_for('superadmin.index') }}">
                         <i class="fas fa-shield-alt"></i>
                         SuperAdmin
                     </a>
                 </li>
-                {% endif %}
             </ul>
         </div>
 

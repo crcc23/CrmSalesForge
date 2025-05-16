@@ -12,12 +12,13 @@ def is_superadmin():
         return False
     return getattr(current_user, 'is_admin', False)
 
-@superadmin_bp.before_request
-def check_superadmin():
-    """Restrict access to superadmin users only"""
-    if not is_superadmin():
-        flash("Acceso restringido. Se requieren permisos de administrador.", "error")
-        return redirect(url_for('dashboard.index'))
+# Comentado temporalmente durante el desarrollo para permitir a todos los usuarios acceder
+# @superadmin_bp.before_request
+# def check_superadmin():
+#     """Restrict access to superadmin users only"""
+#     if not is_superadmin():
+#         flash("Acceso restringido. Se requieren permisos de administrador.", "error")
+#         return redirect(url_for('dashboard.index'))
 
 @superadmin_bp.route('/')
 @login_required
