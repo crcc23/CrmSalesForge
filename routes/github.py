@@ -11,7 +11,7 @@ import json
 # Create blueprint
 github_bp = Blueprint('github', __name__)
 
-@github_bp.route('/')
+@github_bp.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
     """GitHub integration dashboard"""
@@ -23,6 +23,42 @@ def index():
     
     # Get GitHub configuration for this tenant
     config = GithubConfig.query.filter_by(tenant_id=tenant_id).first()
+    if not config:
+        config = GithubConfig()
+        config.tenant_id = tenant_id
+        config.name = "GitHub Integration"
+        db.session.add(config)
+        db.session.commit()
+    
+    # Handle direct connection from index page
+    if request.method == 'POST':
+        token = request.form.get('github_token', '').strip()
+        organization = request.form.get('organization', '').strip()
+        
+        if token:
+            config.github_token = token
+            config.organization = organization
+            db.session.commit()
+            
+            # Test connection
+            github_service = GitHubService(token=config.github_token)
+            try:
+                user_info = github_service.get_user_info()
+                flash(f"Conexión con GitHub establecida correctamente como: {user_info.get('login')}", "success")
+                
+                # Sync some repositories automatically
+                try:
+                    repos = github_service.get_user_repositories()
+                    # Only sync the first 3 to not overwhelm
+                    for repo in repos[:3]:
+                        github_service.sync_repository_to_db(tenant_id, repo['owner']['login'], repo['name'])
+                    flash(f"Se sincronizaron {min(3, len(repos))} repositorios automáticamente.", "info")
+                except Exception as e:
+                    # Non-critical error, just log it
+                    print(f"Error syncing repos: {str(e)}")
+                    
+            except Exception as e:
+                flash(f"Error al conectar con GitHub: {str(e)}", "error")
     
     # Get GitHub repositories for this tenant
     repositories = GithubRepository.query.filter_by(tenant_id=tenant_id).all()
@@ -44,7 +80,9 @@ def setup():
     # Get or create GitHub configuration
     config = GithubConfig.query.filter_by(tenant_id=tenant_id).first()
     if not config:
-        config = GithubConfig(tenant_id=tenant_id)
+        config = GithubConfig()
+        config.tenant_id = tenant_id
+        config.name = "GitHub Integration"
         db.session.add(config)
         db.session.commit()
     
