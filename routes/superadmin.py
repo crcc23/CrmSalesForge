@@ -230,13 +230,13 @@ def tenant_billing(tenant_id):
         settings.subscription_status = request.form.get('subscription_status')
         
         try:
-            if request.form.get('subscription_start_date'):
-                settings.subscription_start_date = datetime.datetime.strptime(
-                    request.form.get('subscription_start_date'), '%Y-%m-%d')
+            start_date = request.form.get('subscription_start_date')
+            if start_date and start_date.strip():
+                settings.subscription_start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
             
-            if request.form.get('subscription_end_date'):
-                settings.subscription_end_date = datetime.datetime.strptime(
-                    request.form.get('subscription_end_date'), '%Y-%m-%d')
+            end_date = request.form.get('subscription_end_date')
+            if end_date and end_date.strip():
+                settings.subscription_end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
         except ValueError:
             flash("Formato de fecha incorrecto. Use el formato YYYY-MM-DD.", "error")
             return redirect(url_for('superadmin.tenant_billing', tenant_id=tenant_id))
