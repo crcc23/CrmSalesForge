@@ -119,6 +119,12 @@
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'github' in request.path %}active{% endif %}" href="{{ url_for('github.index') }}">
+                        <i class="fab fa-github"></i>
+                        GitHub
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'ajustes' in request.path %}active{% endif %}" href="{{ url_for('client_settings.index') }}">
                         <i class="fas fa-cog"></i>
                         Ajustes
