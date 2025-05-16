@@ -51,6 +51,7 @@ def load_user(user_id):
 with app.app_context():
     # Import all models
     import models
+    import models_github
     # Create database tables
     db.create_all()
     
