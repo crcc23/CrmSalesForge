@@ -39,6 +39,63 @@ class Tenant(db.Model):
     opportunities = db.relationship('Opportunity', backref='tenant', lazy='dynamic')
     contacts = db.relationship('Contact', backref='tenant', lazy='dynamic')
     accounts = db.relationship('Account', backref='tenant', lazy='dynamic')
+    
+# Cliente Settings - Configuración detallada del cliente
+class ClientSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tenant_id = db.Column(db.Integer, db.ForeignKey('tenant.id'), nullable=False)
+    
+    # Información de la empresa
+    company_name = db.Column(db.String(100))
+    company_logo = db.Column(db.String(255))  # URL o ruta al logo
+    industry = db.Column(db.String(100))
+    company_size = db.Column(db.String(50))  # Pequeña, Mediana, Grande
+    website = db.Column(db.String(255))
+    
+    # Información de contacto
+    primary_contact_name = db.Column(db.String(100))
+    primary_contact_email = db.Column(db.String(120))
+    primary_contact_phone = db.Column(db.String(20))
+    address = db.Column(db.Text)
+    city = db.Column(db.String(100))
+    state_province = db.Column(db.String(100))
+    postal_code = db.Column(db.String(20))
+    country = db.Column(db.String(100))
+    
+    # Configuración de facturación
+    billing_plan = db.Column(db.String(50))  # Básico, Profesional, Empresarial
+    billing_cycle = db.Column(db.String(20))  # Mensual, Anual
+    billing_contact_email = db.Column(db.String(120))
+    tax_id = db.Column(db.String(50))
+    
+    # Límites y cuotas
+    max_users = db.Column(db.Integer, default=5)
+    max_contacts = db.Column(db.Integer, default=1000)
+    max_storage_gb = db.Column(db.Float, default=5.0)
+    
+    # Preferencias
+    timezone = db.Column(db.String(50), default='UTC')
+    language = db.Column(db.String(10), default='es')
+    date_format = db.Column(db.String(20), default='DD/MM/YYYY')
+    currency = db.Column(db.String(3), default='EUR')
+    
+    # Integraciones habilitadas
+    enable_email_integration = db.Column(db.Boolean, default=False)
+    enable_whatsapp_integration = db.Column(db.Boolean, default=False)
+    enable_notion_integration = db.Column(db.Boolean, default=False)
+    enable_ai_content_writer = db.Column(db.Boolean, default=False)
+    
+    # Información de suscripción
+    subscription_status = db.Column(db.String(20), default='active')  # active, canceled, suspended
+    subscription_start_date = db.Column(db.DateTime)
+    subscription_end_date = db.Column(db.DateTime)
+    
+    # Metadatos
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    
+    # Relaciones
+    tenant = db.relationship('Tenant', backref=db.backref('client_settings', uselist=False))
 
 # User Role within Tenant
 class Role(db.Model):

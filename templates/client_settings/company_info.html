@@ -1,0 +1,258 @@
+{% extends 'layout.html' %}
+
+{% block title %}Información de la empresa{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .settings-container {
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .settings-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .settings-header i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+    color: var(--bs-primary);
+  }
+  
+  .settings-card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .settings-card-header {
+    background-color: var(--bs-primary);
+    color: #fff;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .settings-card-body {
+    padding: 20px;
+  }
+  
+  .form-section-title {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    color: var(--bs-primary);
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .logo-preview-container {
+    width: 150px;
+    height: 150px;
+    border: 1px dashed #ccc;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .logo-preview {
+    max-width: 100%;
+    max-height: 100%;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="settings-header">
+    <h2 class="mb-0"><i class="fas fa-building"></i> Información de la empresa</h2>
+  </div>
+
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('client_settings.index') }}">Ajustes</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Información de la empresa</li>
+    </ol>
+  </nav>
+
+  <div class="settings-container">
+    <form method="POST" action="{{ url_for('client_settings.company_info') }}">
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <i class="fas fa-building mr-2"></i> Datos generales
+        </div>
+        <div class="settings-card-body">
+          <h5 class="form-section-title">Información básica</h5>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="company_name" class="form-label">Nombre de la empresa *</label>
+                <input type="text" class="form-control" id="company_name" name="company_name" value="{{ settings.company_name or '' }}" required>
+                <small class="form-text text-muted">Nombre legal de su empresa o organización</small>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="industry" class="form-label">Industria</label>
+                <select class="form-select" id="industry" name="industry">
+                  <option value="" {% if not settings.industry %}selected{% endif %}>Seleccionar industria</option>
+                  <option value="technology" {% if settings.industry == 'technology' %}selected{% endif %}>Tecnología</option>
+                  <option value="healthcare" {% if settings.industry == 'healthcare' %}selected{% endif %}>Salud</option>
+                  <option value="education" {% if settings.industry == 'education' %}selected{% endif %}>Educación</option>
+                  <option value="finance" {% if settings.industry == 'finance' %}selected{% endif %}>Finanzas</option>
+                  <option value="retail" {% if settings.industry == 'retail' %}selected{% endif %}>Comercio minorista</option>
+                  <option value="manufacturing" {% if settings.industry == 'manufacturing' %}selected{% endif %}>Manufactura</option>
+                  <option value="hospitality" {% if settings.industry == 'hospitality' %}selected{% endif %}>Hostelería y turismo</option>
+                  <option value="professional_services" {% if settings.industry == 'professional_services' %}selected{% endif %}>Servicios profesionales</option>
+                  <option value="construction" {% if settings.industry == 'construction' %}selected{% endif %}>Construcción</option>
+                  <option value="other" {% if settings.industry == 'other' %}selected{% endif %}>Otro</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="company_size" class="form-label">Tamaño de la empresa</label>
+                <select class="form-select" id="company_size" name="company_size">
+                  <option value="" {% if not settings.company_size %}selected{% endif %}>Seleccionar tamaño</option>
+                  <option value="1-10" {% if settings.company_size == '1-10' %}selected{% endif %}>1-10 empleados</option>
+                  <option value="11-50" {% if settings.company_size == '11-50' %}selected{% endif %}>11-50 empleados</option>
+                  <option value="51-200" {% if settings.company_size == '51-200' %}selected{% endif %}>51-200 empleados</option>
+                  <option value="201-500" {% if settings.company_size == '201-500' %}selected{% endif %}>201-500 empleados</option>
+                  <option value="501-1000" {% if settings.company_size == '501-1000' %}selected{% endif %}>501-1000 empleados</option>
+                  <option value="1001+" {% if settings.company_size == '1001+' %}selected{% endif %}>Más de 1000 empleados</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="website" class="form-label">Sitio web</label>
+                <input type="url" class="form-control" id="website" name="website" value="{{ settings.website or '' }}" placeholder="https://www.ejemplo.com">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="company_logo" class="form-label">URL del logotipo</label>
+                <input type="url" class="form-control" id="company_logo" name="company_logo" value="{{ settings.company_logo or '' }}" placeholder="https://www.ejemplo.com/logo.png">
+                <small class="form-text text-muted">URL de la imagen de su logotipo (formatos recomendados: PNG, SVG)</small>
+                
+                {% if settings.company_logo %}
+                <div class="logo-preview-container mt-2">
+                  <img src="{{ settings.company_logo }}" alt="Logo de la empresa" class="logo-preview">
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          <h5 class="form-section-title mt-4">Información de contacto</h5>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="primary_contact_name" class="form-label">Nombre de contacto principal</label>
+                <input type="text" class="form-control" id="primary_contact_name" name="primary_contact_name" value="{{ settings.primary_contact_name or '' }}">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="primary_contact_email" class="form-label">Email de contacto</label>
+                <input type="email" class="form-control" id="primary_contact_email" name="primary_contact_email" value="{{ settings.primary_contact_email or '' }}">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="primary_contact_phone" class="form-label">Teléfono de contacto</label>
+                <input type="tel" class="form-control" id="primary_contact_phone" name="primary_contact_phone" value="{{ settings.primary_contact_phone or '' }}">
+              </div>
+            </div>
+          </div>
+          
+          <h5 class="form-section-title mt-4">Dirección</h5>
+          
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="address" class="form-label">Dirección</label>
+                <textarea class="form-control" id="address" name="address" rows="2">{{ settings.address or '' }}</textarea>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="city" class="form-label">Ciudad</label>
+                <input type="text" class="form-control" id="city" name="city" value="{{ settings.city or '' }}">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="state_province" class="form-label">Estado/Provincia</label>
+                <input type="text" class="form-control" id="state_province" name="state_province" value="{{ settings.state_province or '' }}">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="postal_code" class="form-label">Código postal</label>
+                <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ settings.postal_code or '' }}">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="country" class="form-label">País</label>
+                <select class="form-select" id="country" name="country">
+                  <option value="" {% if not settings.country %}selected{% endif %}>Seleccionar país</option>
+                  <option value="ES" {% if settings.country == 'ES' %}selected{% endif %}>España</option>
+                  <option value="MX" {% if settings.country == 'MX' %}selected{% endif %}>México</option>
+                  <option value="CO" {% if settings.country == 'CO' %}selected{% endif %}>Colombia</option>
+                  <option value="AR" {% if settings.country == 'AR' %}selected{% endif %}>Argentina</option>
+                  <option value="CL" {% if settings.country == 'CL' %}selected{% endif %}>Chile</option>
+                  <option value="PE" {% if settings.country == 'PE' %}selected{% endif %}>Perú</option>
+                  <option value="US" {% if settings.country == 'US' %}selected{% endif %}>Estados Unidos</option>
+                  <option value="other" {% if settings.country and settings.country not in ['ES', 'MX', 'CO', 'AR', 'CL', 'PE', 'US'] %}selected{% endif %}>Otro</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 d-flex justify-content-between">
+            <a href="{{ url_for('client_settings.index') }}" class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-1"></i> Volver
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i> Guardar cambios
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

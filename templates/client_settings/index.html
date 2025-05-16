@@ -1,0 +1,209 @@
+{% extends 'layout.html' %}
+
+{% block title %}Ajustes del cliente{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .settings-container {
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .settings-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .settings-header i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+    color: var(--bs-primary);
+  }
+  
+  .settings-card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .settings-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .settings-card-header {
+    background-color: var(--bs-primary);
+    color: #fff;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .settings-card-body {
+    padding: 20px;
+    flex: 1;
+  }
+  
+  .settings-card-footer {
+    padding: 15px 20px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+  }
+  
+  .settings-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: var(--bs-primary);
+  }
+  
+  .settings-description {
+    color: var(--bs-secondary-color);
+    margin-bottom: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="settings-header">
+    <h2 class="mb-0"><i class="fas fa-cogs"></i> Ajustes del cliente</h2>
+  </div>
+
+  <div class="settings-container">
+    <div class="row">
+      <!-- Información de la empresa -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <i class="fas fa-building mr-2"></i> Información de la empresa
+          </div>
+          <div class="settings-card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-building settings-icon"></i>
+            </div>
+            <h5 class="card-title">Datos generales</h5>
+            <p class="settings-description">Configure la información básica de su empresa, como nombre, logotipo, industria y datos de contacto.</p>
+          </div>
+          <div class="settings-card-footer">
+            <a href="{{ url_for('client_settings.company_info') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-edit mr-1"></i> Editar información
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Facturación -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <i class="fas fa-credit-card mr-2"></i> Facturación y suscripción
+          </div>
+          <div class="settings-card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-credit-card settings-icon"></i>
+            </div>
+            <h5 class="card-title">Detalles de facturación</h5>
+            <p class="settings-description">Gestione su plan de suscripción, información de facturación, ciclo de pago y datos fiscales.</p>
+          </div>
+          <div class="settings-card-footer">
+            <a href="{{ url_for('client_settings.billing') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-edit mr-1"></i> Administrar facturación
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferencias -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <i class="fas fa-sliders-h mr-2"></i> Preferencias
+          </div>
+          <div class="settings-card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-sliders-h settings-icon"></i>
+            </div>
+            <h5 class="card-title">Personalización</h5>
+            <p class="settings-description">Configure preferencias como zona horaria, idioma, formato de fecha, moneda y esquema de colores.</p>
+          </div>
+          <div class="settings-card-footer">
+            <a href="{{ url_for('client_settings.preferences') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-edit mr-1"></i> Configurar preferencias
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integraciones -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <i class="fas fa-plug mr-2"></i> Integraciones
+          </div>
+          <div class="settings-card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-plug settings-icon"></i>
+            </div>
+            <h5 class="card-title">Servicios conectados</h5>
+            <p class="settings-description">Administre las integraciones con servicios externos como correo electrónico, WhatsApp, Notion y herramientas de IA.</p>
+          </div>
+          <div class="settings-card-footer">
+            <a href="{{ url_for('client_settings.integrations') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-edit mr-1"></i> Gestionar integraciones
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usuarios -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <i class="fas fa-users mr-2"></i> Usuarios
+          </div>
+          <div class="settings-card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-users settings-icon"></i>
+            </div>
+            <h5 class="card-title">Gestión de usuarios</h5>
+            <p class="settings-description">Administre los usuarios de su organización, roles y permisos.</p>
+          </div>
+          <div class="settings-card-footer">
+            <a href="#" class="btn btn-secondary btn-sm disabled">
+              <i class="fas fa-edit mr-1"></i> Próximamente
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seguridad -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <i class="fas fa-shield-alt mr-2"></i> Seguridad
+          </div>
+          <div class="settings-card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-shield-alt settings-icon"></i>
+            </div>
+            <h5 class="card-title">Configuración de seguridad</h5>
+            <p class="settings-description">Configure las políticas de seguridad, autenticación de dos factores y requisitos de contraseña.</p>
+          </div>
+          <div class="settings-card-footer">
+            <a href="#" class="btn btn-secondary btn-sm disabled">
+              <i class="fas fa-edit mr-1"></i> Próximamente
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
