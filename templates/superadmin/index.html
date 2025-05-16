@@ -1,0 +1,174 @@
+{% extends 'layout.html' %}
+
+{% block title %}Panel de SuperAdmin{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .admin-dashboard-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    height: 100%;
+  }
+  
+  .admin-dashboard-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .admin-dashboard-card .card-body {
+    padding: 1.5rem;
+  }
+  
+  .admin-stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--bs-primary);
+  }
+  
+  .admin-stat-label {
+    font-size: 1rem;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0;
+  }
+  
+  .admin-icon {
+    font-size: 2rem;
+    color: var(--bs-primary);
+    opacity: 0.2;
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+  
+  .action-button {
+    margin-top: 1rem;
+    width: 100%;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="fas fa-shield-alt me-2"></i> Panel de SuperAdmin</h2>
+  </div>
+  
+  <!-- Estadísticas generales -->
+  <div class="row mb-4">
+    <div class="col-md-4 mb-4">
+      <div class="card admin-dashboard-card">
+        <div class="card-body position-relative">
+          <h5 class="card-title text-muted">Clientes totales</h5>
+          <p class="admin-stat-value">{{ tenant_count }}</p>
+          <p class="admin-stat-label">{{ active_tenant_count }} activos</p>
+          <i class="fas fa-building admin-icon"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card admin-dashboard-card">
+        <div class="card-body position-relative">
+          <h5 class="card-title text-muted">Usuarios totales</h5>
+          <p class="admin-stat-value">{{ user_count }}</p>
+          <p class="admin-stat-label">Todos los usuarios del sistema</p>
+          <i class="fas fa-users admin-icon"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card admin-dashboard-card">
+        <div class="card-body position-relative">
+          <h5 class="card-title text-muted">Planes de suscripción</h5>
+          <p class="admin-stat-value">{{ subscription_plans|length }}</p>
+          <p class="admin-stat-label">Planes disponibles</p>
+          <i class="fas fa-tags admin-icon"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Acciones rápidas -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Acciones rápidas</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <a href="{{ url_for('superadmin.tenants') }}" class="btn btn-primary action-button">
+                <i class="fas fa-building me-2"></i> Gestionar clientes
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="{{ url_for('superadmin.plans') }}" class="btn btn-success action-button">
+                <i class="fas fa-tags me-2"></i> Gestionar planes
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="#" class="btn btn-info action-button">
+                <i class="fas fa-chart-bar me-2"></i> Ver estadísticas
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="#" class="btn btn-secondary action-button">
+                <i class="fas fa-cog me-2"></i> Configuración del sistema
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Lista de planes -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Planes de suscripción</h5>
+          <a href="{{ url_for('superadmin.plans') }}" class="btn btn-sm btn-primary">
+            <i class="fas fa-eye me-1"></i> Ver todos
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Precio</th>
+                  <th>Usuarios máx.</th>
+                  <th>Prospectos máx.</th>
+                  <th>Funcionalidades</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for plan in subscription_plans %}
+                <tr>
+                  <td>{{ plan.name }}</td>
+                  <td>{{ "€%.2f"|format(plan.price) }}</td>
+                  <td>{{ plan.max_users }}</td>
+                  <td>{{ plan.max_prospects }}</td>
+                  <td>
+                    {% if plan.includes_email_campaigns %}<span class="badge bg-success me-1">Email</span>{% endif %}
+                    {% if plan.includes_whatsapp %}<span class="badge bg-success me-1">WhatsApp</span>{% endif %}
+                    {% if plan.includes_ai_content %}<span class="badge bg-success me-1">IA</span>{% endif %}
+                    {% if plan.includes_web_scraping %}<span class="badge bg-success me-1">Scraping</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

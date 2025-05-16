@@ -1,0 +1,188 @@
+{% extends 'layout.html' %}
+
+{% block title %}Añadir Plan{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .form-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-card-header {
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .form-card-body {
+    padding: 2rem;
+  }
+  
+  .form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .form-section-title {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--bs-primary);
+  }
+  
+  .features-select {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .feature-item {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    flex: 1 0 45%;
+  }
+  
+  .form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-0"><i class="fas fa-plus me-2"></i> Añadir Plan</h2>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 mt-2">
+          <li class="breadcrumb-item"><a href="{{ url_for('superadmin.index') }}">SuperAdmin</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('superadmin.plans') }}">Planes</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Añadir Plan</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="form-card">
+        <div class="form-card-header">
+          <h4 class="mb-0"><i class="fas fa-tag me-2"></i> Nuevo Plan de Suscripción</h4>
+        </div>
+        <div class="form-card-body">
+          <form method="POST" action="{{ url_for('superadmin.add_plan') }}">
+            <div class="form-section">
+              <h5 class="form-section-title">Información básica</h5>
+              
+              <div class="mb-3">
+                <label for="name" class="form-label">Nombre del plan *</label>
+                <input type="text" class="form-control" id="name" name="name" required placeholder="Ej: Plan Básico">
+                <div class="form-text">Nombre que será visible para los clientes</div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="price" class="form-label">Precio mensual (€) *</label>
+                <div class="input-group">
+                  <span class="input-group-text">€</span>
+                  <input type="number" class="form-control" id="price" name="price" required step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="form-text">Precio en euros, por mes</div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="max_users" class="form-label">Número máximo de usuarios</label>
+                    <input type="number" class="form-control" id="max_users" name="max_users" min="1" value="5">
+                    <div class="form-text">Límite de usuarios permitidos</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="max_prospects" class="form-label">Número máximo de prospectos</label>
+                    <input type="number" class="form-control" id="max_prospects" name="max_prospects" min="1" value="100">
+                    <div class="form-text">Límite de prospectos permitidos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h5 class="form-section-title">Características incluidas</h5>
+              
+              <div class="features-select">
+                <div class="feature-item">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="includes_email_campaigns" name="includes_email_campaigns">
+                    <label class="form-check-label" for="includes_email_campaigns">
+                      Campañas de Email
+                    </label>
+                    <div class="form-text">Permite crear y gestionar campañas de email</div>
+                  </div>
+                </div>
+                
+                <div class="feature-item">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="includes_whatsapp" name="includes_whatsapp">
+                    <label class="form-check-label" for="includes_whatsapp">
+                      Integración WhatsApp
+                    </label>
+                    <div class="form-text">Permite enviar mensajes a través de WhatsApp</div>
+                  </div>
+                </div>
+                
+                <div class="feature-item">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="includes_ai_content" name="includes_ai_content">
+                    <label class="form-check-label" for="includes_ai_content">
+                      Redacción con IA
+                    </label>
+                    <div class="form-text">Acceso al módulo de generación de contenido con IA</div>
+                  </div>
+                </div>
+                
+                <div class="feature-item">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="includes_web_scraping" name="includes_web_scraping">
+                    <label class="form-check-label" for="includes_web_scraping">
+                      Web Scraping
+                    </label>
+                    <div class="form-text">Acceso al módulo de extracción de datos web</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="features" class="form-label">Características adicionales</label>
+                <textarea class="form-control" id="features" name="features" rows="3" placeholder="Describe características adicionales del plan..."></textarea>
+                <div class="form-text">Descripción detallada de otras funcionalidades incluidas</div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{{ url_for('superadmin.plans') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Guardar Plan
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
