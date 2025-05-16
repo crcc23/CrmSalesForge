@@ -179,6 +179,9 @@
               <a href="{{ url_for('superadmin.edit_tenant', tenant_id=tenant.id) }}" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-edit me-1"></i> Editar
               </a>
+              <a href="{{ url_for('superadmin.tenant_admins', tenant_id=tenant.id) }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-users-cog me-1"></i> Admins
+              </a>
               <a href="{{ url_for('superadmin.tenant_billing', tenant_id=tenant.id) }}" class="btn btn-sm btn-outline-info">
                 <i class="fas fa-credit-card me-1"></i> Facturación
               </a>

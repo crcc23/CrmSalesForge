@@ -1,0 +1,248 @@
+{% extends 'layout.html' %}
+
+{% block title %}Administradores de {{ tenant.name }}{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .form-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+  
+  .form-card-header {
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .form-card-body {
+    padding: 2rem;
+  }
+  
+  .admin-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+  
+  .admin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-card-header {
+    background-color: var(--bs-secondary);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .admin-card-body {
+    padding: 1.5rem;
+  }
+  
+  .admin-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--bs-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-avatar i {
+    font-size: 2.5rem;
+    color: var(--bs-secondary);
+  }
+  
+  .admin-info {
+    text-align: center;
+  }
+  
+  .admin-info h5 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .admin-info p {
+    color: var(--bs-secondary);
+    margin-bottom: 0.25rem;
+  }
+  
+  .admin-info .text-muted {
+    font-size: 0.875rem;
+  }
+  
+  .admin-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-0"><i class="fas fa-users-cog me-2"></i> Administradores de {{ tenant.name }}</h2>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 mt-2">
+          <li class="breadcrumb-item"><a href="{{ url_for('superadmin.index') }}">SuperAdmin</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('superadmin.tenants') }}">Clientes</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Administradores</li>
+        </ol>
+      </nav>
+    </div>
+    <div>
+      <a href="{{ url_for('superadmin.tenants') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Volver a Clientes
+      </a>
+    </div>
+  </div>
+  
+  <!-- Formulario para añadir administrador -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="form-card">
+        <div class="form-card-header">
+          <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i> Añadir Nuevo Administrador</h4>
+        </div>
+        <div class="form-card-body">
+          <form method="POST" action="{{ url_for('superadmin.tenant_admins', tenant_id=tenant.id) }}">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="first_name" class="form-label">Nombre *</label>
+                  <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="last_name" class="form-label">Apellidos *</label>
+                  <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email *</label>
+                  <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="username" class="form-label">Nombre de usuario *</label>
+                  <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="password" class="form-label">Contraseña *</label>
+                  <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="confirm_password" class="form-label">Confirmar Contraseña *</label>
+                  <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Añadir Administrador
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Lista de administradores actuales -->
+  <div class="row">
+    <div class="col-lg-12 mb-4">
+      <h3><i class="fas fa-users me-2"></i> Administradores Actuales</h3>
+      <p class="text-muted">Mostrando {{ admins|length }} administrador(es) para {{ tenant.name }}</p>
+    </div>
+  </div>
+  
+  <div class="row">
+    {% if admins %}
+      {% for admin in admins %}
+      <div class="col-md-4 col-lg-3 mb-4">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h5 class="mb-0">{{ admin.username }}</h5>
+            
+            {% if admins|length > 1 %}
+            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAdminModal{{ admin.id }}">
+              <i class="fas fa-trash"></i>
+            </button>
+            {% endif %}
+          </div>
+          <div class="admin-card-body">
+            <div class="admin-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="admin-info">
+              <h5>{{ admin.first_name }} {{ admin.last_name }}</h5>
+              <p>{{ admin.email }}</p>
+              <p class="text-muted">
+                <i class="fas fa-calendar-alt me-1"></i> Creado: {{ admin.created_at.strftime('%d/%m/%Y') if admin.created_at else 'N/A' }}
+              </p>
+              <p class="text-muted">
+                <i class="fas fa-clock me-1"></i> Último acceso: {{ admin.last_login.strftime('%d/%m/%Y %H:%M') if admin.last_login else 'Nunca' }}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Modal de confirmación para eliminar administrador -->
+        <div class="modal fade" id="deleteAdminModal{{ admin.id }}" tabindex="-1" aria-labelledby="deleteAdminModalLabel{{ admin.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteAdminModalLabel{{ admin.id }}">
+                  <i class="fas fa-exclamation-triangle me-2"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar al administrador <strong>{{ admin.first_name }} {{ admin.last_name }}</strong>?</p>
+                <p class="text-danger">Esta acción no se puede deshacer.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                  <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <form action="{{ url_for('superadmin.delete_tenant_admin', tenant_id=tenant.id, user_id=admin.id) }}" method="POST">
+                  <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Eliminar
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="col-12">
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> No hay administradores para este cliente.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  
+</div>
+{% endblock %}

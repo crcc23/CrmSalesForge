@@ -313,6 +313,86 @@ def edit_tenant(tenant_id):
     
     return render_template('superadmin/edit_tenant.html', tenant=tenant, plans=subscription_plans, admin_user=admin_user)
 
+@superadmin_bp.route('/tenants/admins/<int:tenant_id>', methods=['GET', 'POST'])
+@login_required
+def tenant_admins(tenant_id):
+    """Manage tenant administrators"""
+    tenant = Tenant.query.get_or_404(tenant_id)
+    admin_users = User.query.filter_by(tenant_id=tenant_id, role_id=1).all()
+    
+    if request.method == 'POST':
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        # Validar datos
+        if not first_name or not last_name or not email or not username or not password:
+            flash("Todos los campos son obligatorios.", "error")
+            return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+        
+        if password != confirm_password:
+            flash("Las contraseñas no coinciden.", "error")
+            return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+        
+        # Verificar que el username sea único
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash(f"El nombre de usuario '{username}' ya está en uso.", "error")
+            return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+        
+        # Verificar que el email sea único
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            flash(f"El email '{email}' ya está en uso.", "error")
+            return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+        
+        # Crear nuevo administrador
+        new_admin = User()
+        new_admin.tenant_id = tenant_id
+        new_admin.role_id = 1  # Admin role
+        new_admin.first_name = first_name
+        new_admin.last_name = last_name
+        new_admin.email = email
+        new_admin.username = username
+        new_admin.is_active = True
+        new_admin.set_password(password)
+        
+        db.session.add(new_admin)
+        db.session.commit()
+        
+        flash(f"Administrador '{first_name} {last_name}' añadido correctamente.", "success")
+        return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+    
+    return render_template('superadmin/tenant_admins.html', tenant=tenant, admins=admin_users)
+
+@superadmin_bp.route('/tenants/admins/<int:tenant_id>/delete/<int:user_id>', methods=['POST'])
+@login_required
+def delete_tenant_admin(tenant_id, user_id):
+    """Delete tenant administrator"""
+    tenant = Tenant.query.get_or_404(tenant_id)
+    admin_user = User.query.get_or_404(user_id)
+    
+    # Verificar que el usuario pertenece al tenant
+    if admin_user.tenant_id != tenant_id:
+        flash("El usuario no pertenece a este cliente.", "error")
+        return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+    
+    # Verificar que no es el último administrador
+    admin_count = User.query.filter_by(tenant_id=tenant_id, role_id=1).count()
+    if admin_count <= 1:
+        flash("No se puede eliminar el último administrador del cliente.", "error")
+        return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+    
+    # Eliminar el administrador
+    db.session.delete(admin_user)
+    db.session.commit()
+    
+    flash(f"Administrador '{admin_user.first_name} {admin_user.last_name}' eliminado correctamente.", "success")
+    return redirect(url_for('superadmin.tenant_admins', tenant_id=tenant_id))
+
 @superadmin_bp.route('/tenants/toggle/<int:tenant_id>', methods=['POST'])
 @login_required
 def toggle_tenant(tenant_id):
