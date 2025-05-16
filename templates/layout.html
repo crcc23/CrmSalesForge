@@ -119,7 +119,7 @@
                     </a>
                 </li>
                 <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'settings' in request.path %}active{% endif %}" href="#">
+                    <a class="sidebar-nav-link {% if 'ajustes' in request.path %}active{% endif %}" href="{{ url_for('client_settings.index') }}">
                         <i class="fas fa-cog"></i>
                         Ajustes
                     </a>
