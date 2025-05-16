@@ -134,6 +134,9 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h3><i class="fas fa-code-branch me-2"></i> Tus Repositorios</h3>
     <div>
+      <a href="{{ url_for('github.backup_system') }}" class="btn btn-success me-2">
+        <i class="fas fa-cloud-upload-alt me-1"></i> Backup del Sistema
+      </a>
       <a href="{{ url_for('github.repositories') }}" class="btn btn-outline-primary me-2">
         <i class="fas fa-search me-1"></i> Explorar Repositorios
       </a>

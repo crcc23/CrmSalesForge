@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session, jsonify
 from flask_login import login_required, current_user
 from app import db
 from models_github import GithubConfig, GithubRepository, GithubBranch, GithubCommit
 from integrations.github_service import GitHubService
+from utils.github_backup import create_backup
 import os
 import requests
 import datetime
@@ -356,3 +357,48 @@ def sync_repository(repo_id):
         flash(f"Error al sincronizar repositorio: {str(e)}", "error")
     
     return redirect(url_for('github.index'))
+
+@github_bp.route('/backup', methods=['GET', 'POST'])
+@login_required
+def backup_system():
+    """Backup complete system to GitHub"""
+    tenant_id = session.get('tenant_id')
+    if not tenant_id:
+        flash("Sesión inválida. Por favor, inicie sesión nuevamente.", "error")
+        return redirect(url_for('auth.login'))
+    
+    # Get GitHub configuration
+    config = GithubConfig.query.filter_by(tenant_id=tenant_id).first()
+    if not config or not config.github_token:
+        flash("Configuración de GitHub incompleta. Por favor, configure primero su integración.", "warning")
+        return redirect(url_for('github.setup'))
+    
+    # Handle form submission
+    if request.method == 'POST':
+        repo_name = request.form.get('repo_name')
+        
+        if not repo_name:
+            flash("El nombre del repositorio es obligatorio.", "error")
+            return redirect(url_for('github.backup_system'))
+        
+        # Create backup
+        try:
+            result = create_backup(tenant_id, repo_name)
+            
+            if result['status'] == 'success':
+                flash(f"Backup del sistema creado correctamente en el repositorio: {result['repository']}. Se procesaron {result['successful_files']} de {result['total_files']} archivos.", "success")
+                return redirect(url_for('github.index'))
+            else:
+                flash(f"Error al crear backup: {result.get('message', 'Error desconocido')}", "error")
+        except Exception as e:
+            flash(f"Error al crear backup: {str(e)}", "error")
+    
+    # Get recent backups (repositories with crm-backup in the name)
+    repositories = GithubRepository.query.filter_by(tenant_id=tenant_id).filter(
+        GithubRepository.name.like('%backup%')
+    ).order_by(GithubRepository.created_at.desc()).limit(5).all()
+    
+    return render_template('github/backup.html', 
+                          config=config,
+                          repositories=repositories,
+                          default_repo_name=f"crm-backup-{datetime.datetime.now().strftime('%Y%m%d')}")
