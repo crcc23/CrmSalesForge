@@ -82,7 +82,35 @@ def create_email_campaign():
                     campaign.follow_up1_body_html = request.form.get('follow_up1_body_html', '')
                     campaign.follow_up1_body_text = request.form.get('follow_up1_body_text', '')
             
-            # Seguimientos 2 y 3 tendrían código similar cuando se implementen
+            # Procesar email de seguimiento 2
+            if 'enable_followup2' in request.form:
+                campaign.follow_up2_subject = request.form.get('follow_up2_subject', '')
+                campaign.follow_up2_delay_days = int(request.form.get('follow_up2_delay_days', 7))
+                campaign.follow_up2_template_id = request.form.get('follow_up2_template_id') or None
+                
+                if campaign.follow_up2_template_id:
+                    template = EmailTemplate.query.get(campaign.follow_up2_template_id)
+                    if template:
+                        campaign.follow_up2_body_html = template.body_html
+                        campaign.follow_up2_body_text = template.body_text
+                else:
+                    campaign.follow_up2_body_html = request.form.get('follow_up2_body_html', '')
+                    campaign.follow_up2_body_text = request.form.get('follow_up2_body_text', '')
+            
+            # Procesar email de seguimiento 3
+            if 'enable_followup3' in request.form:
+                campaign.follow_up3_subject = request.form.get('follow_up3_subject', '')
+                campaign.follow_up3_delay_days = int(request.form.get('follow_up3_delay_days', 14))
+                campaign.follow_up3_template_id = request.form.get('follow_up3_template_id') or None
+                
+                if campaign.follow_up3_template_id:
+                    template = EmailTemplate.query.get(campaign.follow_up3_template_id)
+                    if template:
+                        campaign.follow_up3_body_html = template.body_html
+                        campaign.follow_up3_body_text = template.body_text
+                else:
+                    campaign.follow_up3_body_html = request.form.get('follow_up3_body_html', '')
+                    campaign.follow_up3_body_text = request.form.get('follow_up3_body_text', '')
             
             # Guardar la campaña
             db.session.add(campaign)

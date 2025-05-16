@@ -265,9 +265,167 @@
                 </div>
               </div>
               
-              <!-- Email Seguimiento 2 y 3: Similar al seguimiento 1 -->
-              <!-- Por brevedad, se omite el código similar para los seguimientos 2 y 3 -->
-              <!-- En la implementación completa, se copiaría el código del seguimiento 1 y se adaptaría -->
+              <!-- Email Seguimiento 2 -->
+              <div class="tab-pane fade" id="followup2-pane" role="tabpanel" aria-labelledby="followup2-tab">
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="enable_followup2" name="enable_followup2">
+                  <label class="form-check-label" for="enable_followup2">Activar email de seguimiento 2</label>
+                </div>
+                
+                <div id="followup2-content" class="followup-content">
+                  <div class="mb-3">
+                    <label for="follow_up2_delay_days" class="form-label">Días de espera</label>
+                    <input type="number" class="form-control" id="follow_up2_delay_days" name="follow_up2_delay_days" min="1" max="30" value="7">
+                    <div class="form-text">Días después del email inicial para enviar este seguimiento</div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="follow_up2_subject" class="form-label">Asunto</label>
+                    <input type="text" class="form-control" id="follow_up2_subject" name="follow_up2_subject">
+                  </div>
+                  
+                  <ul class="nav nav-pills mb-3" id="followup2ContentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" id="followup2-template-tab" data-bs-toggle="pill" data-bs-target="#followup2-template-pane" type="button" role="tab">
+                        Usar Plantilla
+                      </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="followup2-custom-tab" data-bs-toggle="pill" data-bs-target="#followup2-custom-pane" type="button" role="tab">
+                        Contenido Personalizado
+                      </button>
+                    </li>
+                  </ul>
+                  
+                  <div class="tab-content" id="followup2ContentTabsContent">
+                    <!-- Usar Plantilla Existente -->
+                    <div class="tab-pane fade show active" id="followup2-template-pane" role="tabpanel">
+                      {% if templates %}
+                        <div class="row">
+                          {% for template in templates %}
+                            <div class="col-md-4 mb-4">
+                              <div class="template-preview followup2-template" data-template-id="{{ template.id }}" data-template-name="{{ template.name }}" data-template-subject="{{ template.subject }}">
+                                <div class="form-check mb-2">
+                                  <input class="form-check-input followup2-template-select" type="radio" name="follow_up2_template_id" id="followup2_template{{ template.id }}" value="{{ template.id }}">
+                                  <label class="form-check-label" for="followup2_template{{ template.id }}">
+                                    <h5>{{ template.name }}</h5>
+                                  </label>
+                                </div>
+                                <p class="text-muted small">Asunto: {{ template.subject }}</p>
+                                <div class="template-preview-content">
+                                  <div class="small">
+                                    {{ template.body_html|safe }}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      {% else %}
+                        <div class="alert alert-info">
+                          No hay plantillas disponibles. <a href="{{ url_for('templates.create_email_template') }}">Crear una plantilla</a>
+                        </div>
+                      {% endif %}
+                    </div>
+                    
+                    <!-- Contenido Personalizado -->
+                    <div class="tab-pane fade" id="followup2-custom-pane" role="tabpanel">
+                      <div class="mb-3">
+                        <label for="follow_up2_body_html" class="form-label">Contenido HTML</label>
+                        <div class="editor-container">
+                          <div id="followup2_editor" style="height: 300px"></div>
+                          <textarea id="follow_up2_body_html" name="follow_up2_body_html" style="display: none;"></textarea>
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="follow_up2_body_text" class="form-label">Versión de Texto Plano (opcional)</label>
+                        <textarea class="form-control" id="follow_up2_body_text" name="follow_up2_body_text" rows="5"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Email Seguimiento 3 -->
+              <div class="tab-pane fade" id="followup3-pane" role="tabpanel" aria-labelledby="followup3-tab">
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="enable_followup3" name="enable_followup3">
+                  <label class="form-check-label" for="enable_followup3">Activar email de seguimiento 3</label>
+                </div>
+                
+                <div id="followup3-content" class="followup-content">
+                  <div class="mb-3">
+                    <label for="follow_up3_delay_days" class="form-label">Días de espera</label>
+                    <input type="number" class="form-control" id="follow_up3_delay_days" name="follow_up3_delay_days" min="1" max="30" value="14">
+                    <div class="form-text">Días después del email inicial para enviar este seguimiento</div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="follow_up3_subject" class="form-label">Asunto</label>
+                    <input type="text" class="form-control" id="follow_up3_subject" name="follow_up3_subject">
+                  </div>
+                  
+                  <ul class="nav nav-pills mb-3" id="followup3ContentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" id="followup3-template-tab" data-bs-toggle="pill" data-bs-target="#followup3-template-pane" type="button" role="tab">
+                        Usar Plantilla
+                      </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="followup3-custom-tab" data-bs-toggle="pill" data-bs-target="#followup3-custom-pane" type="button" role="tab">
+                        Contenido Personalizado
+                      </button>
+                    </li>
+                  </ul>
+                  
+                  <div class="tab-content" id="followup3ContentTabsContent">
+                    <!-- Usar Plantilla Existente -->
+                    <div class="tab-pane fade show active" id="followup3-template-pane" role="tabpanel">
+                      {% if templates %}
+                        <div class="row">
+                          {% for template in templates %}
+                            <div class="col-md-4 mb-4">
+                              <div class="template-preview followup3-template" data-template-id="{{ template.id }}" data-template-name="{{ template.name }}" data-template-subject="{{ template.subject }}">
+                                <div class="form-check mb-2">
+                                  <input class="form-check-input followup3-template-select" type="radio" name="follow_up3_template_id" id="followup3_template{{ template.id }}" value="{{ template.id }}">
+                                  <label class="form-check-label" for="followup3_template{{ template.id }}">
+                                    <h5>{{ template.name }}</h5>
+                                  </label>
+                                </div>
+                                <p class="text-muted small">Asunto: {{ template.subject }}</p>
+                                <div class="template-preview-content">
+                                  <div class="small">
+                                    {{ template.body_html|safe }}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      {% else %}
+                        <div class="alert alert-info">
+                          No hay plantillas disponibles. <a href="{{ url_for('templates.create_email_template') }}">Crear una plantilla</a>
+                        </div>
+                      {% endif %}
+                    </div>
+                    
+                    <!-- Contenido Personalizado -->
+                    <div class="tab-pane fade" id="followup3-custom-pane" role="tabpanel">
+                      <div class="mb-3">
+                        <label for="follow_up3_body_html" class="form-label">Contenido HTML</label>
+                        <div class="editor-container">
+                          <div id="followup3_editor" style="height: 300px"></div>
+                          <textarea id="follow_up3_body_html" name="follow_up3_body_html" style="display: none;"></textarea>
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="follow_up3_body_text" class="form-label">Versión de Texto Plano (opcional)</label>
+                        <textarea class="form-control" id="follow_up3_body_text" name="follow_up3_body_text" rows="5"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -317,7 +475,15 @@
       theme: 'snow'
     });
     
-    // Inicializar otros editores de seguimiento aquí cuando se creen
+    const followup2Quill = new Quill('#followup2_editor', {
+      modules: { toolbar: toolbarOptions },
+      theme: 'snow'
+    });
+    
+    const followup3Quill = new Quill('#followup3_editor', {
+      modules: { toolbar: toolbarOptions },
+      theme: 'snow'
+    });
     
     // Función para manejar la selección de plantillas (genérica)
     function setupTemplateSelection(containerSelector, radioNamePrefix, subjectFieldId) {
@@ -343,17 +509,27 @@
     // Configurar selección de plantillas para cada email
     setupTemplateSelection('.initial-template', 'initial_template', 'initial_subject');
     setupTemplateSelection('.followup1-template', 'followup1_template', 'follow_up1_subject');
-    // Configurar para otros seguimientos cuando se creen
+    setupTemplateSelection('.followup2-template', 'followup2_template', 'follow_up2_subject');
+    setupTemplateSelection('.followup3-template', 'followup3_template', 'follow_up3_subject');
     
-    // Mostrar/ocultar contenido de seguimiento cuando se activa/desactiva
-    document.getElementById('enable_followup1').addEventListener('change', function() {
-      const content = document.getElementById('followup1-content');
-      content.style.display = this.checked ? 'block' : 'none';
-    });
+    // Función para configurar un checkbox de activación de seguimiento
+    function setupFollowupToggle(enableId, contentId) {
+      const enableCheckbox = document.getElementById(enableId);
+      const contentElement = document.getElementById(contentId);
+      
+      // Configurar el evento de cambio
+      enableCheckbox.addEventListener('change', function() {
+        contentElement.style.display = this.checked ? 'block' : 'none';
+      });
+      
+      // Configurar estado inicial
+      contentElement.style.display = enableCheckbox.checked ? 'block' : 'none';
+    }
     
-    // Ocultar inicialmente los contenidos de seguimiento si no están activados
-    document.getElementById('followup1-content').style.display = 
-      document.getElementById('enable_followup1').checked ? 'block' : 'none';
+    // Configurar los toggles para cada seguimiento
+    setupFollowupToggle('enable_followup1', 'followup1-content');
+    setupFollowupToggle('enable_followup2', 'followup2-content');
+    setupFollowupToggle('enable_followup3', 'followup3-content');
     
     // Actualizar todos los campos de contenido HTML al enviar el formulario
     document.querySelector('form').addEventListener('submit', function() {
@@ -365,7 +541,13 @@
         document.getElementById('follow_up1_body_html').value = followup1Quill.root.innerHTML;
       }
       
-      // Actualizar otros seguimientos cuando se creen
+      if (document.getElementById('enable_followup2').checked) {
+        document.getElementById('follow_up2_body_html').value = followup2Quill.root.innerHTML;
+      }
+      
+      if (document.getElementById('enable_followup3').checked) {
+        document.getElementById('follow_up3_body_html').value = followup3Quill.root.innerHTML;
+      }
     });
   });
 </script>
