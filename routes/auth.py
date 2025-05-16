@@ -14,13 +14,18 @@ def login():
         return redirect(url_for('dashboard.index'))
         
     if request.method == 'POST':
-        username = request.form.get('username')
+        username_or_email = request.form.get('username')
         password = request.form.get('password')
         
-        user = User.query.filter_by(username=username).first()
+        # Intenta buscar por nombre de usuario primero
+        user = User.query.filter_by(username=username_or_email).first()
+        
+        # Si no encuentra por nombre de usuario, intenta por email
+        if not user:
+            user = User.query.filter_by(email=username_or_email).first()
         
         if not user or not user.check_password(password):
-            flash('Invalid username or password', 'danger')
+            flash('Usuario o contraseña inválidos', 'danger')
             return render_template('login.html')
             
         if not user.is_active:

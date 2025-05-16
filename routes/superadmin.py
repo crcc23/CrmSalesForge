@@ -260,6 +260,9 @@ def edit_tenant(tenant_id):
     tenant = Tenant.query.get_or_404(tenant_id)
     subscription_plans = SubscriptionPlan.query.all()
     
+    # Obtener el usuario administrador del tenant
+    admin_user = User.query.filter_by(tenant_id=tenant_id, role_id=1).first()
+    
     if request.method == 'POST':
         name = request.form.get('name')
         subdomain = request.form.get('subdomain')
@@ -267,6 +270,10 @@ def edit_tenant(tenant_id):
         is_active = 'is_active' in request.form
         primary_color = request.form.get('primary_color')
         secondary_color = request.form.get('secondary_color')
+        
+        # Datos de la contraseña del administrador
+        admin_password = request.form.get('admin_password')
+        admin_password_confirm = request.form.get('admin_password_confirm')
         
         # Check for required fields
         if not name or not subdomain or subscription_plan_id <= 0:
@@ -278,6 +285,18 @@ def edit_tenant(tenant_id):
         if subdomain_tenant:
             flash(f"El subdominio '{subdomain}' ya está siendo utilizado por otro cliente.", "error")
             return redirect(url_for('superadmin.edit_tenant', tenant_id=tenant_id))
+        
+        # Validar la contraseña si se ha especificado
+        if admin_password:
+            if admin_password != admin_password_confirm:
+                flash("Las contraseñas no coinciden. Por favor, inténtelo de nuevo.", "error")
+                return redirect(url_for('superadmin.edit_tenant', tenant_id=tenant_id))
+            
+            # Actualizar la contraseña del administrador
+            if admin_user:
+                admin_user.set_password(admin_password)
+                db.session.add(admin_user)
+                flash("Contraseña del administrador actualizada correctamente.", "success")
         
         # Update tenant
         tenant.name = name
@@ -292,7 +311,7 @@ def edit_tenant(tenant_id):
         flash(f"Cliente '{name}' actualizado correctamente.", "success")
         return redirect(url_for('superadmin.tenants'))
     
-    return render_template('superadmin/edit_tenant.html', tenant=tenant, plans=subscription_plans)
+    return render_template('superadmin/edit_tenant.html', tenant=tenant, plans=subscription_plans, admin_user=admin_user)
 
 @superadmin_bp.route('/tenants/toggle/<int:tenant_id>', methods=['POST'])
 @login_required
