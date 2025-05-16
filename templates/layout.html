@@ -85,13 +85,7 @@
                         Cuentas
                     </a>
                 </li>
-                <li class="sidebar-heading">Integraciones</li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'integrations' in request.path %}active{% endif %}" href="{{ url_for('integration.index') }}">
-                        <i class="fas fa-plug"></i>
-                        Integraciones
-                    </a>
-                </li>
+                <li class="sidebar-heading">Herramientas</li>
                 <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'web-scraping' in request.path %}active{% endif %}" href="{{ url_for('scraping.list_tasks') }}">
                         <i class="fas fa-spider"></i>
@@ -108,6 +102,20 @@
                     <a class="sidebar-nav-link {% if 'campaigns' in request.path %}active{% endif %}" href="{{ url_for('campaigns.index') }}">
                         <i class="fas fa-paper-plane"></i>
                         Campañas
+                    </a>
+                </li>
+                
+                <li class="sidebar-heading">Configuración</li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'integrations' in request.path %}active{% endif %}" href="{{ url_for('integration.index') }}">
+                        <i class="fas fa-plug"></i>
+                        Integraciones
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'settings' in request.path %}active{% endif %}" href="#">
+                        <i class="fas fa-cog"></i>
+                        Ajustes
                     </a>
                 </li>
             </ul>
