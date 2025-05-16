@@ -6,26 +6,28 @@
 {{ super() }}
 <style>
   .content-writer-container {
-    background-color: #1a1a2e;
-    color: #e6e6e6;
+    background-color: var(--bs-dark);
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--bs-dark-border-subtle);
   }
   .content-writer-header {
-    background-color: #16213e;
+    background-color: var(--bs-tertiary-bg);
     padding: 15px 20px;
-    border-bottom: 1px solid #2c3350;
+    border-bottom: 1px solid var(--bs-border-color);
   }
   .content-writer-body {
     padding: 20px;
   }
   .content-writer-result {
-    background-color: #16213e;
+    background-color: var(--bs-dark);
     border-radius: 8px;
     padding: 20px;
     min-height: 300px;
     max-height: 600px;
     overflow-y: auto;
+    border: 1px solid var(--bs-border-color);
   }
   .content-form-group {
     margin-bottom: 20px;
@@ -35,48 +37,9 @@
     margin-bottom: 8px;
     font-weight: 500;
   }
-  .content-form-control {
-    width: 100%;
-    padding: 10px 12px;
-    background-color: #2c3350;
-    border: 1px solid #384067;
-    border-radius: 4px;
-    color: #e6e6e6;
-  }
-  .content-form-control:focus {
-    border-color: #0f3460;
-    background-color: #2a2a5a;
-    outline: none;
-  }
   .custom-input-container {
     margin-top: 8px;
     display: none;
-  }
-  .btn-generate {
-    background-color: #0f3460;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 100%;
-  }
-  .btn-generate:hover {
-    background-color: #16213e;
-  }
-  .btn-export {
-    background-color: #2c3350;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 8px;
-    transition: background-color 0.3s ease;
-  }
-  .btn-export:hover {
-    background-color: #384067;
   }
   .loading-indicator {
     display: none;
@@ -97,6 +60,7 @@
     border-radius: 4px;
     margin-right: 8px;
     font-size: 0.8rem;
+    color: white;
   }
   .api-provider-openai {
     background-color: #10a37f;
@@ -111,13 +75,52 @@
     white-space: pre-wrap;
   }
   .history-link {
-    color: #e6e6e6;
+    color: var(--bs-secondary-color);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
   }
   .history-link:hover {
-    color: #ffffff;
+    color: var(--bs-primary);
+  }
+  .btn-ai-primary {
+    background-color: var(--bs-primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  .btn-ai-primary:hover {
+    background-color: var(--bs-primary-dark, #0056b3);
+  }
+  .btn-ai-secondary {
+    background-color: var(--bs-secondary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: background-color 0.3s ease;
+  }
+  .btn-ai-secondary:hover {
+    background-color: var(--bs-secondary-dark, #495057);
+  }
+  .initial-prompt-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+  }
+  .initial-prompt-icon {
+    font-size: 4rem;
+    color: var(--bs-tertiary-color);
+    margin-bottom: 20px;
   }
 </style>
 {% endblock %}
@@ -144,7 +147,7 @@
             <!-- Tipo de contenido -->
             <div class="content-form-group">
               <label for="contentType">Tipo de contenido:</label>
-              <select class="content-form-control" id="contentType" name="content_type" required>
+              <select class="form-select" id="contentType" name="content_type" required>
                 <option value="" selected disabled>Seleccionar tipo</option>
                 {% for type in content_types %}
                 <option value="{{ type.id }}">{{ type.name }}</option>
@@ -155,13 +158,13 @@
             <!-- Tema principal -->
             <div class="content-form-group">
               <label for="topic">Tema o asunto principal:</label>
-              <input type="text" class="content-form-control" id="topic" name="topic" placeholder="Ej: Beneficios del trabajo remoto" required>
+              <input type="text" class="form-control" id="topic" name="topic" placeholder="Ej: Beneficios del trabajo remoto" required>
             </div>
             
             <!-- Tono -->
             <div class="content-form-group">
               <label for="tone">Tono:</label>
-              <select class="content-form-control" id="tone" name="tone" required>
+              <select class="form-select" id="tone" name="tone" required>
                 <option value="" selected disabled>Seleccionar tono</option>
                 {% for tone in tones %}
                 <option value="{{ tone.id }}">{{ tone.name }}</option>
@@ -169,14 +172,14 @@
               </select>
               
               <div id="customToneContainer" class="custom-input-container">
-                <input type="text" class="content-form-control" id="customTone" name="custom_tone" placeholder="Especifica tu propio tono">
+                <input type="text" class="form-control mt-2" id="customTone" name="custom_tone" placeholder="Especifica tu propio tono">
               </div>
             </div>
             
             <!-- Objetivo -->
             <div class="content-form-group">
               <label for="objective">Objetivo:</label>
-              <select class="content-form-control" id="objective" name="objective" required>
+              <select class="form-select" id="objective" name="objective" required>
                 <option value="" selected disabled>Seleccionar objetivo</option>
                 {% for objective in objectives %}
                 <option value="{{ objective.id }}">{{ objective.name }}</option>
@@ -184,20 +187,20 @@
               </select>
               
               <div id="customObjectiveContainer" class="custom-input-container">
-                <input type="text" class="content-form-control" id="customObjective" name="custom_objective" placeholder="Especifica tu propio objetivo">
+                <input type="text" class="form-control mt-2" id="customObjective" name="custom_objective" placeholder="Especifica tu propio objetivo">
               </div>
             </div>
             
             <!-- Palabras clave -->
             <div class="content-form-group">
               <label for="keywords">Palabras clave:</label>
-              <input type="text" class="content-form-control" id="keywords" name="keywords" placeholder="Ej: productividad, flexibilidad, conciliación">
+              <input type="text" class="form-control" id="keywords" name="keywords" placeholder="Ej: productividad, flexibilidad, conciliación">
             </div>
             
             <!-- Formato de salida -->
             <div class="content-form-group">
               <label for="outputFormat">Formato de salida:</label>
-              <select class="content-form-control" id="outputFormat" name="output_format" required>
+              <select class="form-select" id="outputFormat" name="output_format" required>
                 <option value="" selected disabled>Seleccionar formato</option>
                 {% for format in output_formats %}
                 <option value="{{ format.id }}">{{ format.name }}</option>
@@ -208,7 +211,7 @@
             <!-- Proveedor de API -->
             <div class="content-form-group">
               <label for="apiProvider">Modelo de IA:</label>
-              <select class="content-form-control" id="apiProvider" name="api_provider" required>
+              <select class="form-select" id="apiProvider" name="api_provider" required>
                 <option value="" selected disabled>Seleccionar modelo</option>
                 {% for provider in api_providers %}
                 <option value="{{ provider.id }}">{{ provider.name }}</option>
@@ -223,7 +226,7 @@
             </div>
             
             <!-- Botón generar -->
-            <button type="submit" class="btn-generate" id="generateBtn" {% if not api_providers %}disabled{% endif %}>
+            <button type="submit" class="btn btn-primary w-100" id="generateBtn" {% if not api_providers %}disabled{% endif %}>
               <i class="fas fa-magic me-2"></i> Generar contenido
             </button>
           </form>
@@ -241,8 +244,10 @@
         </div>
         <div class="content-writer-body">
           <div id="loadingIndicator" class="loading-indicator">
-            <i class="fas fa-spinner"></i>
-            <p>Generando contenido...</p>
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3">Generando contenido...</p>
           </div>
           
           <div id="contentResultContainer" style="display: none;">
@@ -251,23 +256,23 @@
             </div>
             
             <div class="d-flex justify-content-end">
-              <button type="button" class="btn-export" id="copyBtn">
+              <button type="button" class="btn btn-outline-secondary me-2" id="copyBtn">
                 <i class="fas fa-copy me-1"></i> Copiar
               </button>
-              <button type="button" class="btn-export" id="exportTxtBtn">
+              <button type="button" class="btn btn-outline-secondary me-2" id="exportTxtBtn">
                 <i class="fas fa-file-alt me-1"></i> Exportar TXT
               </button>
-              <button type="button" class="btn-export" id="exportHtmlBtn">
+              <button type="button" class="btn btn-outline-secondary me-2" id="exportHtmlBtn">
                 <i class="fas fa-file-code me-1"></i> Exportar HTML
               </button>
-              <button type="button" class="btn-export" id="exportDocxBtn">
+              <button type="button" class="btn btn-outline-secondary" id="exportDocxBtn">
                 <i class="fas fa-file-word me-1"></i> Exportar DOCX
               </button>
             </div>
           </div>
           
-          <div id="initialPrompt" class="text-center py-5">
-            <i class="fas fa-robot" style="font-size: 4rem; color: #2c3350; margin-bottom: 20px;"></i>
+          <div id="initialPrompt" class="initial-prompt-container">
+            <i class="fas fa-robot initial-prompt-icon"></i>
             <h5>Completa el formulario y genera contenido con IA</h5>
             <p class="text-muted">El contenido generado aparecerá aquí</p>
           </div>
