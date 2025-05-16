@@ -104,6 +104,12 @@
                         Campañas
                     </a>
                 </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'content-writer' in request.path %}active{% endif %}" href="{{ url_for('content_writer.index') }}">
+                        <i class="fas fa-magic"></i>
+                        Redacción con IA
+                    </a>
+                </li>
                 
                 <li class="sidebar-heading">Configuración</li>
                 <li class="sidebar-nav-item">

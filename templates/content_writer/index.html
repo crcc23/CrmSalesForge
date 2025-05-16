@@ -1,0 +1,463 @@
+{% extends 'layout.html' %}
+
+{% block title %}Redacción con IA{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .content-writer-container {
+    background-color: #1a1a2e;
+    color: #e6e6e6;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .content-writer-header {
+    background-color: #16213e;
+    padding: 15px 20px;
+    border-bottom: 1px solid #2c3350;
+  }
+  .content-writer-body {
+    padding: 20px;
+  }
+  .content-writer-result {
+    background-color: #16213e;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 300px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+  .content-form-group {
+    margin-bottom: 20px;
+  }
+  .content-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .content-form-control {
+    width: 100%;
+    padding: 10px 12px;
+    background-color: #2c3350;
+    border: 1px solid #384067;
+    border-radius: 4px;
+    color: #e6e6e6;
+  }
+  .content-form-control:focus {
+    border-color: #0f3460;
+    background-color: #2a2a5a;
+    outline: none;
+  }
+  .custom-input-container {
+    margin-top: 8px;
+    display: none;
+  }
+  .btn-generate {
+    background-color: #0f3460;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  .btn-generate:hover {
+    background-color: #16213e;
+  }
+  .btn-export {
+    background-color: #2c3350;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: background-color 0.3s ease;
+  }
+  .btn-export:hover {
+    background-color: #384067;
+  }
+  .loading-indicator {
+    display: none;
+    text-align: center;
+    padding: 20px;
+  }
+  .loading-indicator i {
+    font-size: 2rem;
+    animation: spin 2s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .api-provider-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    font-size: 0.8rem;
+  }
+  .api-provider-openai {
+    background-color: #10a37f;
+  }
+  .api-provider-anthropic {
+    background-color: #5436da;
+  }
+  .api-provider-gemini {
+    background-color: #4285f4;
+  }
+  #contentResult {
+    white-space: pre-wrap;
+  }
+  .history-link {
+    color: #e6e6e6;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .history-link:hover {
+    color: #ffffff;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Redacción con IA</h2>
+    <div>
+      <a href="{{ url_for('content_writer.view_history') }}" class="history-link">
+        <i class="fas fa-history me-2"></i> Ver historial
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="content-writer-container mb-4">
+        <div class="content-writer-header">
+          <h4 class="mb-0">Content Writer AI</h4>
+        </div>
+        <div class="content-writer-body">
+          <form id="contentGeneratorForm">
+            <!-- Tipo de contenido -->
+            <div class="content-form-group">
+              <label for="contentType">Tipo de contenido:</label>
+              <select class="content-form-control" id="contentType" name="content_type" required>
+                <option value="" selected disabled>Seleccionar tipo</option>
+                {% for type in content_types %}
+                <option value="{{ type.id }}">{{ type.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <!-- Tema principal -->
+            <div class="content-form-group">
+              <label for="topic">Tema o asunto principal:</label>
+              <input type="text" class="content-form-control" id="topic" name="topic" placeholder="Ej: Beneficios del trabajo remoto" required>
+            </div>
+            
+            <!-- Tono -->
+            <div class="content-form-group">
+              <label for="tone">Tono:</label>
+              <select class="content-form-control" id="tone" name="tone" required>
+                <option value="" selected disabled>Seleccionar tono</option>
+                {% for tone in tones %}
+                <option value="{{ tone.id }}">{{ tone.name }}</option>
+                {% endfor %}
+              </select>
+              
+              <div id="customToneContainer" class="custom-input-container">
+                <input type="text" class="content-form-control" id="customTone" name="custom_tone" placeholder="Especifica tu propio tono">
+              </div>
+            </div>
+            
+            <!-- Objetivo -->
+            <div class="content-form-group">
+              <label for="objective">Objetivo:</label>
+              <select class="content-form-control" id="objective" name="objective" required>
+                <option value="" selected disabled>Seleccionar objetivo</option>
+                {% for objective in objectives %}
+                <option value="{{ objective.id }}">{{ objective.name }}</option>
+                {% endfor %}
+              </select>
+              
+              <div id="customObjectiveContainer" class="custom-input-container">
+                <input type="text" class="content-form-control" id="customObjective" name="custom_objective" placeholder="Especifica tu propio objetivo">
+              </div>
+            </div>
+            
+            <!-- Palabras clave -->
+            <div class="content-form-group">
+              <label for="keywords">Palabras clave:</label>
+              <input type="text" class="content-form-control" id="keywords" name="keywords" placeholder="Ej: productividad, flexibilidad, conciliación">
+            </div>
+            
+            <!-- Formato de salida -->
+            <div class="content-form-group">
+              <label for="outputFormat">Formato de salida:</label>
+              <select class="content-form-control" id="outputFormat" name="output_format" required>
+                <option value="" selected disabled>Seleccionar formato</option>
+                {% for format in output_formats %}
+                <option value="{{ format.id }}">{{ format.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <!-- Proveedor de API -->
+            <div class="content-form-group">
+              <label for="apiProvider">Modelo de IA:</label>
+              <select class="content-form-control" id="apiProvider" name="api_provider" required>
+                <option value="" selected disabled>Seleccionar modelo</option>
+                {% for provider in api_providers %}
+                <option value="{{ provider.id }}">{{ provider.name }}</option>
+                {% endfor %}
+              </select>
+              
+              {% if not api_providers %}
+              <div class="alert alert-warning mt-2">
+                <small>No hay APIs de IA configuradas. Configure una en la sección de <a href="{{ url_for('integration.index') }}" class="alert-link">Integraciones</a>.</small>
+              </div>
+              {% endif %}
+            </div>
+            
+            <!-- Botón generar -->
+            <button type="submit" class="btn-generate" id="generateBtn" {% if not api_providers %}disabled{% endif %}>
+              <i class="fas fa-magic me-2"></i> Generar contenido
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <div class="content-writer-container">
+        <div class="content-writer-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Contenido generado</h4>
+          <div id="apiProviderBadge" style="display: none;">
+            <span id="providerBadgeText" class="api-provider-badge">OpenAI</span>
+          </div>
+        </div>
+        <div class="content-writer-body">
+          <div id="loadingIndicator" class="loading-indicator">
+            <i class="fas fa-spinner"></i>
+            <p>Generando contenido...</p>
+          </div>
+          
+          <div id="contentResultContainer" style="display: none;">
+            <div class="content-writer-result mb-3">
+              <div id="contentResult"></div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+              <button type="button" class="btn-export" id="copyBtn">
+                <i class="fas fa-copy me-1"></i> Copiar
+              </button>
+              <button type="button" class="btn-export" id="exportTxtBtn">
+                <i class="fas fa-file-alt me-1"></i> Exportar TXT
+              </button>
+              <button type="button" class="btn-export" id="exportHtmlBtn">
+                <i class="fas fa-file-code me-1"></i> Exportar HTML
+              </button>
+              <button type="button" class="btn-export" id="exportDocxBtn">
+                <i class="fas fa-file-word me-1"></i> Exportar DOCX
+              </button>
+            </div>
+          </div>
+          
+          <div id="initialPrompt" class="text-center py-5">
+            <i class="fas fa-robot" style="font-size: 4rem; color: #2c3350; margin-bottom: 20px;"></i>
+            <h5>Completa el formulario y genera contenido con IA</h5>
+            <p class="text-muted">El contenido generado aparecerá aquí</p>
+          </div>
+          
+          <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del DOM
+    const form = document.getElementById('contentGeneratorForm');
+    const tone = document.getElementById('tone');
+    const customToneContainer = document.getElementById('customToneContainer');
+    const objective = document.getElementById('objective');
+    const customObjectiveContainer = document.getElementById('customObjectiveContainer');
+    const apiProvider = document.getElementById('apiProvider');
+    const apiProviderBadge = document.getElementById('apiProviderBadge');
+    const providerBadgeText = document.getElementById('providerBadgeText');
+    const generateBtn = document.getElementById('generateBtn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const contentResultContainer = document.getElementById('contentResultContainer');
+    const contentResult = document.getElementById('contentResult');
+    const initialPrompt = document.getElementById('initialPrompt');
+    const errorMessage = document.getElementById('errorMessage');
+    const copyBtn = document.getElementById('copyBtn');
+    const exportTxtBtn = document.getElementById('exportTxtBtn');
+    const exportHtmlBtn = document.getElementById('exportHtmlBtn');
+    const exportDocxBtn = document.getElementById('exportDocxBtn');
+    
+    // Mostrar/ocultar campos personalizados
+    tone.addEventListener('change', function() {
+      if (this.value === 'custom') {
+        customToneContainer.style.display = 'block';
+      } else {
+        customToneContainer.style.display = 'none';
+      }
+    });
+    
+    objective.addEventListener('change', function() {
+      if (this.value === 'custom') {
+        customObjectiveContainer.style.display = 'block';
+      } else {
+        customObjectiveContainer.style.display = 'none';
+      }
+    });
+    
+    // Cambiar badge del proveedor de API
+    apiProvider.addEventListener('change', function() {
+      if (this.value) {
+        apiProviderBadge.style.display = 'block';
+        providerBadgeText.textContent = this.options[this.selectedIndex].text;
+        
+        // Cambiar la clase según el proveedor
+        providerBadgeText.className = 'api-provider-badge';
+        if (this.value === 'openai') {
+          providerBadgeText.classList.add('api-provider-openai');
+        } else if (this.value === 'anthropic') {
+          providerBadgeText.classList.add('api-provider-anthropic');
+        } else if (this.value === 'gemini') {
+          providerBadgeText.classList.add('api-provider-gemini');
+        }
+      } else {
+        apiProviderBadge.style.display = 'none';
+      }
+    });
+    
+    // Enviar formulario
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Validación básica
+      const requiredFields = form.querySelectorAll('[required]');
+      let isValid = true;
+      
+      requiredFields.forEach(field => {
+        if (!field.value) {
+          isValid = false;
+          field.classList.add('is-invalid');
+        } else {
+          field.classList.remove('is-invalid');
+        }
+      });
+      
+      if (!isValid) {
+        errorMessage.textContent = 'Por favor, completa todos los campos requeridos.';
+        errorMessage.style.display = 'block';
+        return;
+      }
+      
+      // Ocultar mensajes de error previos
+      errorMessage.style.display = 'none';
+      
+      // Mostrar indicador de carga
+      initialPrompt.style.display = 'none';
+      contentResultContainer.style.display = 'none';
+      loadingIndicator.style.display = 'block';
+      
+      // Deshabilitar botón mientras se procesa
+      generateBtn.disabled = true;
+      
+      // Recopilar datos del formulario
+      const formData = new FormData(form);
+      
+      // Enviar petición AJAX
+      fetch('{{ url_for("content_writer.generate_content") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Ocultar indicador de carga
+        loadingIndicator.style.display = 'none';
+        
+        if (data.success) {
+          // Mostrar resultado
+          contentResult.innerHTML = data.content;
+          contentResultContainer.style.display = 'block';
+        } else {
+          // Mostrar error
+          errorMessage.textContent = data.error || 'Ha ocurrido un error al generar el contenido.';
+          errorMessage.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        // Ocultar indicador de carga
+        loadingIndicator.style.display = 'none';
+        
+        // Mostrar error
+        errorMessage.textContent = 'Error de conexión. Por favor, inténtalo de nuevo.';
+        errorMessage.style.display = 'block';
+        console.error('Error:', error);
+      })
+      .finally(() => {
+        // Habilitar botón nuevamente
+        generateBtn.disabled = false;
+      });
+    });
+    
+    // Copiar contenido
+    copyBtn.addEventListener('click', function() {
+      const content = contentResult.innerText;
+      navigator.clipboard.writeText(content)
+        .then(() => {
+          this.innerHTML = '<i class="fas fa-check me-1"></i> Copiado';
+          setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-copy me-1"></i> Copiar';
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Error al copiar:', err);
+        });
+    });
+    
+    // Exportar como TXT
+    exportTxtBtn.addEventListener('click', function() {
+      const content = contentResult.innerText;
+      downloadFile(content, 'contenido_generado.txt', 'text/plain');
+    });
+    
+    // Exportar como HTML
+    exportHtmlBtn.addEventListener('click', function() {
+      const content = contentResult.innerHTML;
+      downloadFile(content, 'contenido_generado.html', 'text/html');
+    });
+    
+    // Exportar como DOCX (implementación básica, para una versión real se necesitaría una biblioteca como docx.js)
+    exportDocxBtn.addEventListener('click', function() {
+      alert('La exportación a DOCX requiere procesamiento adicional. Esta funcionalidad se implementará en una versión futura.');
+    });
+    
+    // Función para descargar archivos
+    function downloadFile(content, filename, contentType) {
+      const a = document.createElement('a');
+      const file = new Blob([content], {type: contentType});
+      a.href = URL.createObjectURL(file);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  });
+</script>
+{% endblock %}

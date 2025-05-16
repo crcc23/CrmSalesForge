@@ -1,0 +1,264 @@
+{% extends 'layout.html' %}
+
+{% block title %}Historial de Redacción{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .history-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .history-header {
+    background-color: #e9ecef;
+    padding: 15px 20px;
+    border-bottom: 1px solid #dee2e6;
+  }
+  .history-item {
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px;
+    transition: background-color 0.2s ease;
+  }
+  .history-item:hover {
+    background-color: #f1f3f5;
+  }
+  .history-item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .history-item-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  .history-item-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+  .history-item-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .history-item-detail {
+    background-color: #e9ecef;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  .empty-history {
+    text-align: center;
+    padding: 50px 20px;
+  }
+  .api-provider-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: white;
+  }
+  .api-provider-openai {
+    background-color: #10a37f;
+  }
+  .api-provider-anthropic {
+    background-color: #5436da;
+  }
+  .api-provider-gemini {
+    background-color: #4285f4;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Historial de Redacción</h2>
+    <div>
+      <a href="{{ url_for('content_writer.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Volver al generador
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="history-container">
+        <div class="history-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Contenidos generados recientemente</h4>
+          <div>
+            <!-- Filtros (se implementarán posteriormente) -->
+            <!--
+            <select class="form-select form-select-sm" style="display: inline-block; width: auto;">
+              <option value="all">Todos los tipos</option>
+              <option value="blog_post">Artículos de blog</option>
+              <option value="email">Emails</option>
+            </select>
+            -->
+          </div>
+        </div>
+        
+        {% if content_history and content_history|length > 0 %}
+          {% for item in content_history %}
+            <div class="history-item">
+              <div class="history-item-header">
+                <div class="history-item-title">{{ item.topic }}</div>
+                <div class="history-item-date">{{ item.created_at|date }}</div>
+              </div>
+              
+              <div class="history-item-details">
+                <span class="history-item-detail">
+                  <i class="fas fa-file-alt me-1"></i> 
+                  {% if item.content_type == 'blog_post' %}
+                    Artículo de blog
+                  {% elif item.content_type == 'email' %}
+                    Email
+                  {% elif item.content_type == 'instagram_post' %}
+                    Post de Instagram
+                  {% elif item.content_type == 'facebook_post' %}
+                    Post de Facebook
+                  {% elif item.content_type == 'twitter_post' %}
+                    Post de Twitter
+                  {% elif item.content_type == 'product_short' %}
+                    Descripción corta
+                  {% elif item.content_type == 'product_long' %}
+                    Descripción larga
+                  {% else %}
+                    {{ item.content_type }}
+                  {% endif %}
+                </span>
+                
+                <span class="history-item-detail">
+                  <i class="fas fa-comment-alt me-1"></i> {{ item.tone }}
+                </span>
+                
+                <span class="history-item-detail">
+                  <i class="fas fa-bullseye me-1"></i> {{ item.objective }}
+                </span>
+                
+                {% if item.keywords %}
+                <span class="history-item-detail">
+                  <i class="fas fa-tags me-1"></i> {{ item.keywords }}
+                </span>
+                {% endif %}
+                
+                <span class="api-provider-badge 
+                  {% if item.api_provider == 'openai' %}api-provider-openai
+                  {% elif item.api_provider == 'anthropic' %}api-provider-anthropic
+                  {% elif item.api_provider == 'gemini' %}api-provider-gemini{% endif %}">
+                  {% if item.api_provider == 'openai' %}
+                    OpenAI
+                  {% elif item.api_provider == 'anthropic' %}
+                    Claude
+                  {% elif item.api_provider == 'gemini' %}
+                    Gemini
+                  {% else %}
+                    {{ item.api_provider }}
+                  {% endif %}
+                </span>
+              </div>
+              
+              <div class="mt-2">
+                <a href="#" class="btn btn-sm btn-outline-primary view-content-btn" data-id="{{ item.id }}">
+                  <i class="fas fa-eye me-1"></i> Ver contenido
+                </a>
+                <a href="#" class="btn btn-sm btn-outline-secondary" data-id="{{ item.id }}">
+                  <i class="fas fa-copy me-1"></i> Copiar
+                </a>
+                <a href="#" class="btn btn-sm btn-outline-secondary" data-id="{{ item.id }}">
+                  <i class="fas fa-edit me-1"></i> Editar parámetros
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-history">
+            <i class="fas fa-history" style="font-size: 3rem; color: #adb5bd; margin-bottom: 20px;"></i>
+            <h5>No hay contenidos generados en el historial</h5>
+            <p class="text-muted">Los contenidos que generes aparecerán aquí</p>
+            <a href="{{ url_for('content_writer.index') }}" class="btn btn-primary mt-3">
+              <i class="fas fa-magic me-1"></i> Generar nuevo contenido
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para visualizar contenido -->
+<div class="modal fade" id="contentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contentModalTitle">Contenido generado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="p-3 bg-light rounded mb-3">
+          <div id="modalContentDetails"></div>
+        </div>
+        <div id="modalContent" style="white-space: pre-wrap;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" id="modalCopyBtn">
+          <i class="fas fa-copy me-1"></i> Copiar
+        </button>
+        <button type="button" class="btn btn-primary" id="modalExportBtn">
+          <i class="fas fa-download me-1"></i> Exportar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // No se implementa la lógica completa ya que el historial no está todavía guardándose
+    // Esta sección se completará cuando se implemente la funcionalidad de guardar el historial
+    
+    // Modal para visualizar contenido
+    const contentModal = new bootstrap.Modal(document.getElementById('contentModal'));
+    const modalContentDetails = document.getElementById('modalContentDetails');
+    const modalContent = document.getElementById('modalContent');
+    const modalTitle = document.getElementById('contentModalTitle');
+    const modalCopyBtn = document.getElementById('modalCopyBtn');
+    
+    // Simular visualización de contenido para la demostración
+    const viewContentBtns = document.querySelectorAll('.view-content-btn');
+    viewContentBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const id = this.dataset.id;
+        
+        // En una implementación real, aquí se haría una petición AJAX para obtener el contenido
+        // Por ahora, mostramos un mensaje simulado
+        modalTitle.textContent = 'Vista previa de contenido';
+        modalContentDetails.innerHTML = '<p>Aquí se mostrarán los detalles del contenido seleccionado.</p>';
+        modalContent.innerHTML = '<p>En una implementación completa, aquí se mostrará el contenido generado correspondiente al elemento seleccionado del historial.</p>';
+        
+        contentModal.show();
+      });
+    });
+    
+    // Copiar contenido desde el modal
+    modalCopyBtn.addEventListener('click', function() {
+      const content = modalContent.innerText;
+      navigator.clipboard.writeText(content)
+        .then(() => {
+          this.innerHTML = '<i class="fas fa-check me-1"></i> Copiado';
+          setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-copy me-1"></i> Copiar';
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Error al copiar:', err);
+        });
+    });
+  });
+</script>
+{% endblock %}
