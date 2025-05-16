@@ -2,7 +2,7 @@ import os
 import requests
 from datetime import datetime
 from app import db
-from models import GithubRepository, GithubBranch, GithubCommit
+from models_github import GithubRepository, GithubBranch, GithubCommit
 
 class GitHubService:
     """Service to interact with GitHub API"""

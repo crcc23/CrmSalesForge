@@ -1,0 +1,232 @@
+{% extends 'layout.html' %}
+
+{% block title %}Crear Repositorio GitHub{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .repo-create-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .repo-create-header {
+    background-color: #24292e;
+    color: white;
+    padding: 1.5rem;
+  }
+  
+  .repo-create-body {
+    padding: 2rem;
+  }
+  
+  .form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eaeaea;
+  }
+  
+  .form-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .form-section-title {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #24292e;
+  }
+  
+  .form-help {
+    background-color: #f6f8fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+  
+  .form-help h5 {
+    margin-bottom: 1rem;
+  }
+  
+  .form-help ul {
+    margin-bottom: 0;
+  }
+  
+  .repo-preview {
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .repo-preview-header {
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .repo-preview-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .repo-preview-url {
+    color: #586069;
+    font-size: 0.875rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-0"><i class="fab fa-github me-2"></i> Crear Repositorio</h2>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 mt-2">
+              <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="{{ url_for('github.index') }}">GitHub</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Crear Repositorio</li>
+            </ol>
+          </nav>
+        </div>
+        <a href="{{ url_for('github.index') }}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left me-1"></i> Volver
+        </a>
+      </div>
+      
+      <div class="repo-create-card">
+        <div class="repo-create-header">
+          <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i> Nuevo Repositorio GitHub</h3>
+        </div>
+        <div class="repo-create-body">
+          <div class="form-help">
+            <h5><i class="fas fa-info-circle me-2"></i> Información Importante</h5>
+            <ul>
+              <li>El nombre del repositorio debe ser único en tu cuenta de GitHub.</li>
+              <li>Se creará un README.md inicial automáticamente.</li>
+              <li>El repositorio se agregará automáticamente a tu CRM.</li>
+              <li>Podrás configurar ramas, colaboradores y otros ajustes directamente en GitHub.</li>
+            </ul>
+          </div>
+          
+          <form method="POST" action="{{ url_for('github.create_repository') }}" id="createRepoForm">
+            <div class="form-section">
+              <h5 class="form-section-title">Información Básica</h5>
+              
+              <div class="mb-3">
+                <label for="name" class="form-label">Nombre del Repositorio *</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+                <div class="form-text">El nombre del repositorio (sin espacios, usar guiones)</div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="description" class="form-label">Descripción</label>
+                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                <div class="form-text">Una breve descripción de lo que hace este repositorio</div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h5 class="form-section-title">Visibilidad</h5>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="private" name="private" checked>
+                <label class="form-check-label" for="private">
+                  Repositorio Privado
+                </label>
+                <div class="form-text">Si está marcado, solo tú y los colaboradores que invites podrán ver este repositorio</div>
+              </div>
+            </div>
+            
+            <div class="repo-preview" id="repoPreview">
+              <div class="repo-preview-header">
+                <div class="repo-preview-name">Vista Previa: <span id="previewName">nombre-repositorio</span></div>
+                <div class="repo-preview-url text-muted">https://github.com/<span id="previewOwner">{{ config.organization or '[tu-usuario]' }}</span>/<span id="previewRepoName">nombre-repositorio</span></div>
+              </div>
+              <div class="repo-preview-body">
+                <div id="previewDescription" class="text-muted">Descripción del repositorio</div>
+                <div class="mt-3">
+                  <span class="badge bg-danger" id="previewPrivate">Privado</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Crear Repositorio
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const descriptionInput = document.getElementById('description');
+    const privateCheckbox = document.getElementById('private');
+    
+    const previewName = document.getElementById('previewName');
+    const previewRepoName = document.getElementById('previewRepoName');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewPrivate = document.getElementById('previewPrivate');
+    
+    // Update preview when name changes
+    nameInput.addEventListener('input', function() {
+      const repoName = this.value.trim().toLowerCase().replace(/\s+/g, '-');
+      previewName.textContent = repoName || 'nombre-repositorio';
+      previewRepoName.textContent = repoName || 'nombre-repositorio';
+    });
+    
+    // Update preview when description changes
+    descriptionInput.addEventListener('input', function() {
+      previewDescription.textContent = this.value.trim() || 'Descripción del repositorio';
+    });
+    
+    // Update preview when private changes
+    privateCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        previewPrivate.textContent = 'Privado';
+        previewPrivate.className = 'badge bg-danger';
+      } else {
+        previewPrivate.textContent = 'Público';
+        previewPrivate.className = 'badge bg-success';
+      }
+    });
+    
+    // Form validation before submit
+    document.getElementById('createRepoForm').addEventListener('submit', function(e) {
+      const name = nameInput.value.trim();
+      
+      // Check for spaces in name
+      if (name.includes(' ')) {
+        e.preventDefault();
+        alert('El nombre del repositorio no puede contener espacios. Use guiones en su lugar.');
+        nameInput.focus();
+        return false;
+      }
+      
+      // Check for special characters in name (allow only alphanumeric, dash, underscore)
+      if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+        e.preventDefault();
+        alert('El nombre del repositorio solo puede contener letras, números, guiones y guiones bajos.');
+        nameInput.focus();
+        return false;
+      }
+      
+      return true;
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}
