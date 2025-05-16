@@ -209,25 +209,36 @@ def add_tenant():
         db.session.add(client_settings)
         db.session.commit()
         
+        # Obtener los datos del administrador
+        admin_email = request.form.get('admin_email')
+        admin_password = request.form.get('admin_password')
+        admin_password_confirm = request.form.get('admin_password_confirm')
+        
+        # Validar los datos del administrador
+        if not admin_email or not admin_password or not admin_password_confirm:
+            flash("El email y la contraseña del administrador son campos obligatorios.", "error")
+            return redirect(url_for('superadmin.add_tenant'))
+        
+        if admin_password != admin_password_confirm:
+            flash("Las contraseñas no coinciden. Por favor, inténtelo de nuevo.", "error")
+            return redirect(url_for('superadmin.add_tenant'))
+            
         # Crear un usuario administrador para el nuevo tenant
-        admin_password = generate_random_password()
         admin_user = User()
         admin_user.tenant_id = new_tenant.id
         admin_user.role_id = 1  # Asumimos que 1 es el rol de administrador
         admin_user.first_name = "Admin"
         admin_user.last_name = name
         admin_user.username = f"admin_{subdomain}"
-        admin_user.email = f"admin@{subdomain}.crm.app"
+        admin_user.email = admin_email
         admin_user.set_password(admin_password)
         
         db.session.add(admin_user)
         db.session.commit()
         
         flash(f"""Cliente '{name}' creado correctamente. 
-              Usuario administrador creado: 
-              Usuario: {admin_user.username}
-              Contraseña: {admin_password}
-              Por favor, guarde estas credenciales en un lugar seguro.""", "success")
+              Usuario administrador creado con email: {admin_email}
+              Por favor, utilice este email y la contraseña establecida para iniciar sesión.""", "success")
         
         return redirect(url_for('superadmin.tenants'))
     
