@@ -153,6 +153,95 @@ def tenants():
     subscription_plans = SubscriptionPlan.query.all()
     return render_template('superadmin/tenants.html', tenants=tenants, plans=subscription_plans)
 
+@superadmin_bp.route('/tenants/add', methods=['GET', 'POST'])
+@login_required
+def add_tenant():
+    """Add a new tenant (client)"""
+    subscription_plans = SubscriptionPlan.query.all()
+    
+    if request.method == 'POST':
+        name = request.form.get('name')
+        subdomain = request.form.get('subdomain')
+        subscription_plan_id = int(request.form.get('subscription_plan_id') or 0)
+        primary_color = request.form.get('primary_color', '#3498db')
+        secondary_color = request.form.get('secondary_color', '#2ecc71')
+        logo_url = request.form.get('logo_url')
+        
+        # Validar datos
+        if not name or not subdomain:
+            flash("Nombre y subdominio son campos obligatorios.", "error")
+            return redirect(url_for('superadmin.add_tenant'))
+        
+        # Verificar que el subdominio sea único
+        existing_tenant = Tenant.query.filter_by(subdomain=subdomain).first()
+        if existing_tenant:
+            flash(f"El subdominio '{subdomain}' ya está en uso. Por favor, elija otro.", "error")
+            return redirect(url_for('superadmin.add_tenant'))
+        
+        # Verificar que exista el plan seleccionado
+        if subscription_plan_id <= 0:
+            flash("Debe seleccionar un plan de suscripción válido.", "error")
+            return redirect(url_for('superadmin.add_tenant'))
+        
+        # Crear nuevo tenant
+        new_tenant = Tenant()
+        new_tenant.name = name
+        new_tenant.subdomain = subdomain
+        new_tenant.subscription_plan_id = subscription_plan_id
+        new_tenant.primary_color = primary_color
+        new_tenant.secondary_color = secondary_color
+        new_tenant.logo_url = logo_url
+        new_tenant.is_active = True
+        
+        db.session.add(new_tenant)
+        db.session.commit()
+        
+        # Crear configuración inicial para el cliente
+        client_settings = ClientSettings()
+        client_settings.tenant_id = new_tenant.id
+        client_settings.company_name = name
+        client_settings.billing_plan = new_tenant.subscription_plan.name
+        client_settings.billing_cycle = 'monthly'
+        client_settings.subscription_status = 'active'
+        client_settings.subscription_start_date = datetime.datetime.now()
+        client_settings.subscription_end_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        
+        db.session.add(client_settings)
+        db.session.commit()
+        
+        # Crear un usuario administrador para el nuevo tenant
+        admin_password = generate_random_password()
+        admin_user = User()
+        admin_user.tenant_id = new_tenant.id
+        admin_user.role_id = 1  # Asumimos que 1 es el rol de administrador
+        admin_user.first_name = "Admin"
+        admin_user.last_name = name
+        admin_user.username = f"admin_{subdomain}"
+        admin_user.email = f"admin@{subdomain}.crm.app"
+        admin_user.set_password(admin_password)
+        
+        db.session.add(admin_user)
+        db.session.commit()
+        
+        flash(f"""Cliente '{name}' creado correctamente. 
+              Usuario administrador creado: 
+              Usuario: {admin_user.username}
+              Contraseña: {admin_password}
+              Por favor, guarde estas credenciales en un lugar seguro.""", "success")
+        
+        return redirect(url_for('superadmin.tenants'))
+    
+    return render_template('superadmin/add_tenant.html', plans=subscription_plans)
+
+def generate_random_password(length=10):
+    """Generate a random password"""
+    import random
+    import string
+    
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for i in range(length))
+    return password
+
 @superadmin_bp.route('/tenants/edit/<int:tenant_id>', methods=['GET', 'POST'])
 @login_required
 def edit_tenant(tenant_id):

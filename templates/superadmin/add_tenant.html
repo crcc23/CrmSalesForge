@@ -1,0 +1,235 @@
+{% extends 'layout.html' %}
+
+{% block title %}Añadir Cliente{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .form-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-card-header {
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .form-card-body {
+    padding: 2rem;
+  }
+  
+  .form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .form-section-title {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--bs-primary);
+  }
+  
+  .color-picker-preview {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    margin-left: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .theme-preview {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .preview-header {
+    padding: 1rem;
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 1rem;
+  }
+  
+  .preview-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    color: white;
+    margin-right: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-0"><i class="fas fa-plus-circle me-2"></i> Añadir Cliente</h2>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 mt-2">
+          <li class="breadcrumb-item"><a href="{{ url_for('superadmin.index') }}">SuperAdmin</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('superadmin.tenants') }}">Clientes</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Añadir Cliente</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="form-card">
+        <div class="form-card-header">
+          <h4 class="mb-0"><i class="fas fa-building me-2"></i> Nuevo Cliente</h4>
+        </div>
+        <div class="form-card-body">
+          <form method="POST" action="{{ url_for('superadmin.add_tenant') }}">
+            <div class="form-section">
+              <h5 class="form-section-title">Información básica</h5>
+              
+              <div class="mb-3">
+                <label for="name" class="form-label">Nombre del cliente *</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+                <div class="form-text">Nombre de la empresa u organización</div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="subdomain" class="form-label">Subdominio *</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="subdomain" name="subdomain" required>
+                  <span class="input-group-text">.crm.app</span>
+                </div>
+                <div class="form-text">Subdominio único para acceder a la aplicación</div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="logo_url" class="form-label">URL del logo</label>
+                <input type="url" class="form-control" id="logo_url" name="logo_url" placeholder="https://ejemplo.com/logo.png">
+                <div class="form-text">URL de la imagen del logo de la empresa (opcional)</div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h5 class="form-section-title">Plan de suscripción</h5>
+              
+              <div class="mb-3">
+                <label for="subscription_plan_id" class="form-label">Plan *</label>
+                <select class="form-select" id="subscription_plan_id" name="subscription_plan_id" required>
+                  <option value="">Seleccionar plan</option>
+                  {% for plan in plans %}
+                  <option value="{{ plan.id }}">
+                    {{ plan.name }} ({{ "€%.2f"|format(plan.price) }}/mes)
+                  </option>
+                  {% endfor %}
+                </select>
+                <div class="form-text">Plan de suscripción asignado al cliente</div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h5 class="form-section-title">Personalización de tema</h5>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="primary_color" class="form-label">Color primario</label>
+                  <div class="input-group">
+                    <input type="color" class="form-control form-control-color" id="primary_color" name="primary_color" value="#3498db">
+                    <input type="text" class="form-control" value="#3498db" id="primary_color_text" readonly>
+                    <div class="color-picker-preview" style="background-color: #3498db;"></div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="secondary_color" class="form-label">Color secundario</label>
+                  <div class="input-group">
+                    <input type="color" class="form-control form-control-color" id="secondary_color" name="secondary_color" value="#2ecc71">
+                    <input type="text" class="form-control" value="#2ecc71" id="secondary_color_text" readonly>
+                    <div class="color-picker-preview" style="background-color: #2ecc71;"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="theme-preview">
+                <h6 class="mb-3">Vista previa del tema</h6>
+                
+                <div class="preview-header" style="background-color: #3498db;">
+                  Encabezado del tema
+                </div>
+                
+                <div>
+                  <span class="preview-button" style="background-color: #3498db;">
+                    Botón primario
+                  </span>
+                  <span class="preview-button" style="background-color: #2ecc71;">
+                    Botón secundario
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{{ url_for('superadmin.tenants') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Crear Cliente
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Update color text input when color picker changes
+    const primaryColorPicker = document.getElementById('primary_color');
+    const primaryColorText = document.getElementById('primary_color_text');
+    const primaryColorPreview = document.querySelector('.color-picker-preview:first-of-type');
+    
+    const secondaryColorPicker = document.getElementById('secondary_color');
+    const secondaryColorText = document.getElementById('secondary_color_text');
+    const secondaryColorPreview = document.querySelector('.color-picker-preview:last-of-type');
+    
+    // Primary color preview elements
+    const previewHeader = document.querySelector('.preview-header');
+    const primaryButton = document.querySelector('.preview-button:first-of-type');
+    
+    // Secondary color preview elements
+    const secondaryButton = document.querySelector('.preview-button:last-of-type');
+    
+    // Update primary color
+    primaryColorPicker.addEventListener('input', function() {
+      const color = this.value;
+      primaryColorText.value = color;
+      primaryColorPreview.style.backgroundColor = color;
+      previewHeader.style.backgroundColor = color;
+      primaryButton.style.backgroundColor = color;
+    });
+    
+    // Update secondary color
+    secondaryColorPicker.addEventListener('input', function() {
+      const color = this.value;
+      secondaryColorText.value = color;
+      secondaryColorPreview.style.backgroundColor = color;
+      secondaryButton.style.backgroundColor = color;
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}
