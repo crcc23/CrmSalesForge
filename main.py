@@ -15,8 +15,10 @@ from routes.client_settings import client_settings_bp
 from routes.superadmin import superadmin_bp
 from routes.github import github_bp
 from routes.plans import plans_bp
+from routes.home import home_bp
 
 # Register all blueprints
+app.register_blueprint(home_bp)  # La página de inicio debe registrarse primero
 app.register_blueprint(auth)
 app.register_blueprint(dashboard)
 app.register_blueprint(tenant)

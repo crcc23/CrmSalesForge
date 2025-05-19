@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CRM inteligente para empresas modernas. Gestiona tus clientes, automatiza tu marketing y potencia tus ventas con inteligencia artificial.">
+    <title>CRM Pro - Solución completa para gestión de clientes</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --accent-color: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-color);
+            overflow-x: hidden;
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
+        }
+        
+        .text-gradient {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-section {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: 0.1;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .navbar {
+            background-color: transparent;
+            transition: background-color 0.3s ease;
+            padding: 1rem 0;
+        }
+        
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.25rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            background-color: rgba(59, 130, 246, 0.1);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+        
+        .feature-card {
+            padding: 2rem;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .testimonial-card {
+            padding: 2rem;
+            border-radius: 1rem;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .testimonial-avatar {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 9999px;
+            object-fit: cover;
+        }
+        
+        .pricing-card {
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pricing-header {
+            padding: 2rem;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .pricing-popular .pricing-header {
+            background-color: var(--accent-color);
+        }
+        
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        
+        .pricing-period {
+            opacity: 0.8;
+        }
+        
+        .pricing-features {
+            padding: 2rem;
+            background-color: white;
+        }
+        
+        .pricing-features ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .pricing-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .pricing-features li::before {
+            content: "✓";
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .pricing-popular .pricing-features li::before {
+            color: var(--accent-color);
+        }
+        
+        .pricing-action {
+            padding: 1.5rem 2rem;
+            background-color: white;
+        }
+        
+        .cta-section {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .cta-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: 0.1;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+        
+        .footer-links h5 {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 2rem 0;
+        }
+        
+        .hero-animated-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .hero-animated-bg::before {
+            content: "";
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 120%;
+            height: 120%;
+            background: linear-gradient(120deg, var(--primary-color), var(--accent-color));
+            animation: rotate 20s linear infinite;
+            opacity: 0.1;
+        }
+        
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Para pantallas más pequeñas */
+        @media (max-width: 768px) {
+            .hero-section {
+                text-align: center;
+            }
+            
+            .hero-image {
+                margin-top: 2rem;
+            }
+            
+            .feature-card, .testimonial-card, .pricing-card {
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cube me-2 text-primary"></i>CRM<span class="text-primary">Pro</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto me-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#caracteristicas">Características</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#precios">Precios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonios">Testimonios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contacto">Contacto</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary me-2">Iniciar Sesión</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Registrarse</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-animated-bg"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Potencia tu negocio con inteligencia artificial</h1>
+                    <p class="lead mb-5">CRMPro es la solución completa para gestionar clientes, automatizar marketing y acelerar ventas. Convierte más prospectos en clientes con nuestra plataforma impulsada por IA.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Comenzar gratis</a>
+                        <a href="#demo" class="btn btn-outline-primary btn-lg">Ver demostración</a>
+                    </div>
+                    <div class="mt-5 d-flex align-items-center">
+                        <div class="d-flex me-4">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle" width="40" height="40" alt="Usuario">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" class="rounded-circle ms-n2" width="40" height="40" alt="Usuario">
+                            <img src="https://randomuser.me/api/portraits/men/68.jpg" class="rounded-circle ms-n2" width="40" height="40" alt="Usuario">
+                        </div>
+                        <p class="mb-0"><span class="fw-bold">+1,500</span> empresas ya confían en nosotros</p>
+                    </div>
+                </div>
+                <div class="col-lg-6 hero-image">
+                    <img src="{{ url_for('static', filename='img/dashboard-preview.png') }}" class="img-fluid rounded-3 shadow-lg" alt="Dashboard CRMPro">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Marcas que confían -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <p class="text-muted mb-0">EMPRESAS QUE CONFÍAN EN NOSOTROS</p>
+            </div>
+            <div class="row justify-content-center align-items-center">
+                <div class="col-6 col-md-2 mb-4 mb-md-0">
+                    <img src="https://via.placeholder.com/150x50?text=LOGO" class="img-fluid opacity-50" alt="Marca">
+                </div>
+                <div class="col-6 col-md-2 mb-4 mb-md-0">
+                    <img src="https://via.placeholder.com/150x50?text=LOGO" class="img-fluid opacity-50" alt="Marca">
+                </div>
+                <div class="col-6 col-md-2 mb-4 mb-md-0">
+                    <img src="https://via.placeholder.com/150x50?text=LOGO" class="img-fluid opacity-50" alt="Marca">
+                </div>
+                <div class="col-6 col-md-2 mb-4 mb-md-0">
+                    <img src="https://via.placeholder.com/150x50?text=LOGO" class="img-fluid opacity-50" alt="Marca">
+                </div>
+                <div class="col-6 col-md-2">
+                    <img src="https://via.placeholder.com/150x50?text=LOGO" class="img-fluid opacity-50" alt="Marca">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Características -->
+    <section class="py-5 py-lg-7" id="caracteristicas">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h6 class="text-primary text-uppercase fw-bold mb-3">Características</h6>
+                <h2 class="display-5 fw-bold mb-4">Todo lo que necesitas para impulsar tu negocio</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 600px;">Una plataforma completa con todas las herramientas que necesitas para gestionar clientes, automatizar procesos y aumentar ventas.</p>
+            </div>
+
+            <div class="row g-4 mt-3">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card bg-white shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4 class="mb-3">Gestión de contactos y clientes</h4>
+                        <p class="text-muted mb-0">Administra de forma centralizada toda la información de tus prospectos y clientes en un solo lugar.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card bg-white shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 class="mb-3">Seguimiento de oportunidades</h4>
+                        <p class="text-muted mb-0">Visualiza y gestiona todas tus oportunidades de negocio y su progreso en el proceso de ventas.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card bg-white shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h4 class="mb-3">Campañas de email</h4>
+                        <p class="text-muted mb-0">Crea, automatiza y analiza campañas de email marketing con seguimientos automáticos.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card bg-white shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h4 class="mb-3">Asistente de contenido IA</h4>
+                        <p class="text-muted mb-0">Genera contenido personalizado para tus comunicaciones con inteligencia artificial avanzada.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card bg-white shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fas fa-spider"></i>
+                        </div>
+                        <h4 class="mb-3">Web scraping inteligente</h4>
+                        <p class="text-muted mb-0">Extrae información valiosa de sitios web para enriquecer tus datos y generar nuevas oportunidades.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card bg-white shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <h4 class="mb-3">Múltiples integraciones</h4>
+                        <p class="text-muted mb-0">Conecta con tus herramientas favoritas y sistemas existentes para un flujo de trabajo sin interrupciones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Beneficios -->
+    <section class="py-5 py-lg-7 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <img src="{{ url_for('static', filename='img/dashboard-analytics.png') }}" class="img-fluid rounded-3 shadow-lg" alt="Analytics Dashboard">
+                </div>
+                <div class="col-lg-6">
+                    <h6 class="text-primary text-uppercase fw-bold mb-3">Analítica avanzada</h6>
+                    <h2 class="display-5 fw-bold mb-4">Toma decisiones basadas en datos</h2>
+                    <p class="lead mb-4">Obtén insights valiosos sobre el rendimiento de tu equipo de ventas, la eficacia de tus campañas y el comportamiento de tus clientes.</p>
+                    
+                    <div class="d-flex mb-4">
+                        <div class="me-4 text-primary">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Informes personalizables</h5>
+                            <p class="text-muted mb-0">Crea paneles e informes adaptados a tus necesidades específicas.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-4">
+                        <div class="me-4 text-primary">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Análisis predictivo</h5>
+                            <p class="text-muted mb-0">Anticipa tendencias y comportamientos futuros con modelos de IA avanzados.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex">
+                        <div class="me-4 text-primary">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Seguimiento en tiempo real</h5>
+                            <p class="text-muted mb-0">Monitorea el desempeño y las métricas clave en tiempo real.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Precios -->
+    <section class="py-5 py-lg-7" id="precios">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h6 class="text-primary text-uppercase fw-bold mb-3">Planes flexibles</h6>
+                <h2 class="display-5 fw-bold mb-4">Precios adaptados a tu negocio</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 600px;">Elige el plan que mejor se adapte a tus necesidades y escala a medida que tu negocio crece.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="pricing-card shadow-sm">
+                        <div class="pricing-header text-center">
+                            <h4 class="mb-3">Básico</h4>
+                            <p class="pricing-price">€29<span class="pricing-period">/mes</span></p>
+                            <p class="mb-0">Ideal para empresas pequeñas</p>
+                        </div>
+                        <div class="pricing-features">
+                            <ul>
+                                <li>Hasta 1.000 contactos</li>
+                                <li>3 usuarios</li>
+                                <li>Funciones básicas de CRM</li>
+                                <li>Campañas de email (límite 3/mes)</li>
+                                <li>Soporte por email</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-action text-center">
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary w-100">Comenzar ahora</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="pricing-card pricing-popular shadow">
+                        <div class="pricing-header text-center">
+                            <span class="badge rounded-pill bg-white text-primary mb-3">Más popular</span>
+                            <h4 class="mb-3">Profesional</h4>
+                            <p class="pricing-price">€79<span class="pricing-period">/mes</span></p>
+                            <p class="mb-0">Perfecto para negocios en crecimiento</p>
+                        </div>
+                        <div class="pricing-features">
+                            <ul>
+                                <li>Hasta 10.000 contactos</li>
+                                <li>10 usuarios</li>
+                                <li>Web scraping (50 páginas/mes)</li>
+                                <li>Contenido IA (500 generaciones/mes)</li>
+                                <li>Campañas ilimitadas</li>
+                                <li>Soporte prioritario</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-action text-center">
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary w-100">Comenzar ahora</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="pricing-card shadow-sm">
+                        <div class="pricing-header text-center">
+                            <h4 class="mb-3">Empresarial</h4>
+                            <p class="pricing-price">€199<span class="pricing-period">/mes</span></p>
+                            <p class="mb-0">Para empresas con grandes necesidades</p>
+                        </div>
+                        <div class="pricing-features">
+                            <ul>
+                                <li>Contactos ilimitados</li>
+                                <li>Usuarios ilimitados</li>
+                                <li>Web scraping ilimitado</li>
+                                <li>Contenido IA ilimitado</li>
+                                <li>Integraciones avanzadas</li>
+                                <li>API personalizada</li>
+                                <li>Soporte 24/7 dedicado</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-action text-center">
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary w-100">Comenzar ahora</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="mb-0">¿Necesitas un plan personalizado? <a href="#contacto" class="text-primary">Contacta con nosotros</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonios -->
+    <section class="py-5 py-lg-7 bg-light" id="testimonios">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h6 class="text-primary text-uppercase fw-bold mb-3">Testimonios</h6>
+                <h2 class="display-5 fw-bold mb-4">Lo que dicen nuestros clientes</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 600px;">Descubre cómo CRMPro ha ayudado a empresas como la tuya a potenciar sus ventas y optimizar sus procesos.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="testimonial-avatar me-3" alt="Cliente">
+                            <div>
+                                <h5 class="mb-1">Carlos Rodríguez</h5>
+                                <p class="mb-0 text-muted">Director de Ventas, TechSolutions</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">"Desde que implementamos CRMPro, nuestro ciclo de ventas se ha reducido en un 30%. La automatización de email y el seguimiento de oportunidades nos ha permitido cerrar más acuerdos con menos esfuerzo."</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" class="testimonial-avatar me-3" alt="Cliente">
+                            <div>
+                                <h5 class="mb-1">Laura Martínez</h5>
+                                <p class="mb-0 text-muted">CEO, MarketingPro</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">"La herramienta de generación de contenido con IA nos ha ahorrado horas de trabajo. Podemos crear campañas personalizadas en minutos y los resultados han sido increíbles. Nuestras tasas de conversión han aumentado un 45%."</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="https://randomuser.me/api/portraits/men/68.jpg" class="testimonial-avatar me-3" alt="Cliente">
+                            <div>
+                                <h5 class="mb-1">Miguel Sánchez</h5>
+                                <p class="mb-0 text-muted">Director de Marketing, GrowthCorp</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">"Lo que más me impresiona de CRMPro es su flexibilidad. Hemos podido adaptar la plataforma a nuestros procesos específicos y la integración con nuestras herramientas existentes fue muy sencilla. Excelente soporte técnico."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-5 py-lg-7">
+        <div class="container">
+            <div class="cta-section p-5">
+                <div class="cta-bg" style="background-image: url('{{ url_for('static', filename='img/cta-pattern.png') }}');"></div>
+                <div class="row align-items-center">
+                    <div class="col-lg-8 mb-4 mb-lg-0">
+                        <h2 class="fw-bold mb-3">¿Listo para impulsar tu negocio?</h2>
+                        <p class="lead mb-0">Únete a más de 1,500 empresas que confían en CRMPro para gestionar sus clientes y aumentar sus ventas.</p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">Comenzar ahora</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section class="py-5 py-lg-7 bg-light" id="contacto">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <h6 class="text-primary text-uppercase fw-bold mb-3">Contacto</h6>
+                    <h2 class="display-5 fw-bold mb-4">¿Tienes preguntas?</h2>
+                    <p class="lead mb-5">Nuestro equipo está aquí para ayudarte. Ponte en contacto con nosotros y te responderemos lo antes posible.</p>
+                    
+                    <div class="d-flex mb-4">
+                        <div class="me-4 text-primary">
+                            <i class="fas fa-envelope fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Email</h5>
+                            <p class="mb-0">info@crmpro.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-4">
+                        <div class="me-4 text-primary">
+                            <i class="fas fa-phone-alt fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Teléfono</h5>
+                            <p class="mb-0">+34 910 123 456</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex">
+                        <div class="me-4 text-primary">
+                            <i class="fas fa-map-marker-alt fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Dirección</h5>
+                            <p class="mb-0">Calle Gran Vía 28, Madrid, España</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4 p-lg-5">
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="name" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="company" class="form-label">Empresa</label>
+                                    <input type="text" class="form-control" id="company">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Asunto</label>
+                                    <input type="text" class="form-control" id="subject" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="message" class="form-label">Mensaje</label>
+                                    <textarea class="form-control" id="message" rows="5" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enviar mensaje</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <a href="#" class="d-inline-block mb-4">
+                        <i class="fas fa-cube me-2 text-primary"></i>
+                        <span class="fs-4 fw-bold text-white">CRM<span class="text-primary">Pro</span></span>
+                    </a>
+                    <p class="mb-4">La solución completa para gestionar clientes, automatizar marketing y potenciar tus ventas con inteligencia artificial.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6 mb-4 mb-lg-0 footer-links">
+                    <h5>Producto</h5>
+                    <ul>
+                        <li><a href="#">Características</a></li>
+                        <li><a href="#">Precios</a></li>
+                        <li><a href="#">Clientes</a></li>
+                        <li><a href="#">Actualizaciones</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6 mb-4 mb-lg-0 footer-links">
+                    <h5>Empresa</h5>
+                    <ul>
+                        <li><a href="#">Sobre nosotros</a></li>
+                        <li><a href="#">Carreras</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6 mb-4 mb-lg-0 footer-links">
+                    <h5>Recursos</h5>
+                    <ul>
+                        <li><a href="#">Centro de ayuda</a></li>
+                        <li><a href="#">Documentación</a></li>
+                        <li><a href="#">Academia CRMPro</a></li>
+                        <li><a href="#">Comunidad</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6 mb-4 mb-lg-0 footer-links">
+                    <h5>Legal</h5>
+                    <ul>
+                        <li><a href="#">Términos de servicio</a></li>
+                        <li><a href="#">Privacidad</a></li>
+                        <li><a href="#">Cookies</a></li>
+                        <li><a href="#">Compliance</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+                <div class="col-md-6 copyright mb-3 mb-md-0">
+                    <p class="mb-0">&copy; 2025 CRMPro. Todos los derechos reservados.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Hecho con <i class="fas fa-heart text-danger"></i> en Madrid, España</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
