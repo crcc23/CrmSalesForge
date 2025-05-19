@@ -407,6 +407,56 @@ def toggle_tenant(tenant_id):
     flash(f"Cliente '{tenant.name}' {status} correctamente.", "success")
     
     return redirect(url_for('superadmin.tenants'))
+    
+@superadmin_bp.route('/tenants/toggle-superadmin/<int:tenant_id>', methods=['POST'])
+@login_required
+def toggle_tenant_superadmin(tenant_id):
+    """Toggle tenant superadmin status"""
+    tenant = Tenant.query.get_or_404(tenant_id)
+    
+    # Toggle superadmin status
+    tenant.is_superadmin = not tenant.is_superadmin
+    db.session.commit()
+    
+    status = "establecido como superadmin" if tenant.is_superadmin else "removido como superadmin"
+    flash(f"Cliente '{tenant.name}' {status} correctamente.", "success")
+    return redirect(url_for('superadmin.tenants'))
+
+@superadmin_bp.route('/tenants/delete/<int:tenant_id>', methods=['POST'])
+@login_required
+def delete_tenant(tenant_id):
+    """Delete tenant and all associated data"""
+    tenant = Tenant.query.get_or_404(tenant_id)
+    
+    # No permitir eliminar el propio tenant del superadmin principal
+    current_tenant_id = session.get('tenant_id')
+    if current_tenant_id == tenant_id:
+        flash("No puedes eliminar tu propio tenant.", "error")
+        return redirect(url_for('superadmin.tenants'))
+    
+    tenant_name = tenant.name
+    
+    try:
+        # Eliminar todas las relaciones y datos asociados a este tenant
+        # Nota: Esto podría eliminarse si se configura CASCADE en la base de datos
+        User.query.filter_by(tenant_id=tenant_id).delete()
+        
+        # Eliminar las configuraciones de cliente
+        client_settings = ClientSettings.query.filter_by(tenant_id=tenant_id).first()
+        if client_settings:
+            db.session.delete(client_settings)
+            
+        # Finalmente, eliminar el tenant
+        db.session.delete(tenant)
+        db.session.commit()
+        
+        flash(f"Cliente '{tenant_name}' y todos sus datos asociados han sido eliminados correctamente.", "success")
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al eliminar cliente: {str(e)}", "error")
+    
+    return redirect(url_for('superadmin.tenants'))
 
 @superadmin_bp.route('/tenants/billing/<int:tenant_id>', methods=['GET', 'POST'])
 @login_required

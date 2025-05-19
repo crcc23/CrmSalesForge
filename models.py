@@ -32,6 +32,7 @@ class Tenant(db.Model):
     secondary_color = db.Column(db.String(20), nullable=True, default="#2ecc71")
     subscription_plan_id = db.Column(db.Integer, db.ForeignKey('subscription_plan.id'), nullable=False)
     is_active = db.Column(db.Boolean, default=True)  # This is fine as Tenant doesn't extend UserMixin
+    is_superadmin = db.Column(db.Boolean, default=False)  # Indica si este tenant tiene permisos de superadmin
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
     users = db.relationship('User', backref='tenant', lazy='dynamic')

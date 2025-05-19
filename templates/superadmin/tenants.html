@@ -188,7 +188,7 @@
             </div>
             <div>
               <form method="POST" action="{{ url_for('superadmin.toggle_tenant', tenant_id=tenant.id) }}" class="d-inline">
-                <button type="submit" class="btn btn-sm {% if tenant.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                <button type="submit" class="btn btn-sm {% if tenant.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} me-1">
                   {% if tenant.is_active %}
                   <i class="fas fa-ban me-1"></i> Desactivar
                   {% else %}
@@ -196,6 +196,50 @@
                   {% endif %}
                 </button>
               </form>
+              
+              <form method="POST" action="{{ url_for('superadmin.toggle_tenant_superadmin', tenant_id=tenant.id) }}" class="d-inline">
+                <button type="submit" class="btn btn-sm {% if tenant.is_superadmin %}btn-outline-warning{% else %}btn-outline-secondary{% endif %} me-1">
+                  {% if tenant.is_superadmin %}
+                  <i class="fas fa-crown me-1"></i> Quitar SuperAdmin
+                  {% else %}
+                  <i class="fas fa-crown me-1"></i> Hacer SuperAdmin
+                  {% endif %}
+                </button>
+              </form>
+              
+              <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTenantModal{{ tenant.id }}">
+                <i class="fas fa-trash me-1"></i> Eliminar
+              </button>
+              
+              <!-- Modal de confirmación para eliminar cliente -->
+              <div class="modal fade" id="deleteTenantModal{{ tenant.id }}" tabindex="-1" aria-labelledby="deleteTenantModalLabel{{ tenant.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                      <h5 class="modal-title" id="deleteTenantModalLabel{{ tenant.id }}">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Confirmar eliminación
+                      </h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>¿Está seguro de que desea eliminar el cliente <strong>{{ tenant.name }}</strong>?</p>
+                      <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i> Esta acción eliminará todos los datos asociados a este cliente y no se puede deshacer.
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                      </button>
+                      <form method="POST" action="{{ url_for('superadmin.delete_tenant', tenant_id=tenant.id) }}">
+                        <button type="submit" class="btn btn-danger">
+                          <i class="fas fa-trash me-1"></i> Eliminar definitivamente
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
