@@ -113,6 +113,12 @@
                 
                 <li class="sidebar-heading">Configuración</li>
                 <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link {% if 'plans' in request.path %}active{% endif %}" href="{{ url_for('plans.index') }}">
+                        <i class="fas fa-star"></i>
+                        Planes de Suscripción
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
                     <a class="sidebar-nav-link {% if 'integrations' in request.path %}active{% endif %}" href="{{ url_for('integration.index') }}">
                         <i class="fas fa-plug"></i>
                         Integraciones
