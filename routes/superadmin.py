@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import login_required, current_user
 from app import db
 from models import Tenant, SubscriptionPlan, User, ClientSettings
@@ -429,7 +429,7 @@ def delete_tenant(tenant_id):
     tenant = Tenant.query.get_or_404(tenant_id)
     
     # No permitir eliminar el propio tenant del superadmin principal
-    current_tenant_id = session.get('tenant_id')
+    current_tenant_id = int(session.get('tenant_id', 0))
     if current_tenant_id == tenant_id:
         flash("No puedes eliminar tu propio tenant.", "error")
         return redirect(url_for('superadmin.tenants'))
