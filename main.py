@@ -14,6 +14,7 @@ from routes.content_writer import content_writer_bp
 from routes.client_settings import client_settings_bp
 from routes.superadmin import superadmin_bp
 from routes.github import github_bp
+from routes.plans import plans_bp
 
 # Register all blueprints
 app.register_blueprint(auth)
@@ -31,6 +32,7 @@ app.register_blueprint(content_writer_bp)
 app.register_blueprint(client_settings_bp)
 app.register_blueprint(superadmin_bp)
 app.register_blueprint(github_bp, url_prefix='/github')
+app.register_blueprint(plans_bp, url_prefix='/plans')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

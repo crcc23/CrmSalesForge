@@ -1,0 +1,144 @@
+{% extends 'layout.html' %}
+
+{% block title %}Planes de Suscripción{% endblock %}
+
+{% block styles %}
+<style>
+  .plan-card {
+    border-radius: 8px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+  }
+  
+  .plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+  
+  .plan-card.current {
+    border: 2px solid var(--bs-primary);
+  }
+  
+  .plan-features {
+    margin-top: 20px;
+    padding-left: 0;
+  }
+  
+  .plan-features li {
+    list-style: none;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .plan-features li i {
+    margin-right: 10px;
+    color: var(--bs-success);
+  }
+  
+  .plan-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .plan-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  .price-period {
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: normal;
+  }
+  
+  .plan-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(30%, -30%);
+  }
+  
+  .section-header {
+    margin-bottom: 3rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="section-header text-center">
+    <h1 class="display-4 mb-3">Elija el plan perfecto para su negocio</h1>
+    <p class="lead text-muted">Nuestros planes escalables se adaptan a su crecimiento</p>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+    {% for plan in plans %}
+    <div class="col">
+      <div class="card plan-card h-100 position-relative {% if current_plan and current_plan.id == plan.id %}current{% endif %}">
+        {% if current_plan and current_plan.id == plan.id %}
+        <span class="badge bg-primary plan-badge">Plan Actual</span>
+        {% endif %}
+        
+        <div class="card-body text-center p-4">
+          <h5 class="plan-title mb-3">{{ plan.name }}</h5>
+          <div class="plan-price">
+            {% if plan.price == 0 %}
+            Gratis
+            {% else %}
+            ${{ plan.price }}<span class="price-period">/mes</span>
+            {% endif %}
+          </div>
+          
+          <ul class="plan-features">
+            {% if plan.name == 'Básico' %}
+            <li><i class="fas fa-check-circle"></i> Hasta 1.000 contactos</li>
+            <li><i class="fas fa-check-circle"></i> 3 usuarios</li>
+            <li><i class="fas fa-check-circle"></i> Soporte por email</li>
+            <li><i class="fas fa-check-circle"></i> Funciones básicas de CRM</li>
+            <li><i class="fas fa-check-circle"></i> Campañas de email (límite 3/mes)</li>
+            {% elif plan.name == 'Profesional' %}
+            <li><i class="fas fa-check-circle"></i> Hasta 10.000 contactos</li>
+            <li><i class="fas fa-check-circle"></i> 10 usuarios</li>
+            <li><i class="fas fa-check-circle"></i> Soporte prioritario</li>
+            <li><i class="fas fa-check-circle"></i> Web scraping (50 páginas/mes)</li>
+            <li><i class="fas fa-check-circle"></i> Contenido AI (500 generaciones/mes)</li>
+            <li><i class="fas fa-check-circle"></i> Campañas ilimitadas</li>
+            {% elif plan.name == 'Empresarial' %}
+            <li><i class="fas fa-check-circle"></i> Contactos ilimitados</li>
+            <li><i class="fas fa-check-circle"></i> Usuarios ilimitados</li>
+            <li><i class="fas fa-check-circle"></i> Soporte 24/7 dedicado</li>
+            <li><i class="fas fa-check-circle"></i> Integraciones avanzadas</li>
+            <li><i class="fas fa-check-circle"></i> Web scraping ilimitado</li>
+            <li><i class="fas fa-check-circle"></i> Contenido AI ilimitado</li>
+            <li><i class="fas fa-check-circle"></i> API personalizada</li>
+            {% endif %}
+          </ul>
+          
+          <form action="{{ url_for('plans.select_plan', plan_id=plan.id) }}" method="post" class="mt-auto">
+            {% if current_plan and current_plan.id == plan.id %}
+            <button class="btn btn-outline-primary w-100" disabled>Plan Actual</button>
+            {% else %}
+            <button type="submit" class="btn btn-primary w-100">Seleccionar Plan</button>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  <div class="text-center mt-5">
+    <h2 class="h3 mb-4">¿Necesita un plan personalizado?</h2>
+    <p class="mb-4">Contáctenos para una solución adaptada a sus necesidades específicas</p>
+    <a href="#" class="btn btn-outline-primary px-4 py-2">Contactar con Ventas</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Scripts adicionales si son necesarios
+</script>
+{% endblock %}
