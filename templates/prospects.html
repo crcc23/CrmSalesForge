@@ -3,29 +3,29 @@
 {% block title %}Prospectos - Sistema CRM{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
+<div class="row mb-4"> {/* Bootstrap grid - keep for now */}
     <div class="col-md-8">
-        <h1 class="h3 mb-0">Prospectos</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Prospectos</h1>
     </div>
-    <div class="col-md-4 text-md-end">
-        <a href="{{ url_for('prospect.new_prospect') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Nuevo Prospecto
+    <div class="col-md-4 text-md-end"> {/* Bootstrap grid - keep for now */}
+        <a href="{{ url_for('prospect.new_prospect') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <i class="fas fa-plus mr-2"></i>Nuevo Prospecto
         </a>
     </div>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4"> {/* This card still uses Bootstrap .card, .card-header, .card-body. Focus on typography within for now. */}
     <div class="card-header">
-        <h5 class="mb-0">Filtrar Prospectos</h5>
+        <h3 class="text-lg font-medium text-gray-900">Filtrar Prospectos</h3>
     </div>
     <div class="card-body">
-        <form id="prospectSearchForm" action="{{ url_for('prospect.list_prospects') }}" method="GET" class="row">
+        <form id="prospectSearchForm" action="{{ url_for('prospect.list_prospects') }}" method="GET" class="row"> {/* Bootstrap grid for form layout - keep for now */}
             <div class="col-md-3 mb-3">
-                <label for="prospectSearchInput" class="form-label">Buscar</label>
+                <label for="prospectSearchInput" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
                 <input type="text" class="form-control" id="prospectSearchInput" name="q" value="{{ request.args.get('q', '') }}" placeholder="Nombre, email, empresa...">
             </div>
             <div class="col-md-3 mb-3">
-                <label for="status" class="form-label">Estado</label>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
                 <select class="form-select" id="status" name="status">
                     <option value="">Todos los Estados</option>
                     {% for status in statuses %}
@@ -34,7 +34,7 @@
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="sort" class="form-label">Ordenar por</label>
+                <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
                 <select class="form-select" id="sort" name="sort">
                     <option value="created_at" {% if request.args.get('sort') == 'created_at' or not request.args.get('sort') %}selected{% endif %}>Fecha de Creación</option>
                     <option value="last_name" {% if request.args.get('sort') == 'last_name' %}selected{% endif %}>Apellido</option>
@@ -43,26 +43,26 @@
                 </select>
             </div>
             <div class="col-md-2 mb-3">
-                <label for="order" class="form-label">Orden</label>
+                <label for="order" class="block text-sm font-medium text-gray-700 mb-1">Orden</label>
                 <select class="form-select" id="order" name="order">
                     <option value="desc" {% if request.args.get('order') == 'desc' or not request.args.get('order') %}selected{% endif %}>Descendente</option>
                     <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascendente</option>
                 </select>
             </div>
             <div class="col-md-2 mb-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+                <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button> {/* Bootstrap button - keep for now */}
             </div>
         </form>
     </div>
 </div>
 
-<div class="row mb-4">
+<div class="row mb-4"> {/* Bootstrap grid - keep for now */}
     <div class="col-12">
-        <div class="card">
+        <div class="card"> {/* This card also uses Bootstrap classes */}
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Lista de Prospectos</h5>
+                <h3 class="text-lg font-medium text-gray-900">Lista de Prospectos</h3>
                 <div class="d-flex align-items-center">
-                    <select class="form-select form-select-sm me-2" id="bulkActionSelect">
+                    <select class="form-select form-select-sm me-2" id="bulkActionSelect"> {/* Bootstrap form-select - keep for now */}
                         <option value="">Acciones en Grupo</option>
                         <option value="change_status">Cambiar Estado</option>
                         <option value="delete">Eliminar</option>
@@ -70,72 +70,72 @@
                     <button class="btn btn-sm btn-outline-primary" id="bulkActionBtn">Aplicar</button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th width="40">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="selectAllProspects">
-                                        <label class="form-check-label" for="selectAllProspects"></label>
-                                    </div>
-                                </th>
-                                <th>Nombre</th>
-                                <th>Empresa</th>
-                                <th>Email</th>
-                                <th>Fuente</th>
-                                <th>Estado</th>
-                                <th>Fecha de Creación</th>
-                                <th>Última Interacción</th>
-                                <th width="120">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for prospect in prospects %}
-                            <tr data-prospect-id="{{ prospect.id }}">
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input prospect-checkbox" type="checkbox" value="{{ prospect.id }}" id="prospect{{ prospect.id }}">
-                                        <label class="form-check-label" for="prospect{{ prospect.id }}"></label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <a href="{{ url_for('prospect.edit_prospect', prospect_id=prospect.id) }}">
-                                        {{ prospect.first_name }} {{ prospect.last_name }}
+            <!-- Table section -->
+            <div class="overflow-x-auto shadow border-b border-gray-200 sm:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAllProspects">
+                                    <label class="form-check-label" for="selectAllProspects"></label>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fuente</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de Creación</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Última Interacción</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for prospect in prospects %}
+                        <tr class="hover:bg-gray-50" data-prospect-id="{{ prospect.id }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="form-check">
+                                    <input class="form-check-input prospect-checkbox" type="checkbox" value="{{ prospect.id }}" id="prospect{{ prospect.id }}">
+                                    <label class="form-check-label" for="prospect{{ prospect.id }}"></label>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{{ url_for('prospect.edit_prospect', prospect_id=prospect.id) }}" class="text-indigo-600 hover:text-indigo-900">
+                                    {{ prospect.first_name }} {{ prospect.last_name }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prospect.company or '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prospect.email or '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prospect.source or '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="badge rounded-pill prospect-status-badge
+                                    {% if prospect.status == 'New' %}bg-primary
+                                    {% elif prospect.status == 'Contacted' %}bg-info
+                                    {% elif prospect.status == 'Qualified' %}bg-success
+                                    {% elif prospect.status == 'Disqualified' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}" 
+                                    data-prospect-id="{{ prospect.id }}">
+                                    {{ prospect.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ prospect.created_at.strftime('%d/%m/%Y %H:%M') if prospect.created_at else '-' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ prospect.last_interaction_date.strftime('%d/%m/%Y %H:%M') if prospect.last_interaction_date else '-' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="btn-group btn-group-sm"> {/* Bootstrap btn-group classes remain for now */}
+                                    <a href="{{ url_for('prospect.edit_prospect', prospect_id=prospect.id) }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
                                     </a>
-                                </td>
-                                <td>{{ prospect.company or '-' }}</td>
-                                <td>{{ prospect.email or '-' }}</td>
-                                <td>{{ prospect.source or '-' }}</td>
-                                <td>
-                                    <span class="badge rounded-pill prospect-status-badge
-                                        {% if prospect.status == 'New' %}bg-primary
-                                        {% elif prospect.status == 'Contacted' %}bg-info
-                                        {% elif prospect.status == 'Qualified' %}bg-success
-                                        {% elif prospect.status == 'Disqualified' %}bg-danger
-                                        {% else %}bg-secondary{% endif %}" 
-                                        data-prospect-id="{{ prospect.id }}">
-                                        {{ prospect.status }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <small>{{ prospect.created_at.strftime('%d/%m/%Y %H:%M') if prospect.created_at else '-' }}</small>
-                                </td>
-                                <td>
-                                    <small>{{ prospect.last_interaction_date.strftime('%d/%m/%Y %H:%M') if prospect.last_interaction_date else '-' }}</small>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ url_for('prospect.edit_prospect', prospect_id=prospect.id) }}" class="btn btn-outline-primary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteProspectModal{{ prospect.id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                    
-                                    <!-- Delete Modal -->
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteProspectModal{{ prospect.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Delete Modal -->
                                     <div class="modal fade" id="deleteProspectModal{{ prospect.id }}" tabindex="-1" aria-labelledby="deleteProspectModalLabel{{ prospect.id }}" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
@@ -156,21 +156,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="7" class="text-center py-4">
-                                    <p class="mb-0 text-muted">No se encontraron prospectos</p>
-                                    <a href="{{ url_for('prospect.new_prospect') }}" class="btn btn-sm btn-primary mt-2">
-                                        <i class="fas fa-plus me-2"></i>Agregar Nuevo Prospecto
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500"> {/* Updated colspan to 9 for new th count */}
+                                <p class="mb-2">No se encontraron prospectos</p>
+                                <a href="{{ url_for('prospect.new_prospect') }}" class="btn btn-sm btn-primary mt-2"> {/* Bootstrap button classes remain for now */}
+                                    <i class="fas fa-plus me-2"></i>Agregar Nuevo Prospecto
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

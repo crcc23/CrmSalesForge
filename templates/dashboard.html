@@ -12,11 +12,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4">
+<div class="row mb-4"> {/* Bootstrap grid - keep for now, focus on typography */}
     <div class="col-md-6">
-        <h1 class="h3 mb-0">Dashboard</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
     </div>
-    <div class="col-md-6 text-md-end">
+    <div class="col-md-6 text-md-end"> {/* Bootstrap grid - keep for now */}
         {% if prospect_count == 0 %}
         <form action="{{ url_for('dashboard.create_demo_data') }}" method="POST" style="display: inline-block;">
             <button type="submit" class="btn btn-primary">
@@ -28,76 +28,76 @@
 </div>
 
 <!-- Stats Row -->
-<div class="row mb-3">
+<div class="row mb-3"> {/* Bootstrap grid - keep for now */}
     <div class="col-12">
-        <h2 class="h5 mb-3">Key Metrics</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Key Metrics</h2>
     </div>
 </div>
 
-<div class="row">
+<div class="row"> {/* Bootstrap grid - keep for now */}
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card primary">
+        <div class="stat-card primary"> {/* stat-card styling is custom, text inside is target */}
             <div class="stat-icon">
                 <i class="fas fa-user-plus"></i>
             </div>
             <div class="stat-content">
-                <h4 id="prospectCount">{{ prospect_count }}</h4>
-                <p>Prospects</p>
+                <h4 id="prospectCount" class="text-3xl font-bold text-gray-900">{{ prospect_count }}</h4>
+                <p class="text-sm text-gray-500">Prospects</p>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card success">
+        <div class="stat-card success"> {/* stat-card styling is custom, text inside is target */}
             <div class="stat-icon">
                 <i class="fas fa-chart-line"></i>
             </div>
             <div class="stat-content">
-                <h4 id="opportunityCount">{{ opportunity_count }}</h4>
-                <p>Opportunities</p>
+                <h4 id="opportunityCount" class="text-3xl font-bold text-gray-900">{{ opportunity_count }}</h4>
+                <p class="text-sm text-gray-500">Opportunities</p>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card info">
+        <div class="stat-card info"> {/* stat-card styling is custom, text inside is target */}
             <div class="stat-icon">
                 <i class="fas fa-address-book"></i>
             </div>
             <div class="stat-content">
-                <h4 id="contactCount">{{ contact_count }}</h4>
-                <p>Contacts</p>
+                <h4 id="contactCount" class="text-3xl font-bold text-gray-900">{{ contact_count }}</h4>
+                <p class="text-sm text-gray-500">Contacts</p>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card warning">
+        <div class="stat-card warning"> {/* stat-card styling is custom, text inside is target */}
             <div class="stat-icon">
                 <i class="fas fa-building"></i>
             </div>
             <div class="stat-content">
-                <h4 id="accountCount">{{ account_count }}</h4>
-                <p>Accounts</p>
+                <h4 id="accountCount" class="text-3xl font-bold text-gray-900">{{ account_count }}</h4>
+                <p class="text-sm text-gray-500">Accounts</p>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Charts Row -->
-<div class="row mt-4 mb-3">
+<div class="row mt-4 mb-3"> {/* Bootstrap grid - keep for now */}
     <div class="col-12">
-        <h2 class="h5 mb-3">Sales Analytics</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Sales Analytics</h2>
     </div>
 </div>
 
-<div class="row">
+<div class="row"> {/* Bootstrap grid - keep for now */}
     <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Sales Pipeline</h5>
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-6"> {/* This card was previously refactored */}
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Sales Pipeline</h3>
                 <button class="btn btn-sm btn-outline-primary" onclick="refreshDashboardData()">
                     <i class="fas fa-sync-alt me-2"></i>Refresh
                 </button>
             </div>
-            <div class="card-body">
+            <div class="px-4 py-5 sm:p-6">
                 <div class="chart-container">
                     <canvas id="pipelineChart" 
                             data-stages="{{ pipeline_stages|tojson }}" 
@@ -108,18 +108,18 @@
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="card">
+        <div class="card"> {/* This card needs typography and potentially base card refactor */}
             <div class="card-header">
-                <h5 class="mb-0">Total Opportunity Value</h5>
+                <h3 class="text-lg font-medium text-gray-900">Total Opportunity Value</h3>
             </div>
             <div class="card-body text-center py-4">
-                <h2 class="display-5 text-tenant-primary" id="totalOpportunityAmount">${{ "%.2f"|format(total_opportunity_amount) }}</h2>
-                <p class="text-muted">Potential revenue from all opportunities</p>
+                <h2 class="text-4xl font-bold text-tenant-primary mb-2" id="totalOpportunityAmount">${{ "%.2f"|format(total_opportunity_amount) }}</h2> {/* Changed display-5 to text-4xl, added mb-2 */}
+                <p class="text-sm text-gray-600">Potential revenue from all opportunities</p>
             </div>
         </div>
-        <div class="card mt-3">
+        <div class="card mt-3"> {/* This card needs typography and potentially base card refactor */}
             <div class="card-header">
-                <h5 class="mb-0">Sales Funnel</h5>
+                <h3 class="text-lg font-medium text-gray-900">Sales Funnel</h3>
             </div>
             <div class="card-body">
                 <div class="chart-container" style="height: 200px;">
@@ -133,17 +133,17 @@
 </div>
 
 <!-- Activity & Closing Deals Row -->
-<div class="row mt-4 mb-3">
+<div class="row mt-4 mb-3"> {/* Bootstrap grid - keep for now */}
     <div class="col-12">
-        <h2 class="h5 mb-3">Recent Activity</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
     </div>
 </div>
 
-<div class="row">
+<div class="row"> {/* Bootstrap grid - keep for now */}
     <div class="col-lg-6">
-        <div class="card">
+        <div class="card"> {/* This card needs typography and potentially base card refactor */}
             <div class="card-header">
-                <h5 class="mb-0">Recent Prospects</h5>
+                <h3 class="text-lg font-medium text-gray-900">Recent Prospects</h3>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush" id="recentProspects">
@@ -168,9 +168,9 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card">
+        <div class="card"> {/* This card needs typography and potentially base card refactor */}
             <div class="card-header">
-                <h5 class="mb-0">Opportunities Closing This Month</h5>
+                <h3 class="text-lg font-medium text-gray-900">Opportunities Closing This Month</h3>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">

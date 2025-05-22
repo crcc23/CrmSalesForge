@@ -27,12 +27,17 @@
     --bs-border-color: #dee2e6;
 }
 
+/* Replaced by Tailwind utilities in layout.html body tag */
+/*
 body {
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
 }
+*/
 
 /* Layout */
+/* Base html, body styles largely handled by Tailwind's h-screen and specific component styling */
+/*
 html, body {
     height: 100%;
     margin: 0;
@@ -52,14 +57,17 @@ body {
     height: 100%;
     overflow: hidden;
 }
+*/
 
+/* Replaced by Tailwind utilities in layout.html */
+/*
 .main-content {
     flex: 1;
     display: flex;
     width: 100%;
     overflow: hidden;
     position: relative;
-    margin-top: 60px; /* Exactamente igual a la altura del navbar */
+    margin-top: 60px; 
 }
 
 .content-wrapper {
@@ -68,10 +76,12 @@ body {
     width: 100%;
     overflow: hidden;
 }
+*/
 
+/* .dashboard-content might have specific padding not yet fully replicated by Tailwind on all pages. Keeping for now. */
 .dashboard-content {
-    padding: 20px !important;
-    background-color: #f8f9fa;
+    padding: 20px !important; /* Overriding padding for dashboard content */
+    background-color: #f8f9fa; /* Tailwind: bg-gray-100 is similar */
     border-radius: 0;
     margin: 0;
     box-shadow: none;
@@ -79,6 +89,8 @@ body {
 }
 
 /* Navbar */
+/* Replaced by Tailwind utilities in layout.html for the main <nav> element */
+/*
 .navbar {
     padding: 0 1.5rem;
     min-height: 60px;
@@ -88,7 +100,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 101; /* Mayor que el sidebar (100) */
+    z-index: 101; 
     border-bottom: 1px solid #eaeaea;
 }
 
@@ -123,8 +135,11 @@ body {
     height: 3px;
     background-color: var(--bs-primary);
 }
+*/
 
 /* Sidebar */
+/* Replaced by Tailwind utilities in layout.html for the main <div class="sidebar"> */
+/*
 .sidebar {
     background-color: #ffffff;
     width: 250px;
@@ -134,7 +149,7 @@ body {
     padding-top: 0;
     box-shadow: 1px 0 10px rgba(0, 0, 0, 0.05);
     border-right: 1px solid var(--bs-gray-200);
-    overflow: hidden;
+    overflow: hidden; 
 }
 
 .sidebar-nav {
@@ -192,7 +207,10 @@ body {
     margin-top: 10px;
     font-weight: 600;
 }
+*/
 
+/* Replaced by Tailwind utilities in layout.html */
+/*
 .content-with-sidebar {
     flex: 1;
     display: flex;
@@ -201,8 +219,10 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
 }
+*/
 
-/* On mobile, hide sidebar by default */
+/* Mobile sidebar responsive styles. Tailwind handles this with md:hidden, etc. on sidebar itself. */
+/*
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;
@@ -225,8 +245,11 @@ body {
         width: 100%;
     }
 }
+*/
 
 /* Cards */
+/* Replaced by Tailwind utilities for standard cards */
+/*
 .card {
     background-color: var(--bs-card-bg);
     border: 1px solid var(--bs-border-color);
@@ -253,8 +276,9 @@ body {
     border-top: 1px solid var(--bs-border-color);
     padding: 0.75rem 1.25rem;
 }
+*/
 
-/* Stats cards */
+/* Stats cards - these are specific and might not be fully replaced yet. Keeping for now. */
 .stat-card {
     display: flex;
     align-items: center;
@@ -324,6 +348,8 @@ body {
     color: var(--bs-danger);
 }
 
+/* Typography inside stat-cards already handled by Tailwind in dashboard.html */
+/*
 .stat-card .stat-content h4 {
     margin: 0;
     font-size: 1.75rem;
@@ -335,8 +361,11 @@ body {
     color: var(--bs-gray-700);
     font-size: 0.9rem;
 }
+*/
 
 /* Tables */
+/* Replaced by Tailwind utilities for tables */
+/*
 .table {
     margin-bottom: 0;
     border-color: var(--bs-border-color);
@@ -368,8 +397,11 @@ body {
 .table a:hover {
     text-decoration: underline;
 }
+*/
 
-/* Forms */
+/* Forms - some parts may be replaced, others like .form-control might still be active on unrefactored forms */
+/* For now, keeping general form styles as not all forms are refactored. 
+   Refactored login.html inputs no longer use .form-control. */
 .form-control, .form-select {
     background-color: var(--bs-body-bg);
     border-color: var(--bs-border-color);
@@ -384,7 +416,7 @@ body {
 }
 
 .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.5); /* This seems like a dark-theme placeholder */
 }
 
 .form-control:disabled, .form-select:disabled {
@@ -398,7 +430,8 @@ body {
     color: var(--bs-body-color);
 }
 
-/* Buttons */
+/* Buttons - some buttons refactored (e.g. login, new prospect), but general .btn styles might be used elsewhere */
+/* Keeping general button styles for now. */
 .btn {
     border-radius: 0.25rem;
     padding: 0.5rem 1rem;
@@ -432,13 +465,13 @@ body {
     color: #fff;
 }
 
-/* Badges */
+/* Badges - keeping for now as .badge is used in tables and might not be fully refactored everywhere */
 .badge {
     padding: 0.5em 0.7em;
     font-weight: 500;
 }
 
-/* Charts */
+/* Charts - keeping for now */
 .chart-container {
     position: relative;
     height: 300px;
@@ -446,6 +479,8 @@ body {
 }
 
 /* Modern Auth pages - Tailwind-inspired */
+/* Replaced by Tailwind utilities in layout.html and login.html */
+/*
 .auth-container {
     display: flex;
     align-items: center;
@@ -453,8 +488,10 @@ body {
     min-height: 100vh;
     background-color: var(--bs-gray-100);
 }
+*/
 
-/* Original auth card styling kept for backward compatibility */
+/* Original auth card styling kept for backward compatibility - likely not needed if modern-auth-card was the target */
+/*
 .auth-card {
     width: 400px;
     max-width: 100%;
@@ -481,8 +518,11 @@ body {
     text-align: center;
     border-top: 1px solid var(--bs-border-color);
 }
+*/
 
 /* Modern auth card styling - React/Tailwind inspired */
+/* Replaced by Tailwind utilities in login.html */
+/*
 .modern-auth-card {
     width: 100%;
     background-color: #ffffff;
@@ -563,8 +603,9 @@ body {
 .modern-auth-card a:hover {
     opacity: 0.8;
 }
+*/
 
-/* Utilities */
+/* Utilities - some of these might be replicable with Tailwind if used. Keeping for now. */
 .border-dashed {
     border-style: dashed !important;
 }
@@ -582,6 +623,8 @@ body {
 }
 
 /* User Dropdown */
+/* Replaced by Tailwind utilities in layout.html */
+/*
 .nav-user-dropdown {
     font-weight: 600;
     display: flex;
@@ -593,8 +636,9 @@ body {
     color: var(--bs-primary);
     margin-right: 5px;
 }
+*/
 
-/* Tenant theme customization */
+/* Tenant theme customization - KEEP THESE, critical for dynamic theming */
 .tenant-primary {
     background-color: var(--tenant-primary-color, var(--bs-primary)) !important;
     border-color: var(--tenant-primary-color, var(--bs-primary)) !important;
@@ -635,7 +679,7 @@ body {
     border-color: var(--tenant-primary-color, var(--bs-primary)) !important;
 }
 
-/* Notifications */
+/* Notifications - Keeping for now, as this is a distinct component */
 .notification {
     top: 20px;
     right: 20px;
@@ -644,7 +688,7 @@ body {
     max-width: 90%;
 }
 
-/* Loader */
+/* Loader - Keeping for now */
 .loader {
     display: inline-block;
     width: 30px;
@@ -659,7 +703,7 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* Pipeline Stages */
+/* Pipeline Stages - Keeping for now, distinct component */
 .pipeline-stage {
     background-color: var(--bs-card-bg);
     border: 1px solid var(--bs-border-color);
@@ -694,7 +738,7 @@ body {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* Integration cards */
+/* Integration cards - Keeping for now, distinct component */
 .integration-card {
     background-color: var(--bs-card-bg);
     border: 1px solid var(--bs-border-color);
@@ -737,7 +781,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* AI Generated Content */
+/* AI Generated Content - Keeping for now */
 .ai-content {
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 0.5rem;
@@ -748,7 +792,7 @@ body {
     margin-top: 1rem;
 }
 
-/* Web Scraping Results */
+/* Web Scraping Results - Keeping for now */
 .scraping-result {
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 0.5rem;
@@ -760,7 +804,7 @@ body {
     overflow-y: auto;
 }
 
-/* Timeline */
+/* Timeline - Keeping for now */
 .timeline {
     position: relative;
     padding-left: 40px;
@@ -818,7 +862,7 @@ body {
     color: rgba(255, 255, 255, 0.9);
 }
 
-/* Color picker for tenant customization */
+/* Color picker for tenant customization - Keeping for now */
 .color-picker-wrapper {
     position: relative;
     display: inline-block;

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CRM System{% endblock %}</title>
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <style>
         :root {
@@ -15,131 +16,287 @@
     </style>
     {% block additional_head %}{% endblock %}
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 h-screen">
     {% if current_user.is_authenticated %}
     <!-- Navbar -->
-    <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-white">
-        <div class="container-fluid">
-            <button id="sidebarToggle" class="btn btn-light btn-sm d-md-none me-2">
+    <nav class="bg-white border-b border-gray-200 h-[60px] fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6">
+        <div class="flex items-center"> {/* Added a wrapper for left items */}
+            <button id="sidebarToggle" class="md:hidden mr-2 p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
                 <i class="fas fa-bars"></i>
             </button>
-            <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
-                <i class="fas fa-cube me-2 text-tenant-primary"></i>
+            <a href="{{ url_for('dashboard.index') }}" class="flex items-center text-lg font-semibold text-gray-800">
+                <i class="fas fa-cube mr-2 text-tenant-primary"></i>
                 {{ session.get('tenant_name', 'CRM System') }}
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle nav-user-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="user-initials">{{ current_user.first_name[0] }}{{ current_user.last_name[0] }}</span> {{ current_user.first_name }}
+        </div>
+        {/* Mobile Navbar Toggler - moved out of the div above to be a direct child of nav */}
+        <button type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="navbarNav" class="hidden md:flex md:items-center md:ml-auto">
+            <ul class="flex items-center space-x-4">
+                <li class="relative"> {/* Added relative for dropdown positioning */}
+                        <a href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" class="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer">
+                            <span class="mr-1 text-tenant-primary font-semibold">{{ current_user.first_name[0] }}{{ current_user.last_name[0] }}</span> {{ current_user.first_name }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <ul aria-labelledby="navbarDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 hidden">
                             {% if current_user.role.name == 'Admin' %}
-                            <li><a class="dropdown-item" href="{{ url_for('tenant.settings') }}"><i class="fas fa-cog me-2"></i>Configuración de Empresa</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('tenant.users') }}"><i class="fas fa-users me-2"></i>Administrar Usuarios</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="{{ url_for('tenant.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"><i class="fas fa-cog mr-2"></i>Configuración de Empresa</a></li>
+                            <li><a href="{{ url_for('tenant.users') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"><i class="fas fa-users mr-2"></i>Administrar Usuarios</a></li>
+                            <li><div class="my-1 border-t border-gray-200"></div></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                            <li><a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"><i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión</a></li>
                         </ul>
                     </li>
                 </ul>
             </div>
-        </div>
+        </div> {/* This closing div corresponds to the one starting with <div class="flex items-center"> or the first navbarNav. Given the current file, it closes the first navbarNav.  */}
     </nav>
 
-    <div class="main-content">
+    <div class="main-content flex flex-1 w-full overflow-hidden mt-[60px]">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <ul class="sidebar-nav">
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if request.path == url_for('dashboard.index') %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
-                        <i class="fas fa-tachometer-alt"></i>
+        <div class="sidebar w-[250px] bg-white shadow-md border-r border-gray-200 flex-shrink-0 overflow-y-auto pt-5">
+            <ul class="space-y-1 px-2">
+                <li>
+                    <a href="{{ url_for('dashboard.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if request.path == url_for('dashboard.index') %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-tachometer-alt mr-3
+                                  {% if request.path == url_for('dashboard.index') %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Panel de Control
                     </a>
                 </li>
-                <li class="sidebar-heading">CRM</li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'prospects' in request.path %}active{% endif %}" href="{{ url_for('prospect.list_prospects') }}">
-                        <i class="fas fa-user-plus"></i>
+                <li class="px-3 mt-4 mb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">CRM</li>
+                <li>
+                    <a href="{{ url_for('prospect.list_prospects') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'prospects' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-user-plus mr-3
+                                  {% if 'prospects' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Prospectos
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'opportunities' in request.path %}active{% endif %}" href="{{ url_for('opportunity.list_opportunities') }}">
-                        <i class="fas fa-chart-line"></i>
+                <li>
+                    <a href="{{ url_for('opportunity.list_opportunities') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'opportunities' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-chart-line mr-3
+                                  {% if 'opportunities' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Oportunidades
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'contacts' in request.path %}active{% endif %}" href="{{ url_for('contact.list_contacts') }}">
-                        <i class="fas fa-address-book"></i>
+                <li>
+                    <a href="{{ url_for('contact.list_contacts') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'contacts' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-address-book mr-3
+                                  {% if 'contacts' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Contactos
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'accounts' in request.path %}active{% endif %}" href="{{ url_for('account.list_accounts') }}">
-                        <i class="fas fa-building"></i>
+                <li>
+                    <a href="{{ url_for('account.list_accounts') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'accounts' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-building mr-3
+                                  {% if 'accounts' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Cuentas
                     </a>
                 </li>
-                <li class="sidebar-heading">Herramientas</li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'web-scraping' in request.path %}active{% endif %}" href="{{ url_for('scraping.list_tasks') }}">
-                        <i class="fas fa-spider"></i>
+                <li class="px-3 mt-4 mb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Herramientas</li>
+                <li>
+                    <a href="{{ url_for('scraping.list_tasks') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'web-scraping' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-spider mr-3
+                                  {% if 'web-scraping' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Web Scraping
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'templates' in request.path %}active{% endif %}" href="{{ url_for('templates.index') }}">
-                        <i class="fas fa-envelope-open-text"></i>
+                <li>
+                    <a href="{{ url_for('templates.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'templates' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-envelope-open-text mr-3
+                                  {% if 'templates' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Plantillas de Mensajes
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'campaigns' in request.path %}active{% endif %}" href="{{ url_for('campaigns.index') }}">
-                        <i class="fas fa-paper-plane"></i>
+                <li>
+                    <a href="{{ url_for('campaigns.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'campaigns' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-paper-plane mr-3
+                                  {% if 'campaigns' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Campañas
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'content-writer' in request.path %}active{% endif %}" href="{{ url_for('content_writer.index') }}">
-                        <i class="fas fa-magic"></i>
+                <li>
+                    <a href="{{ url_for('content_writer.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'content-writer' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-magic mr-3
+                                  {% if 'content-writer' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Redacción con IA
                     </a>
                 </li>
                 
-                <li class="sidebar-heading">Configuración</li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'plans' in request.path %}active{% endif %}" href="{{ url_for('plans.index') }}">
-                        <i class="fas fa-star"></i>
+                <li class="px-3 mt-4 mb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuración</li>
+                <li>
+                    <a href="{{ url_for('plans.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'plans' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-star mr-3
+                                  {% if 'plans' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Planes de Suscripción
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'integrations' in request.path %}active{% endif %}" href="{{ url_for('integration.index') }}">
-                        <i class="fas fa-plug"></i>
+                <li>
+                    <a href="{{ url_for('integration.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'integrations' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-plug mr-3
+                                  {% if 'integrations' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Integraciones
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'github' in request.path %}active{% endif %}" href="{{ url_for('github.index') }}">
-                        <i class="fab fa-github"></i>
+                <li>
+                    <a href="{{ url_for('github.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'github' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fab fa-github mr-3
+                                  {% if 'github' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         GitHub
                     </a>
                 </li>
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'ajustes' in request.path %}active{% endif %}" href="{{ url_for('client_settings.index') }}">
-                        <i class="fas fa-cog"></i>
+                <li>
+                    <a href="{{ url_for('client_settings.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'ajustes' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-cog mr-3
+                                  {% if 'ajustes' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         Ajustes
                     </a>
                 </li>
                 <!-- Durante el desarrollo, mostrar el enlace de SuperAdmin para todos los usuarios -->
-                <li class="sidebar-nav-item">
-                    <a class="sidebar-nav-link {% if 'superadmin' in request.path %}active{% endif %}" href="{{ url_for('superadmin.index') }}">
-                        <i class="fas fa-shield-alt"></i>
+                <li>
+                    <a href="{{ url_for('superadmin.index') }}"
+                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md group
+                              {% if 'superadmin' in request.path %}
+                                 bg-indigo-50 text-indigo-700
+                              {% else %}
+                                 text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              {% endif %}">
+                        <i class="fas fa-shield-alt mr-3
+                                  {% if 'superadmin' in request.path %}
+                                     text-indigo-500
+                                  {% else %}
+                                     text-gray-400 group-hover:text-gray-500
+                                  {% endif %}"></i>
                         SuperAdmin
                     </a>
                 </li>
@@ -147,7 +304,7 @@
         </div>
 
         <!-- Content -->
-        <div class="content-with-sidebar">
+        <div class="content-with-sidebar flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
             <div class="container-fluid dashboard-content">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
@@ -167,7 +324,7 @@
     
     {% else %}
     
-    <div class="auth-container">
+    <div class="auth-container flex items-center justify-center min-h-screen bg-gray-100">
         <div class="container">
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
